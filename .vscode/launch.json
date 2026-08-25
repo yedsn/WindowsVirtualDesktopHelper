@@ -11,13 +11,19 @@
       "stopAtEntry": false
     },
     {
-      "name": "Run Release WindowsVirtualDesktopHelper",
+      "name": "Build and Run Release WindowsVirtualDesktopHelper",
       "type": "clr",
       "request": "launch",
       "preLaunchTask": "prepare: release launch",
       "program": "${workspaceFolder}/Source/bin/Release/WindowsVirtualDesktopHelper.exe",
       "cwd": "${workspaceFolder}/Source/bin/Release",
       "stopAtEntry": false
+    },
+    {
+      "name": "Package Release Zip",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$vswhere = Join-Path ([Environment]::GetFolderPath('ProgramFilesX86')) 'Microsoft Visual Studio\\Installer\\vswhere.exe'; if (!(Test-Path $vswhere)) { throw 'Visual Studio Installer vswhere.exe was not found.' }; $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; if (!$vsPath) { throw 'MSBuild was not found. Install Visual Studio with .NET desktop development.' }; $msbuild = Join-Path $vsPath 'MSBuild\\Current\\Bin\\MSBuild.exe'; & $msbuild '${workspaceFolder}\\WindowsVirtualDesktopHelper.sln' /p:Configuration=Release /p:Platform='Any CPU' /p:PostBuildEvent= /m; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $dist = '${workspaceFolder}\\dist'; New-Item -ItemType Directory -Force -Path $dist | Out-Null; $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'; $zip = Join-Path $dist \\\"WindowsVirtualDesktopHelper.Release.Unsigned.$stamp.zip\\\"; Compress-Archive -LiteralPath '${workspaceFolder}\\Source\\bin\\Release\\WindowsVirtualDesktopHelper.exe','${workspaceFolder}\\Source\\bin\\Release\\WindowsVirtualDesktopHelper.exe.config' -DestinationPath $zip; Write-Host \\\"Created $zip\\\"\""
     }
   ]
 }
