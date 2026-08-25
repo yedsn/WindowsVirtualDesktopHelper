@@ -38,10 +38,10 @@ namespace WindowsVirtualDesktopHelper {
 			RegisterDefault("theme.icons.font", "Segoe UI", "Defines the font name to use for the icons (for regular numbers, characters). If a specific style is to be used, then one can append 'Bold', 'Italic', 'Regular' after a comma and the font name - for example 'Arial, Bold'.");
 			RegisterDefault("theme.icons.emojiFont", "Segoe UI Symbol", "Defines the font name to use for emoji icons.");
 			RegisterDefault("theme.icons.symbolsFont", "Segoe UI Symbol", "Defines the font name to use for symbol icons.");
-			RegisterDefault("theme.icons.iconBG.dark", "black");
+			RegisterDefault("theme.icons.iconBG.dark", "#0078D4");
 			RegisterDefault("theme.icons.iconFG.dark", "white");
-			RegisterDefault("theme.icons.iconBG.light", "white");
-			RegisterDefault("theme.icons.iconFG.light", "black");
+			RegisterDefault("theme.icons.iconBG.light", "#0078D4");
+			RegisterDefault("theme.icons.iconFG.light", "white");
 			RegisterDefault("theme.overlay.width", 900, "With width in pixels of the switch overlay.");
 			RegisterDefault("theme.overlay.height", 430, "With height in pixels of the switch overlay.");
 			RegisterDefault("theme.overlay.font", "Segoe UI Light", "Defines the font name to use for the switch overlay.");

@@ -17,10 +17,10 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 | theme.icons.font | ``"Segoe UI"`` | Defines the font name to use for the icons (for regular numbers, characters). If a specific style is to be used, then one can append 'Bold', 'Italic', 'Regular' after a comma and the font name - for example 'Arial, Bold'. |
 | theme.icons.emojiFont | ``"Segoe UI Symbol"`` | Defines the font name to use for emoji icons. |
 | theme.icons.symbolsFont | ``"Segoe UI Symbol"`` | Defines the font name to use for symbol icons. |
-| theme.icons.iconBG.dark | ``"black"`` |  |
+| theme.icons.iconBG.dark | ``"#0078D4"`` |  |
 | theme.icons.iconFG.dark | ``"white"`` |  |
-| theme.icons.iconBG.light | ``"white"`` |  |
-| theme.icons.iconFG.light | ``"black"`` |  |
+| theme.icons.iconBG.light | ``"#0078D4"`` |  |
+| theme.icons.iconFG.light | ``"white"`` |  |
 | theme.overlay.width | ``900`` | With width in pixels of the switch overlay. |
 | theme.overlay.height | ``430`` | With height in pixels of the switch overlay. |
 | theme.overlay.font | ``"Segoe UI Light"`` | Defines the font name to use for the switch overlay. |

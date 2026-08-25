@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -26,14 +27,9 @@ namespace WindowsVirtualDesktopHelper.Util {
 			if (textToRender == null) textToRender = ""; // sanity
 			var textToRenderInfo = new StringInfo(textToRender);
 			if (textToRenderInfo.LengthInTextElements > 2) textToRender = new StringInfo(textToRender).SubstringByTextElements(0, 2);
-			var textToRenderSizeRatio = 1.0f;
-			if (textToRenderInfo.LengthInTextElements == 1) textToRenderSizeRatio = 0.9f;
-			if (textToRenderInfo.LengthInTextElements == 2) textToRenderSizeRatio = 0.5f;
-			if (textToRenderInfo.LengthInTextElements == 2) {
-				textToRenderSizeRatio = 0.75f;
-				//textStyle = FontStyle.Regular;
-			}
-			var automaticFontSizeFitTolerance = 0.2f;
+			var textElementCount = textToRenderInfo.LengthInTextElements;
+			var textToRenderSizeRatio = textElementCount == 1 ? 0.50f : 0.38f;
+			var automaticFontSizeFitTolerance = 0.0f;
 			var offsetY = 0.0f;
 			var fontFamily = Settings.GetFontName("theme.icons.font");
 			var fontStyle = Settings.GetFontStyle("theme.icons.font");
@@ -50,17 +46,26 @@ namespace WindowsVirtualDesktopHelper.Util {
 				offsetY = -0.4f;
 			}
 			var textSize = renderSize * textToRenderSizeRatio;
+			var bgColorSetting = Settings.GetString("theme.icons.iconBG." + theme);
+			var fgColorSetting = Settings.GetString("theme.icons.iconFG." + theme);
 
 			// Cache hit?
-			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontStyle + "_" + opacity;
+			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity;
 			Icon cachedIcon;
 			if (_cache.TryGetValue(cacheKey, out cachedIcon)) {
 				return cachedIcon;
 			}
 
 			// Theme
-			var fgColor = ColorTranslator.FromHtml(Settings.GetString("theme.icons.iconFG." + theme));
+			var configuredBgColor = ColorTranslator.FromHtml(bgColorSetting);
+			var configuredFgColor = ColorTranslator.FromHtml(fgColorSetting);
+			var bgColor = configuredBgColor;
+			var fgColor = configuredFgColor;
+			if(!drawAsSymbol) {
+				UseBadgePalette(theme, configuredBgColor, configuredFgColor, out bgColor, out fgColor);
+			}
 			if (opacity != 1.0) fgColor = Color.FromArgb((int)(255.0f * opacity), fgColor);
+			if (opacity != 1.0) bgColor = Color.FromArgb((int)(255.0f * opacity), bgColor);
 
 			Icon icon;
 			using (var bitmap = new Bitmap(renderSize, renderSize, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
@@ -69,10 +74,16 @@ namespace WindowsVirtualDesktopHelper.Util {
 				using (var g = Graphics.FromImage(bitmap))
 				using (var fgBrush = new SolidBrush(fgColor))
 				using (var format = new StringFormat()) {
+					g.CompositingQuality = CompositingQuality.HighQuality;
 					g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+					g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
+					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
 					g.Clear(Color.Transparent);
+					if(!drawAsSymbol) {
+						DrawBadgeBackground(g, renderSize, bgColor);
+					}
 
 					format.Alignment = StringAlignment.Center;
 					format.LineAlignment = StringAlignment.Center;
@@ -108,7 +119,10 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 				// Scale down
 				using (var g = Graphics.FromImage(bitmapScaledDown)) {
+					g.CompositingQuality = CompositingQuality.HighQuality;
 					g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+					g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
 					g.DrawImage(bitmap, 0, 0, size, size);
 					g.Flush();
 				}
@@ -131,6 +145,44 @@ namespace WindowsVirtualDesktopHelper.Util {
 			_cache[cacheKey] = icon;
 
 			return icon;
+		}
+
+		private static void UseBadgePalette(string theme, Color configuredBgColor, Color configuredFgColor, out Color bgColor, out Color fgColor) {
+			var defaultAccent = Color.FromArgb(0, 120, 212);
+			var isDefaultDark = configuredBgColor.ToArgb() == Color.Black.ToArgb() && configuredFgColor.ToArgb() == Color.White.ToArgb();
+			var isDefaultLight = configuredBgColor.ToArgb() == Color.White.ToArgb() && configuredFgColor.ToArgb() == Color.Black.ToArgb();
+			var isDefaultBlue = configuredBgColor.ToArgb() == defaultAccent.ToArgb() && configuredFgColor.ToArgb() == Color.White.ToArgb();
+			var useDefaultFluentPalette = isDefaultDark || isDefaultLight || isDefaultBlue;
+
+			if(isDefaultBlue) {
+				bgColor = defaultAccent;
+				fgColor = Color.White;
+				return;
+			}
+
+			if(useDefaultFluentPalette && theme == "light") {
+				bgColor = defaultAccent;
+				fgColor = Color.White;
+				return;
+			}
+
+			if(useDefaultFluentPalette) {
+				bgColor = defaultAccent;
+				fgColor = Color.White;
+				return;
+			}
+
+			bgColor = configuredBgColor;
+			fgColor = configuredFgColor;
+		}
+
+		private static void DrawBadgeBackground(Graphics g, int renderSize, Color bgColor) {
+			var inset = renderSize * 0.025f;
+			var rect = new RectangleF(inset, inset, renderSize - inset * 2, renderSize - inset * 2);
+
+			using (var bgBrush = new SolidBrush(bgColor)) {
+				g.FillRectangle(bgBrush, rect);
+			}
 		}
 
 	}
