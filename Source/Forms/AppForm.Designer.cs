@@ -28,6 +28,7 @@ namespace WindowsVirtualDesktopHelper {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AppForm));
             this.notifyIconNumber = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripSeparatorDesktops = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemDonate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSettings = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,39 +51,46 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripSeparatorDesktops,
             this.toolStripMenuItemAbout,
             this.toolStripMenuItemDonate,
             this.toolStripMenuItemSettings,
             this.toolStripMenuItemExit});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 148);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 188);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            // 
+            // toolStripSeparatorDesktops
+            // 
+            this.toolStripSeparatorDesktops.Name = "toolStripSeparatorDesktops";
+            this.toolStripSeparatorDesktops.Size = new System.Drawing.Size(177, 6);
             // 
             // toolStripMenuItemAbout
             // 
             this.toolStripMenuItemAbout.Name = "toolStripMenuItemAbout";
-            this.toolStripMenuItemAbout.Size = new System.Drawing.Size(160, 36);
+            this.toolStripMenuItemAbout.Size = new System.Drawing.Size(180, 36);
             this.toolStripMenuItemAbout.Tag = "about";
             this.toolStripMenuItemAbout.Text = "About";
             // 
             // toolStripMenuItemDonate
             // 
             this.toolStripMenuItemDonate.Name = "toolStripMenuItemDonate";
-            this.toolStripMenuItemDonate.Size = new System.Drawing.Size(160, 36);
+            this.toolStripMenuItemDonate.Size = new System.Drawing.Size(180, 36);
             this.toolStripMenuItemDonate.Tag = "donate";
             this.toolStripMenuItemDonate.Text = "Donate";
             // 
             // toolStripMenuItemSettings
             // 
             this.toolStripMenuItemSettings.Name = "toolStripMenuItemSettings";
-            this.toolStripMenuItemSettings.Size = new System.Drawing.Size(160, 36);
+            this.toolStripMenuItemSettings.Size = new System.Drawing.Size(180, 36);
             this.toolStripMenuItemSettings.Tag = "settings";
             this.toolStripMenuItemSettings.Text = "Settings";
             // 
             // toolStripMenuItemExit
             // 
             this.toolStripMenuItemExit.Name = "toolStripMenuItemExit";
-            this.toolStripMenuItemExit.Size = new System.Drawing.Size(160, 36);
+            this.toolStripMenuItemExit.Size = new System.Drawing.Size(180, 36);
             this.toolStripMenuItemExit.Tag = "exit";
             this.toolStripMenuItemExit.Text = "Exit";
             // 
@@ -134,6 +142,7 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemExit;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSettings;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDonate;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorDesktops;
 		public System.Windows.Forms.NotifyIcon notifyIconNumber;
 		public System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
 		public System.Windows.Forms.NotifyIcon notifyIconPrev;

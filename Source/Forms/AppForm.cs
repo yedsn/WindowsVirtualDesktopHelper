@@ -98,10 +98,35 @@ namespace WindowsVirtualDesktopHelper {
 		#region Menu and Icon Tray Events
 
 		private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-			if(e.ClickedItem.Tag.ToString() == "exit") App.Instance.Exit();
+			if(e.ClickedItem.Tag == null) return;
+			if(e.ClickedItem.Tag.ToString().StartsWith("desktop:")) App.Instance.SwitchToDesktop(int.Parse(e.ClickedItem.Tag.ToString().Replace("desktop:", "")));
+			else if(e.ClickedItem.Tag.ToString() == "exit") App.Instance.Exit();
 			else if(e.ClickedItem.Tag.ToString() == "settings") App.Instance.ShowSettings();
 			else if(e.ClickedItem.Tag.ToString() == "about") App.Instance.ShowAbout();
 			else if(e.ClickedItem.Tag.ToString() == "donate") App.Instance.OpenDonatePage();
+		}
+
+		private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
+			UpdateDesktopMenuItems();
+		}
+
+		private void UpdateDesktopMenuItems() {
+			for(var i = this.contextMenuStrip1.Items.Count - 1; i >= 0; i--) {
+				var item = this.contextMenuStrip1.Items[i];
+				if(item.Tag != null && item.Tag.ToString().StartsWith("desktop:")) {
+					this.contextMenuStrip1.Items.RemoveAt(i);
+				}
+			}
+
+			var count = Math.Max(1, App.Instance.CurrentVDDisplayCount);
+			var current = (int)App.Instance.CurrentVDDisplayNumber;
+			var insertIndex = this.contextMenuStrip1.Items.IndexOf(this.toolStripSeparatorDesktops);
+			if(insertIndex < 0) insertIndex = 0;
+
+			for(var i = 0; i < count; i++) {
+				var item = new ToolStripMenuItem("Desktop " + (i + 1)) { Tag = "desktop:" + i, Checked = i == current };
+				this.contextMenuStrip1.Items.Insert(insertIndex + i, item);
+			}
 		}
 
 		private void notifyIconPrev_Click(object sender, EventArgs e) {

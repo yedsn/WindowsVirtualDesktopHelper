@@ -28,7 +28,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			var textToRenderInfo = new StringInfo(textToRender);
 			if (textToRenderInfo.LengthInTextElements > 2) textToRender = new StringInfo(textToRender).SubstringByTextElements(0, 2);
 			var textElementCount = textToRenderInfo.LengthInTextElements;
-			var textToRenderSizeRatio = textElementCount == 1 ? 0.50f : 0.38f;
+			var textToRenderSizeRatio = textElementCount == 1 ? 0.45f : 0.38f;
 			var automaticFontSizeFitTolerance = 0.0f;
 			var offsetY = 0.0f;
 			var fontFamily = Settings.GetFontName("theme.icons.font");
