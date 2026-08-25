@@ -29,6 +29,9 @@ namespace WindowsVirtualDesktopHelper {
 			this.checkBoxShowPrevNextIcons.Checked = Settings.GetBool("feature.showPrevNextIcons");
 			this.checkBoxShowDesktopNameInitial.Checked = Settings.GetBool("feature.showDesktopNameInIconTray");
 			this.checkBoxStartupWithWindows.Checked = Settings.GetBool("general.startupWithWindows");
+			this.textBoxIconBackgroundColor.Text = Settings.GetString("theme.icons.iconBG." + App.Instance.CurrentSystemThemeName);
+			this.textBoxIconTextColor.Text = Settings.GetString("theme.icons.iconFG." + App.Instance.CurrentSystemThemeName);
+			UpdateIconColorButtons();
 
 			this.checkBoxShowOverlay.Checked = Settings.GetBool("feature.showDesktopSwitchOverlay");
 			this.checkBoxOverlayAnimate.Checked = Settings.GetBool("feature.showDesktopSwitchOverlay.animate");
@@ -144,6 +147,63 @@ namespace WindowsVirtualDesktopHelper {
 		private void checkBoxClickDesktopNumberTaskView_CheckedChanged(object sender, EventArgs e) {
 			if(IsLoading) return;
 			Settings.SetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView", this.checkBoxClickDesktopNumberTaskView.Checked);
+		}
+
+		private void textBoxIconColor_TextChanged(object sender, EventArgs e) {
+			if(IsLoading) return;
+			try {
+				ColorTranslator.FromHtml(this.textBoxIconBackgroundColor.Text);
+				ColorTranslator.FromHtml(this.textBoxIconTextColor.Text);
+			} catch {
+				return;
+			}
+
+			Settings.SetString("theme.icons.iconBG.dark", this.textBoxIconBackgroundColor.Text);
+			Settings.SetString("theme.icons.iconBG.light", this.textBoxIconBackgroundColor.Text);
+			Settings.SetString("theme.icons.iconFG.dark", this.textBoxIconTextColor.Text);
+			Settings.SetString("theme.icons.iconFG.light", this.textBoxIconTextColor.Text);
+			UpdateIconColorButtons();
+			App.Instance.UIUpdate();
+		}
+
+		private void buttonIconBackgroundColor_Click(object sender, EventArgs e) {
+			SelectIconColor(this.textBoxIconBackgroundColor);
+		}
+
+		private void buttonIconTextColor_Click(object sender, EventArgs e) {
+			SelectIconColor(this.textBoxIconTextColor);
+		}
+
+		private void SelectIconColor(TextBox textBox) {
+			Color currentColor;
+			try {
+				currentColor = ColorTranslator.FromHtml(textBox.Text);
+			} catch {
+				currentColor = Color.FromArgb(0, 120, 212);
+			}
+
+			using(var colorDialog = new ColorDialog()) {
+				colorDialog.Color = currentColor;
+				colorDialog.FullOpen = true;
+				if(colorDialog.ShowDialog(this) == DialogResult.OK) {
+					textBox.Text = ColorTranslator.ToHtml(colorDialog.Color);
+				}
+			}
+		}
+
+		private void UpdateIconColorButtons() {
+			SetColorButton(this.buttonIconBackgroundColor, this.textBoxIconBackgroundColor.Text);
+			SetColorButton(this.buttonIconTextColor, this.textBoxIconTextColor.Text);
+		}
+
+		private void SetColorButton(Button button, string colorText) {
+			try {
+				button.BackColor = ColorTranslator.FromHtml(colorText);
+				button.FlatAppearance.BorderColor = Color.FromArgb(96, 96, 96);
+			} catch {
+				button.BackColor = SystemColors.Control;
+				button.FlatAppearance.BorderColor = Color.Firebrick;
+			}
 		}
 
 		private void checkBoxUseHotKeyToOpenTaskView_CheckedChanged(object sender, EventArgs e) {

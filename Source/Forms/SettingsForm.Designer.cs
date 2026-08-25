@@ -72,6 +72,12 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxStatusOverlayTranslucent = new System.Windows.Forms.CheckBox();
             this.checkBoxStatusOverlayAnimate = new System.Windows.Forms.CheckBox();
             this.checkBoxShowStatusOverlay = new System.Windows.Forms.CheckBox();
+            this.labelIconBackgroundColor = new System.Windows.Forms.Label();
+            this.textBoxIconBackgroundColor = new System.Windows.Forms.TextBox();
+            this.buttonIconBackgroundColor = new System.Windows.Forms.Button();
+            this.labelIconTextColor = new System.Windows.Forms.Label();
+            this.textBoxIconTextColor = new System.Windows.Forms.TextBox();
+            this.buttonIconTextColor = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -483,12 +489,18 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.buttonIconTextColor);
+            this.groupBox2.Controls.Add(this.buttonIconBackgroundColor);
+            this.groupBox2.Controls.Add(this.textBoxIconTextColor);
+            this.groupBox2.Controls.Add(this.labelIconTextColor);
+            this.groupBox2.Controls.Add(this.textBoxIconBackgroundColor);
+            this.groupBox2.Controls.Add(this.labelIconBackgroundColor);
             this.groupBox2.Controls.Add(this.checkBoxStartupWithWindows);
-            this.groupBox2.Location = new System.Drawing.Point(22, 748);
+            this.groupBox2.Location = new System.Drawing.Point(22, 708);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox2.Size = new System.Drawing.Size(757, 84);
+            this.groupBox2.Size = new System.Drawing.Size(757, 124);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Settings";
@@ -504,6 +516,66 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxStartupWithWindows.Text = "Startup with Windows";
             this.checkBoxStartupWithWindows.UseVisualStyleBackColor = true;
             this.checkBoxStartupWithWindows.CheckedChanged += new System.EventHandler(this.checkBoxStartupWithWindows_CheckedChanged);
+            // 
+            // labelIconBackgroundColor
+            // 
+            this.labelIconBackgroundColor.AutoSize = true;
+            this.labelIconBackgroundColor.Location = new System.Drawing.Point(28, 78);
+            this.labelIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelIconBackgroundColor.Name = "labelIconBackgroundColor";
+            this.labelIconBackgroundColor.Size = new System.Drawing.Size(173, 25);
+            this.labelIconBackgroundColor.TabIndex = 2;
+            this.labelIconBackgroundColor.Text = "Icon background:";
+            // 
+            // textBoxIconBackgroundColor
+            // 
+            this.textBoxIconBackgroundColor.Location = new System.Drawing.Point(210, 74);
+            this.textBoxIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6);
+            this.textBoxIconBackgroundColor.Name = "textBoxIconBackgroundColor";
+            this.textBoxIconBackgroundColor.Size = new System.Drawing.Size(106, 29);
+            this.textBoxIconBackgroundColor.TabIndex = 3;
+            this.textBoxIconBackgroundColor.TextChanged += new System.EventHandler(this.textBoxIconColor_TextChanged);
+            // 
+            // buttonIconBackgroundColor
+            // 
+            this.buttonIconBackgroundColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonIconBackgroundColor.Location = new System.Drawing.Point(328, 74);
+            this.buttonIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonIconBackgroundColor.Name = "buttonIconBackgroundColor";
+            this.buttonIconBackgroundColor.Size = new System.Drawing.Size(34, 29);
+            this.buttonIconBackgroundColor.TabIndex = 4;
+            this.buttonIconBackgroundColor.UseVisualStyleBackColor = false;
+            this.buttonIconBackgroundColor.Click += new System.EventHandler(this.buttonIconBackgroundColor_Click);
+            // 
+            // labelIconTextColor
+            // 
+            this.labelIconTextColor.AutoSize = true;
+            this.labelIconTextColor.Location = new System.Drawing.Point(390, 78);
+            this.labelIconTextColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelIconTextColor.Name = "labelIconTextColor";
+            this.labelIconTextColor.Size = new System.Drawing.Size(101, 25);
+            this.labelIconTextColor.TabIndex = 4;
+            this.labelIconTextColor.Text = "Icon text:";
+            // 
+            // textBoxIconTextColor
+            // 
+            this.textBoxIconTextColor.Location = new System.Drawing.Point(500, 74);
+            this.textBoxIconTextColor.Margin = new System.Windows.Forms.Padding(6);
+            this.textBoxIconTextColor.Name = "textBoxIconTextColor";
+            this.textBoxIconTextColor.Size = new System.Drawing.Size(106, 29);
+            this.textBoxIconTextColor.TabIndex = 6;
+            this.textBoxIconTextColor.TextChanged += new System.EventHandler(this.textBoxIconColor_TextChanged);
+            // 
+            // buttonIconTextColor
+            // 
+            this.buttonIconTextColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonIconTextColor.Location = new System.Drawing.Point(618, 74);
+            this.buttonIconTextColor.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonIconTextColor.Name = "buttonIconTextColor";
+            this.buttonIconTextColor.Size = new System.Drawing.Size(34, 29);
+            this.buttonIconTextColor.TabIndex = 7;
+            this.buttonIconTextColor.UseVisualStyleBackColor = false;
+            this.buttonIconTextColor.Click += new System.EventHandler(this.buttonIconTextColor_Click);
             // 
             // checkBoxStatusOverlayShowOnAllMonitors
             // 
@@ -770,5 +842,11 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.CheckBox checkBoxStatusOverlayAnimate;
 		private System.Windows.Forms.CheckBox checkBoxShowStatusOverlay;
 		private System.Windows.Forms.RadioButton radioButtonPositionBottomRight;
+		private System.Windows.Forms.Label labelIconBackgroundColor;
+		private System.Windows.Forms.TextBox textBoxIconBackgroundColor;
+		private System.Windows.Forms.Button buttonIconBackgroundColor;
+		private System.Windows.Forms.Label labelIconTextColor;
+		private System.Windows.Forms.TextBox textBoxIconTextColor;
+		private System.Windows.Forms.Button buttonIconTextColor;
 	}
 }
