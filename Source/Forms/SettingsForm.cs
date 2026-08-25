@@ -50,6 +50,7 @@ namespace WindowsVirtualDesktopHelper {
 			
 			this.checkBoxClickDesktopNumberTaskView.Checked = Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView");
 			this.checkBoxUseHotKeysToJumpToDesktop.Checked = Settings.GetBool("feature.useHotKeyToJumpToDesktopNumber");
+			this.checkBoxUseHotKeyToOpenTaskView.Checked = Settings.GetBool("feature.useHotKeyToOpenTaskView");
 
 			this.radioButtonUseHotKeysToJumpToDesktopAlt.Checked = Settings.GetString("feature.useHotKeyToJumpToDesktopNumber.hotkey") == "Alt";
 			this.radioButtonUseHotKeysToJumpToDesktopAltShift.Checked = Settings.GetString("feature.useHotKeyToJumpToDesktopNumber.hotkey") == "Alt + Shift";
@@ -143,6 +144,12 @@ namespace WindowsVirtualDesktopHelper {
 		private void checkBoxClickDesktopNumberTaskView_CheckedChanged(object sender, EventArgs e) {
 			if(IsLoading) return;
 			Settings.SetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView", this.checkBoxClickDesktopNumberTaskView.Checked);
+		}
+
+		private void checkBoxUseHotKeyToOpenTaskView_CheckedChanged(object sender, EventArgs e) {
+			if(IsLoading) return;
+			Settings.SetBool("feature.useHotKeyToOpenTaskView", this.checkBoxUseHotKeyToOpenTaskView.Checked);
+			App.Instance.SetupHotKeys();
 		}
 
 		private void checkBoxOverlayShowOnAllMonitors_CheckedChanged(object sender, EventArgs e) {

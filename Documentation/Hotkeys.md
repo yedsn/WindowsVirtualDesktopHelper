@@ -24,6 +24,19 @@ hotkeys.myCustomKey1: "Alt + W = DesktopForward"
 hotkeys.myCustomKey2: "Alt + Q = DesktopBackward"
 ```
 
+or open Windows Task View:
+
+```
+hotkeys.openTaskView: "Alt + D = TaskView"
+```
+
+or enable the built-in Task View hotkey setting:
+
+```
+feature.useHotKeyToOpenTaskView: true
+feature.useHotKeyToOpenTaskView.hotkey: "Alt + D"
+```
+
 Hotkey settings always define an action:
 - ``Desktop1``
 - ``Desktop2``
@@ -31,6 +44,7 @@ Hotkey settings always define an action:
 - ``DesktopForward``
 - ``DesktopBackward``
 - ``PreviousDesktop``
+- ``TaskView``
 
 See [Actions Documentation](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Actions.md)
 for more information on actions.

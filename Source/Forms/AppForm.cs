@@ -123,12 +123,7 @@ namespace WindowsVirtualDesktopHelper {
 		private void notifyIconName_MouseClick(object sender, MouseEventArgs e) {
 			if(Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView")) {
 				if(e.Button == MouseButtons.Left) {
-					// Already open?
-					if(App.Instance.FGWindowHistory.Contains("Task View")) {
-						// Do nothing
-					} else {
-						Util.OS.OpenTaskView();
-					}
+					App.Instance.OpenTaskView();
 				}
 			}
 		}
@@ -136,12 +131,7 @@ namespace WindowsVirtualDesktopHelper {
 		private void notifyIconNumber_MouseClick(object sender, MouseEventArgs e) {
 			if (Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView")) {
 				if(e.Button == MouseButtons.Left) {
-					// Already open?
-					if(App.Instance.FGWindowHistory.Contains("Task View")) {
-						// Do nothing
-					} else {
-						Util.OS.OpenTaskView();
-					}
+					App.Instance.OpenTaskView();
 				}
 			}
 		}

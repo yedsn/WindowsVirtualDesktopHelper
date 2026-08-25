@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug WindowsVirtualDesktopHelper",
+      "type": "clr",
+      "request": "launch",
+      "preLaunchTask": "prepare: debug launch",
+      "program": "${workspaceFolder}/Source/bin/Debug/WindowsVirtualDesktopHelper.exe",
+      "cwd": "${workspaceFolder}/Source/bin/Debug",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Run Release WindowsVirtualDesktopHelper",
+      "type": "clr",
+      "request": "launch",
+      "preLaunchTask": "prepare: release launch",
+      "program": "${workspaceFolder}/Source/bin/Release/WindowsVirtualDesktopHelper.exe",
+      "cwd": "${workspaceFolder}/Source/bin/Release",
+      "stopAtEntry": false
+    }
+  ]
+}

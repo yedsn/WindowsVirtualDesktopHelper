@@ -32,6 +32,7 @@ namespace WindowsVirtualDesktopHelper {
             this.radioButtonUseHotKeysToJumpToDesktopCtrlAlt = new System.Windows.Forms.RadioButton();
             this.radioButtonUseHotKeysToJumpToDesktopCtrl = new System.Windows.Forms.RadioButton();
             this.checkBoxUseHotKeysToJumpToDesktop = new System.Windows.Forms.CheckBox();
+            this.checkBoxUseHotKeyToOpenTaskView = new System.Windows.Forms.CheckBox();
             this.checkBoxOverlayShowOnAllMonitors = new System.Windows.Forms.CheckBox();
             this.checkBoxShowDesktopNameInitial = new System.Windows.Forms.CheckBox();
             this.checkBoxClickDesktopNumberTaskView = new System.Windows.Forms.CheckBox();
@@ -101,6 +102,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox1.Controls.Add(this.checkBoxShowStatusOverlay);
             this.groupBox1.Controls.Add(this.panel3);
             this.groupBox1.Controls.Add(this.checkBoxUseHotKeysToJumpToDesktop);
+            this.groupBox1.Controls.Add(this.checkBoxUseHotKeyToOpenTaskView);
             this.groupBox1.Controls.Add(this.checkBoxOverlayShowOnAllMonitors);
             this.groupBox1.Controls.Add(this.checkBoxShowDesktopNameInitial);
             this.groupBox1.Controls.Add(this.checkBoxClickDesktopNumberTaskView);
@@ -115,7 +117,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox1.Size = new System.Drawing.Size(757, 634);
+            this.groupBox1.Size = new System.Drawing.Size(757, 674);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Features";
@@ -195,6 +197,18 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxUseHotKeysToJumpToDesktop.Text = "Use Hot Keys to Jump to Desktop";
             this.checkBoxUseHotKeysToJumpToDesktop.UseVisualStyleBackColor = true;
             this.checkBoxUseHotKeysToJumpToDesktop.CheckedChanged += new System.EventHandler(this.checkBoxUseHotKeysToJumpToDesktop_CheckedChanged);
+            // 
+            // checkBoxUseHotKeyToOpenTaskView
+            // 
+            this.checkBoxUseHotKeyToOpenTaskView.AutoSize = true;
+            this.checkBoxUseHotKeyToOpenTaskView.Location = new System.Drawing.Point(28, 625);
+            this.checkBoxUseHotKeyToOpenTaskView.Margin = new System.Windows.Forms.Padding(6);
+            this.checkBoxUseHotKeyToOpenTaskView.Name = "checkBoxUseHotKeyToOpenTaskView";
+            this.checkBoxUseHotKeyToOpenTaskView.Size = new System.Drawing.Size(334, 29);
+            this.checkBoxUseHotKeyToOpenTaskView.TabIndex = 30;
+            this.checkBoxUseHotKeyToOpenTaskView.Text = "Use Alt+D to Open Task View";
+            this.checkBoxUseHotKeyToOpenTaskView.UseVisualStyleBackColor = true;
+            this.checkBoxUseHotKeyToOpenTaskView.CheckedChanged += new System.EventHandler(this.checkBoxUseHotKeyToOpenTaskView_CheckedChanged);
             // 
             // checkBoxOverlayShowOnAllMonitors
             // 
@@ -470,7 +484,7 @@ namespace WindowsVirtualDesktopHelper {
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.checkBoxStartupWithWindows);
-            this.groupBox2.Location = new System.Drawing.Point(22, 668);
+            this.groupBox2.Location = new System.Drawing.Point(22, 748);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
@@ -678,7 +692,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(805, 775);
+            this.ClientSize = new System.Drawing.Size(805, 855);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -739,6 +753,7 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.RadioButton radioButtonUseHotKeysToJumpToDesktopCtrlAlt;
 		private System.Windows.Forms.RadioButton radioButtonUseHotKeysToJumpToDesktopCtrl;
 		private System.Windows.Forms.CheckBox checkBoxUseHotKeysToJumpToDesktop;
+		private System.Windows.Forms.CheckBox checkBoxUseHotKeyToOpenTaskView;
 		private System.Windows.Forms.CheckBox checkBoxStatusOverlayShowOnAllMonitors;
 		private System.Windows.Forms.Panel panel4;
 		private System.Windows.Forms.RadioButton radioButtonStatusOverlayPositionBottomRight;

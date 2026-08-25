@@ -64,6 +64,8 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 | feature.useHotKeyToSwitchDesktopForward.hotkey | ``"Alt + Right"`` |  |
 | feature.useHotKeyToSwitchDesktopBackward | ``false`` |  |
 | feature.useHotKeyToSwitchDesktopBackward.hotkey | ``"Alt + Left"`` |  |
+| feature.useHotKeyToOpenTaskView | ``false`` |  |
+| feature.useHotKeyToOpenTaskView.hotkey | ``"Alt + D"`` |  |
 | feature.showDesktopNumberInIconTray | ``true`` |  |
 | feature.showDesktopNumberInIconTray.clickToOpenTaskView | ``true`` |  |
 | feature.showDesktopNameInIconTray | ``false`` |  |

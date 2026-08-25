@@ -1,0 +1,112 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "stop: app",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Get-Process -Name WindowsVirtualDesktopHelper -ErrorAction SilentlyContinue | Stop-Process -Force"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "build: debug",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$vswhere = Join-Path ([Environment]::GetFolderPath('ProgramFilesX86')) 'Microsoft Visual Studio\\Installer\\vswhere.exe'; if (!(Test-Path $vswhere)) { throw 'Visual Studio Installer vswhere.exe was not found.' }; $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; if (!$vsPath) { throw 'MSBuild was not found. Install Visual Studio with .NET desktop development.' }; $msbuild = Join-Path $vsPath 'MSBuild\\Current\\Bin\\MSBuild.exe'; & $msbuild '${workspaceFolder}\\WindowsVirtualDesktopHelper.sln' /p:Configuration=Debug /p:Platform='Any CPU' /p:PostBuildEvent= /m; exit $LASTEXITCODE"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "prepare: debug launch",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "stop: app",
+        "build: debug"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "build: release unsigned",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$vswhere = Join-Path ([Environment]::GetFolderPath('ProgramFilesX86')) 'Microsoft Visual Studio\\Installer\\vswhere.exe'; if (!(Test-Path $vswhere)) { throw 'Visual Studio Installer vswhere.exe was not found.' }; $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; if (!$vsPath) { throw 'MSBuild was not found. Install Visual Studio with .NET desktop development.' }; $msbuild = Join-Path $vsPath 'MSBuild\\Current\\Bin\\MSBuild.exe'; & $msbuild '${workspaceFolder}\\WindowsVirtualDesktopHelper.sln' /p:Configuration=Release /p:Platform='Any CPU' /p:PostBuildEvent= /m; exit $LASTEXITCODE"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "prepare: release launch",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "stop: app",
+        "build: release unsigned"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "package: release unsigned zip",
+      "type": "shell",
+      "dependsOn": "build: release unsigned",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$dist = '${workspaceFolder}\\dist'; New-Item -ItemType Directory -Force -Path $dist | Out-Null; $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'; $zip = Join-Path $dist \"WindowsVirtualDesktopHelper.Release.Unsigned.$stamp.zip\"; Compress-Archive -LiteralPath '${workspaceFolder}\\Source\\bin\\Release\\WindowsVirtualDesktopHelper.exe','${workspaceFolder}\\Source\\bin\\Release\\WindowsVirtualDesktopHelper.exe.config' -DestinationPath $zip; Write-Host \"Created $zip\""
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "run: debug",
+      "type": "shell",
+      "dependsOn": "build: debug",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Start-Process -FilePath '${workspaceFolder}\\Source\\bin\\Debug\\WindowsVirtualDesktopHelper.exe' -WorkingDirectory '${workspaceFolder}\\Source\\bin\\Debug' -WindowStyle Hidden"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "run: release",
+      "type": "shell",
+      "dependsOn": "build: release unsigned",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Start-Process -FilePath '${workspaceFolder}\\Source\\bin\\Release\\WindowsVirtualDesktopHelper.exe' -WorkingDirectory '${workspaceFolder}\\Source\\bin\\Release' -WindowStyle Hidden"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

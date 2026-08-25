@@ -279,6 +279,15 @@ namespace WindowsVirtualDesktopHelper {
 			}
 		}
 
+		public void OpenTaskView() {
+			if(this.FGWindowHistory.Contains("Task View")) return;
+
+			new Thread(() => {
+				Thread.Sleep(100);
+				Util.OS.OpenTaskView();
+			}).Start();
+		}
+
 		public void SwitchToDesktop(int number) {
 			// Explicitly store the last focused window
 			try {
@@ -411,6 +420,7 @@ namespace WindowsVirtualDesktopHelper {
 			// - DesktopForward
 			// - DesktopBackward
 			// - PreviousDesktop
+			// - TaskView
 			// - Desktop1...Desktop99
 			try {
 
@@ -423,6 +433,9 @@ namespace WindowsVirtualDesktopHelper {
 					return null;
 				} else if(action == "previousdesktop") {
 					this.SwitchToPreviousDesktop();
+					return null;
+				} else if(action == "taskview") {
+					this.OpenTaskView();
 					return null;
 				} else if(action.StartsWith("desktop")) {
 					var desktopNumber = 0;
@@ -498,6 +511,12 @@ namespace WindowsVirtualDesktopHelper {
 				var hotKey = Settings.GetString("feature.useHotKeyToSwitchDesktopBackward.hotkey");
 				if(hotKey != null && hotKey != "") {
 					hotkeys.Add($"{hotKey} = DesktopBackward");
+				}
+			}
+			if(Settings.GetBool("feature.useHotKeyToOpenTaskView")) {
+				var hotKey = Settings.GetString("feature.useHotKeyToOpenTaskView.hotkey");
+				if(hotKey != null && hotKey != "") {
+					hotkeys.Add($"{hotKey} = TaskView");
 				}
 			}
 

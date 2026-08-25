@@ -116,6 +116,15 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 		public static void OpenTaskView() {
 			var simu = new WindowsInput.InputSimulator();
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LMENU);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.RMENU);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LCONTROL);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.RCONTROL);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LSHIFT);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.RSHIFT);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LWIN);
+			simu.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.RWIN);
+			simu.Keyboard.Sleep(50);
 			simu.Keyboard.ModifiedKeyStroke(WindowsInput.Native.VirtualKeyCode.LWIN, WindowsInput.Native.VirtualKeyCode.TAB);
 			//System.Diagnostics.Process.Start("explorer.exe", "shell:::{3080F90E-D7AD-11D9-BD98-0000947B0257}");
 		}

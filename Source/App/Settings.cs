@@ -102,6 +102,10 @@ namespace WindowsVirtualDesktopHelper {
 			RegisterDefault("feature.useHotKeyToSwitchDesktopBackward", false);
 			RegisterDefault("feature.useHotKeyToSwitchDesktopBackward.hotkey", "Alt + Left");
 
+			// Feature: useHotKeyToOpenTaskView
+			RegisterDefault("feature.useHotKeyToOpenTaskView", false);
+			RegisterDefault("feature.useHotKeyToOpenTaskView.hotkey", "Alt + D");
+
 			// Feature: showDesktopNumberInIconTray
 			RegisterDefault("feature.showDesktopNumberInIconTray", true);
 			RegisterDefault("feature.showDesktopNumberInIconTray.clickToOpenTaskView", true);
