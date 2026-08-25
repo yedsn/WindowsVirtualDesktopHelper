@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $assemblyInfo = Get-Content "Source/AssemblyInfo.cs" -Raw
+          if ($assemblyInfo -notmatch 'AssemblyVersion\("([0-9]+\.[0-9]+\.[0-9]+)') {
+            throw "Could not read AssemblyVersion from Source/AssemblyInfo.cs"
+          }
+
+          $version = $Matches[1]
+          $tag = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "v$version" }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Build unsigned Release
+        shell: pwsh
+        run: |
+          msbuild "WindowsVirtualDesktopHelper.sln" `
+            /p:Configuration=Release `
+            /p:Platform="Any CPU" `
+            /p:PostBuildEvent= `
+            /m
+
+      - name: Package executable zip
+        id: package
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $dist = "dist"
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+
+          $zipName = "WindowsVirtualDesktopHelper.Executable.v$version.zip"
+          $zipPath = Join-Path $dist $zipName
+          $hashPath = "$zipPath.sha256"
+
+          Compress-Archive -Force -Path @(
+            "Source/bin/Release/WindowsVirtualDesktopHelper.exe",
+            "Source/bin/Release/WindowsVirtualDesktopHelper.exe.config",
+            "LICENSE.md",
+            "README.md",
+            "CHANGELOG.md"
+          ) -DestinationPath $zipPath
+
+          $hash = (Get-FileHash -Algorithm SHA256 -Path $zipPath).Hash
+          Set-Content -NoNewline -Path $hashPath -Value $hash
+
+          "zip=$zipPath" >> $env:GITHUB_OUTPUT
+          "hash=$hashPath" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Windows Virtual Desktop Helper ${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            ${{ steps.package.outputs.zip }}
+            ${{ steps.package.outputs.hash }}
