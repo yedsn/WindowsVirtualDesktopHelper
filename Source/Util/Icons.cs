@@ -47,7 +47,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			}
 			var textSize = renderSize * textToRenderSizeRatio;
 			var bgColorSetting = Settings.GetString("theme.icons.iconBG." + theme);
-			var fgColorSetting = Settings.GetString("theme.icons.iconFG." + theme);
+			var fgColorSetting = drawAsSymbol ? Settings.GetString("theme.icons.symbolFG." + theme) : Settings.GetString("theme.icons.iconFG." + theme);
 
 			// Cache hit?
 			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity;

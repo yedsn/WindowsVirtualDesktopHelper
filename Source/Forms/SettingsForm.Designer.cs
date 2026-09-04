@@ -78,6 +78,9 @@ namespace WindowsVirtualDesktopHelper {
             this.labelIconTextColor = new System.Windows.Forms.Label();
             this.textBoxIconTextColor = new System.Windows.Forms.TextBox();
             this.buttonIconTextColor = new System.Windows.Forms.Button();
+            this.labelSwitchIconTextColor = new System.Windows.Forms.Label();
+            this.textBoxSwitchIconTextColor = new System.Windows.Forms.TextBox();
+            this.buttonSwitchIconTextColor = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -489,6 +492,9 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.buttonSwitchIconTextColor);
+            this.groupBox2.Controls.Add(this.textBoxSwitchIconTextColor);
+            this.groupBox2.Controls.Add(this.labelSwitchIconTextColor);
             this.groupBox2.Controls.Add(this.buttonIconTextColor);
             this.groupBox2.Controls.Add(this.buttonIconBackgroundColor);
             this.groupBox2.Controls.Add(this.textBoxIconTextColor);
@@ -500,7 +506,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox2.Size = new System.Drawing.Size(757, 124);
+            this.groupBox2.Size = new System.Drawing.Size(757, 164);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Settings";
@@ -576,6 +582,36 @@ namespace WindowsVirtualDesktopHelper {
             this.buttonIconTextColor.TabIndex = 7;
             this.buttonIconTextColor.UseVisualStyleBackColor = false;
             this.buttonIconTextColor.Click += new System.EventHandler(this.buttonIconTextColor_Click);
+            // 
+            // labelSwitchIconTextColor
+            // 
+            this.labelSwitchIconTextColor.AutoSize = true;
+            this.labelSwitchIconTextColor.Location = new System.Drawing.Point(28, 118);
+            this.labelSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelSwitchIconTextColor.Name = "labelSwitchIconTextColor";
+            this.labelSwitchIconTextColor.Size = new System.Drawing.Size(165, 25);
+            this.labelSwitchIconTextColor.TabIndex = 8;
+            this.labelSwitchIconTextColor.Text = "Switch icon text:";
+            // 
+            // textBoxSwitchIconTextColor
+            // 
+            this.textBoxSwitchIconTextColor.Location = new System.Drawing.Point(210, 114);
+            this.textBoxSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6);
+            this.textBoxSwitchIconTextColor.Name = "textBoxSwitchIconTextColor";
+            this.textBoxSwitchIconTextColor.Size = new System.Drawing.Size(106, 29);
+            this.textBoxSwitchIconTextColor.TabIndex = 9;
+            this.textBoxSwitchIconTextColor.TextChanged += new System.EventHandler(this.textBoxIconColor_TextChanged);
+            // 
+            // buttonSwitchIconTextColor
+            // 
+            this.buttonSwitchIconTextColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSwitchIconTextColor.Location = new System.Drawing.Point(328, 114);
+            this.buttonSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonSwitchIconTextColor.Name = "buttonSwitchIconTextColor";
+            this.buttonSwitchIconTextColor.Size = new System.Drawing.Size(34, 29);
+            this.buttonSwitchIconTextColor.TabIndex = 10;
+            this.buttonSwitchIconTextColor.UseVisualStyleBackColor = false;
+            this.buttonSwitchIconTextColor.Click += new System.EventHandler(this.buttonSwitchIconTextColor_Click);
             // 
             // checkBoxStatusOverlayShowOnAllMonitors
             // 
@@ -764,7 +800,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(805, 855);
+            this.ClientSize = new System.Drawing.Size(805, 895);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -848,5 +884,8 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.Label labelIconTextColor;
 		private System.Windows.Forms.TextBox textBoxIconTextColor;
 		private System.Windows.Forms.Button buttonIconTextColor;
+		private System.Windows.Forms.Label labelSwitchIconTextColor;
+		private System.Windows.Forms.TextBox textBoxSwitchIconTextColor;
+		private System.Windows.Forms.Button buttonSwitchIconTextColor;
 	}
 }

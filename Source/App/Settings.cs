@@ -42,6 +42,8 @@ namespace WindowsVirtualDesktopHelper {
 			RegisterDefault("theme.icons.iconFG.dark", "white");
 			RegisterDefault("theme.icons.iconBG.light", "#0078D4");
 			RegisterDefault("theme.icons.iconFG.light", "white");
+			RegisterDefault("theme.icons.symbolFG.dark", "black", "Defines the color to use for the previous/next desktop tray icons.");
+			RegisterDefault("theme.icons.symbolFG.light", "black", "Defines the color to use for the previous/next desktop tray icons.");
 			RegisterDefault("theme.overlay.width", 900, "With width in pixels of the switch overlay.");
 			RegisterDefault("theme.overlay.height", 430, "With height in pixels of the switch overlay.");
 			RegisterDefault("theme.overlay.font", "Segoe UI Light", "Defines the font name to use for the switch overlay.");

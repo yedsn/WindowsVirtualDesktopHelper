@@ -31,6 +31,7 @@ namespace WindowsVirtualDesktopHelper {
 			this.checkBoxStartupWithWindows.Checked = Settings.GetBool("general.startupWithWindows");
 			this.textBoxIconBackgroundColor.Text = Settings.GetString("theme.icons.iconBG." + App.Instance.CurrentSystemThemeName);
 			this.textBoxIconTextColor.Text = Settings.GetString("theme.icons.iconFG." + App.Instance.CurrentSystemThemeName);
+			this.textBoxSwitchIconTextColor.Text = Settings.GetString("theme.icons.symbolFG." + App.Instance.CurrentSystemThemeName);
 			UpdateIconColorButtons();
 
 			this.checkBoxShowOverlay.Checked = Settings.GetBool("feature.showDesktopSwitchOverlay");
@@ -154,6 +155,7 @@ namespace WindowsVirtualDesktopHelper {
 			try {
 				ColorTranslator.FromHtml(this.textBoxIconBackgroundColor.Text);
 				ColorTranslator.FromHtml(this.textBoxIconTextColor.Text);
+				ColorTranslator.FromHtml(this.textBoxSwitchIconTextColor.Text);
 			} catch {
 				return;
 			}
@@ -162,6 +164,8 @@ namespace WindowsVirtualDesktopHelper {
 			Settings.SetString("theme.icons.iconBG.light", this.textBoxIconBackgroundColor.Text);
 			Settings.SetString("theme.icons.iconFG.dark", this.textBoxIconTextColor.Text);
 			Settings.SetString("theme.icons.iconFG.light", this.textBoxIconTextColor.Text);
+			Settings.SetString("theme.icons.symbolFG.dark", this.textBoxSwitchIconTextColor.Text);
+			Settings.SetString("theme.icons.symbolFG.light", this.textBoxSwitchIconTextColor.Text);
 			UpdateIconColorButtons();
 			App.Instance.UIUpdate();
 		}
@@ -172,6 +176,10 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void buttonIconTextColor_Click(object sender, EventArgs e) {
 			SelectIconColor(this.textBoxIconTextColor);
+		}
+
+		private void buttonSwitchIconTextColor_Click(object sender, EventArgs e) {
+			SelectIconColor(this.textBoxSwitchIconTextColor);
 		}
 
 		private void SelectIconColor(TextBox textBox) {
@@ -194,6 +202,7 @@ namespace WindowsVirtualDesktopHelper {
 		private void UpdateIconColorButtons() {
 			SetColorButton(this.buttonIconBackgroundColor, this.textBoxIconBackgroundColor.Text);
 			SetColorButton(this.buttonIconTextColor, this.textBoxIconTextColor.Text);
+			SetColorButton(this.buttonSwitchIconTextColor, this.textBoxSwitchIconTextColor.Text);
 		}
 
 		private void SetColorButton(Button button, string colorText) {

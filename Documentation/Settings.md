@@ -21,6 +21,8 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 | theme.icons.iconFG.dark | ``"white"`` |  |
 | theme.icons.iconBG.light | ``"#0078D4"`` |  |
 | theme.icons.iconFG.light | ``"white"`` |  |
+| theme.icons.symbolFG.dark | ``"black"`` | Defines the color to use for the previous/next desktop tray icons. |
+| theme.icons.symbolFG.light | ``"black"`` | Defines the color to use for the previous/next desktop tray icons. |
 | theme.overlay.width | ``900`` | With width in pixels of the switch overlay. |
 | theme.overlay.height | ``430`` | With height in pixels of the switch overlay. |
 | theme.overlay.font | ``"Segoe UI Light"`` | Defines the font name to use for the switch overlay. |
