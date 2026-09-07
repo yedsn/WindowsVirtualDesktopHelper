@@ -67,6 +67,9 @@ namespace WindowsVirtualDesktopHelper {
 			RegisterDefault("feature.showSplashScreen.duration", 2000, "Splash duration in milliseconds.");
 			RegisterDefault("feature.showSplashScreen.text", "Virtual Desktop Helper", "The splash text to show.");
 
+			// Feature: iconTray
+			RegisterDefault("feature.iconTray.desktopDisplayMode", "navigation", "Controls the desktop tray layout: navigation shows previous/current/next controls; all-desktops shows one numbered icon for every desktop.");
+
 			// Feature: showPrevNextIcons
 			RegisterDefault("feature.showPrevNextIcons", true, "If enabled, a previous and next arrow will appear in the icons tray of Windows to allow easy switching between desktops.");
 			RegisterDefault("feature.showPrevNextIcons.automaticallyHidePrevNextOnBounds", false, "If enabled, the prev/next icon will automatically hide if there is no prev/next desktop.");

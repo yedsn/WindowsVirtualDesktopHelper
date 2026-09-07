@@ -27,6 +27,8 @@ namespace WindowsVirtualDesktopHelper {
 			//TODO: how to sync the startup setting - best would be to see if the reg key is actually there
 
 			this.checkBoxShowPrevNextIcons.Checked = Settings.GetBool("feature.showPrevNextIcons");
+			this.radioButtonTrayDisplayAllDesktops.Checked = App.Instance.GetTrayDesktopDisplayMode() == "all-desktops";
+			this.radioButtonTrayDisplayNavigation.Checked = !this.radioButtonTrayDisplayAllDesktops.Checked;
 			this.checkBoxShowDesktopNameInitial.Checked = Settings.GetBool("feature.showDesktopNameInIconTray");
 			this.checkBoxStartupWithWindows.Checked = Settings.GetBool("general.startupWithWindows");
 			this.textBoxIconBackgroundColor.Text = Settings.GetString("theme.icons.iconBG." + App.Instance.CurrentSystemThemeName);
@@ -79,6 +81,7 @@ namespace WindowsVirtualDesktopHelper {
 			checkBoxShowOverlay_CheckedChanged(this, null);
 			checkBoxShowStatusOverlay_CheckedChanged(this, null);
 			checkBoxUseHotKeysToJumpToDesktop_CheckedChanged(this, null);
+			UpdateTrayDisplayModeControls();
 		}
 		
 		private void SaveSettingsFromUI() {
@@ -136,6 +139,21 @@ namespace WindowsVirtualDesktopHelper {
 			Settings.SetBool("feature.showPrevNextIcons", this.checkBoxShowPrevNextIcons.Checked);
 
 			App.Instance.UIUpdate();
+		}
+
+		private void radioButtonTrayDisplayMode_CheckedChanged(object sender, EventArgs e) {
+			if(!this.radioButtonTrayDisplayNavigation.Checked && !this.radioButtonTrayDisplayAllDesktops.Checked) return;
+			UpdateTrayDisplayModeControls();
+			if(IsLoading) return;
+			Settings.SetString("feature.iconTray.desktopDisplayMode", this.radioButtonTrayDisplayAllDesktops.Checked ? "all-desktops" : "navigation");
+			App.Instance.UIUpdate();
+		}
+
+		private void UpdateTrayDisplayModeControls() {
+			var navigationMode = this.radioButtonTrayDisplayNavigation.Checked;
+			this.checkBoxShowPrevNextIcons.Enabled = navigationMode;
+			this.checkBoxClickDesktopNumberTaskView.Enabled = navigationMode;
+			this.checkBoxShowDesktopNameInitial.Enabled = navigationMode;
 		}
 
 		private void checkBoxShowDesktopNameInitial_CheckedChanged(object sender, EventArgs e) {

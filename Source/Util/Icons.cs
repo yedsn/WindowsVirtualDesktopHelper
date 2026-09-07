@@ -18,7 +18,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 		[DllImport("user32.dll", SetLastError = true)]
 		private static extern bool DestroyIcon(IntPtr hIcon);
 
-		public static Icon GenerateNotificationIcon(string text, string theme, int dpi, bool drawAsSymbol, double opacity = 1.0) {
+		public static Icon GenerateNotificationIcon(string text, string theme, int dpi, bool drawAsSymbol, double opacity = 1.0, bool lightenBackground = false) {
 			// Init
 			var size = 16;
 			if (dpi > 96) size = 64;
@@ -50,7 +50,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			var fgColorSetting = drawAsSymbol ? Settings.GetString("theme.icons.symbolFG." + theme) : Settings.GetString("theme.icons.iconFG." + theme);
 
 			// Cache hit?
-			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity;
+			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity + "_" + lightenBackground;
 			Icon cachedIcon;
 			if (_cache.TryGetValue(cacheKey, out cachedIcon)) {
 				return cachedIcon;
@@ -63,6 +63,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			var fgColor = configuredFgColor;
 			if(!drawAsSymbol) {
 				UseBadgePalette(theme, configuredBgColor, configuredFgColor, out bgColor, out fgColor);
+				if(lightenBackground) bgColor = BlendColors(bgColor, Color.White, 0.30f);
 			}
 			if (opacity != 1.0) fgColor = Color.FromArgb((int)(255.0f * opacity), fgColor);
 			if (opacity != 1.0) bgColor = Color.FromArgb((int)(255.0f * opacity), bgColor);
@@ -183,6 +184,15 @@ namespace WindowsVirtualDesktopHelper.Util {
 			using (var bgBrush = new SolidBrush(bgColor)) {
 				g.FillRectangle(bgBrush, rect);
 			}
+		}
+
+		private static Color BlendColors(Color source, Color target, float targetAmount) {
+			var sourceAmount = 1.0f - targetAmount;
+			return Color.FromArgb(
+				(int)(source.A * sourceAmount + target.A * targetAmount),
+				(int)(source.R * sourceAmount + target.R * targetAmount),
+				(int)(source.G * sourceAmount + target.G * targetAmount),
+				(int)(source.B * sourceAmount + target.B * targetAmount));
 		}
 
 	}

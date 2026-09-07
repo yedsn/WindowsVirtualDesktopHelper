@@ -150,6 +150,7 @@ namespace WindowsVirtualDesktopHelper {
 					var newCurrentVDDisplayCount = this.GetVDDisplayCount();
 					if(newCurrentVDDisplayCount != CurrentVDDisplayCount) {
 						CurrentVDDisplayCount = newCurrentVDDisplayCount;
+						this.UIUpdateIcons();
 						//Debug.WriteLine("Update Count: " + Thread.CurrentThread.ManagedThreadId);
 					}
 					System.Threading.Thread.Sleep(100);
@@ -216,10 +217,8 @@ namespace WindowsVirtualDesktopHelper {
 				Action safeAction = delegate { VDSwitchedSafe(); };
 				this.AppForm.Invoke(safeAction);
 			} else {
-				// Update icons
-				this.UIUpdateIconForVDDisplayNumber(this.CurrentSystemThemeName, this.CurrentVDDisplayNumber, this.CurrentVDDisplayName);
-				this.UIUpdateIconForVDDisplayName(this.CurrentSystemThemeName, this.CurrentVDDisplayName);
-				this.UIUpdateNextPrevIconVisibility(this.CurrentSystemThemeName);
+				// Update the active tray layout.
+				this.UIUpdateIcons();
 				// Show notification overlay
 				if(Settings.GetBool("feature.showDesktopSwitchOverlay")) {
 					this.AppForm.Invoke((Action)(() => {
@@ -712,14 +711,35 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public void UIUpdateIcons() {
+			if(this.AppForm.InvokeRequired) {
+				try {
+					this.AppForm.BeginInvoke((Action)(() => UIUpdateIcons()));
+				} catch(InvalidOperationException) { }
+				return;
+			}
+
 			var theme = App.Instance.CurrentSystemThemeName;
-			// Set current display icons
-			UIUpdateIconForVDDisplayNumber(theme, App.Instance.CurrentVDDisplayNumber, App.Instance.CurrentVDDisplayName);
-			UIUpdateIconForVDDisplayName(theme, App.Instance.CurrentVDDisplayName);
-			UIUpdateNextPrevIconVisibility(theme);
-			// Visibility by feature
-			this.AppForm.notifyIconName.Visible = Settings.GetBool("feature.showDesktopNameInIconTray");
-			this.AppForm.notifyIconNumber.Visible = Settings.GetBool("feature.showDesktopNumberInIconTray");
+			if(GetTrayDesktopDisplayMode() == "all-desktops") {
+				this.AppForm.notifyIconName.Visible = false;
+				this.AppForm.notifyIconNumber.Visible = false;
+				this.AppForm.notifyIconPrev.Visible = false;
+				this.AppForm.notifyIconNext.Visible = false;
+				this.AppForm.UpdateDesktopNotifyIcons(theme, App.Instance.CurrentVDDisplayCount, App.Instance.CurrentVDDisplayNumber, this.AppForm.DeviceDpi);
+			} else {
+				this.AppForm.DisposeDesktopNotifyIcons();
+				// Set current display icons
+				UIUpdateIconForVDDisplayNumber(theme, App.Instance.CurrentVDDisplayNumber, App.Instance.CurrentVDDisplayName);
+				UIUpdateIconForVDDisplayName(theme, App.Instance.CurrentVDDisplayName);
+				UIUpdateNextPrevIconVisibility(theme);
+				// Visibility by feature
+				this.AppForm.notifyIconName.Visible = Settings.GetBool("feature.showDesktopNameInIconTray");
+				this.AppForm.notifyIconNumber.Visible = Settings.GetBool("feature.showDesktopNumberInIconTray");
+			}
+		}
+
+		public string GetTrayDesktopDisplayMode() {
+			var mode = Settings.GetString("feature.iconTray.desktopDisplayMode", "navigation");
+			return mode == "all-desktops" ? mode : "navigation";
 		}
 
 
@@ -797,6 +817,9 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public void Exit() {
+			if(this.AppForm != null && !this.AppForm.IsDisposed) {
+				this.AppForm.DisposeDesktopNotifyIcons();
+			}
 			Application.Exit();
 			System.Environment.Exit(0);
 		}

@@ -25,6 +25,9 @@ namespace WindowsVirtualDesktopHelper {
         /// </summary>
         private void InitializeComponent() {
             this.checkBoxShowPrevNextIcons = new System.Windows.Forms.CheckBox();
+			this.radioButtonTrayDisplayNavigation = new System.Windows.Forms.RadioButton();
+			this.radioButtonTrayDisplayAllDesktops = new System.Windows.Forms.RadioButton();
+			this.labelTrayDisplayMode = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.radioButtonUseHotKeysToJumpToDesktopAlt = new System.Windows.Forms.RadioButton();
@@ -92,7 +95,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxShowPrevNextIcons
             // 
             this.checkBoxShowPrevNextIcons.AutoSize = true;
-            this.checkBoxShowPrevNextIcons.Location = new System.Drawing.Point(28, 35);
+            this.checkBoxShowPrevNextIcons.Location = new System.Drawing.Point(28, 78);
             this.checkBoxShowPrevNextIcons.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxShowPrevNextIcons.Name = "checkBoxShowPrevNextIcons";
             this.checkBoxShowPrevNextIcons.Size = new System.Drawing.Size(409, 29);
@@ -101,8 +104,47 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxShowPrevNextIcons.UseVisualStyleBackColor = true;
             this.checkBoxShowPrevNextIcons.CheckedChanged += new System.EventHandler(this.checkBoxShowPrevNextIcons_CheckedChanged);
             // 
+			// radioButtonTrayDisplayNavigation
+
+			this.radioButtonTrayDisplayNavigation.AutoSize = true;
+			this.radioButtonTrayDisplayNavigation.Location = new System.Drawing.Point(160, 35);
+			this.radioButtonTrayDisplayNavigation.Margin = new System.Windows.Forms.Padding(6);
+			this.radioButtonTrayDisplayNavigation.Name = "radioButtonTrayDisplayNavigation";
+			this.radioButtonTrayDisplayNavigation.Size = new System.Drawing.Size(198, 29);
+			this.radioButtonTrayDisplayNavigation.TabIndex = 31;
+			this.radioButtonTrayDisplayNavigation.TabStop = true;
+			this.radioButtonTrayDisplayNavigation.Text = "Previous / Next";
+			this.radioButtonTrayDisplayNavigation.UseVisualStyleBackColor = true;
+			this.radioButtonTrayDisplayNavigation.CheckedChanged += new System.EventHandler(this.radioButtonTrayDisplayMode_CheckedChanged);
+
+			// radioButtonTrayDisplayAllDesktops
+
+			this.radioButtonTrayDisplayAllDesktops.AutoSize = true;
+			this.radioButtonTrayDisplayAllDesktops.Location = new System.Drawing.Point(382, 35);
+			this.radioButtonTrayDisplayAllDesktops.Margin = new System.Windows.Forms.Padding(6);
+			this.radioButtonTrayDisplayAllDesktops.Name = "radioButtonTrayDisplayAllDesktops";
+			this.radioButtonTrayDisplayAllDesktops.Size = new System.Drawing.Size(164, 29);
+			this.radioButtonTrayDisplayAllDesktops.TabIndex = 32;
+			this.radioButtonTrayDisplayAllDesktops.TabStop = true;
+			this.radioButtonTrayDisplayAllDesktops.Text = "All Desktops";
+			this.radioButtonTrayDisplayAllDesktops.UseVisualStyleBackColor = true;
+			this.radioButtonTrayDisplayAllDesktops.CheckedChanged += new System.EventHandler(this.radioButtonTrayDisplayMode_CheckedChanged);
+
+			// labelTrayDisplayMode
+
+			this.labelTrayDisplayMode.AutoSize = true;
+			this.labelTrayDisplayMode.Location = new System.Drawing.Point(28, 37);
+			this.labelTrayDisplayMode.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+			this.labelTrayDisplayMode.Name = "labelTrayDisplayMode";
+			this.labelTrayDisplayMode.Size = new System.Drawing.Size(117, 25);
+			this.labelTrayDisplayMode.TabIndex = 33;
+			this.labelTrayDisplayMode.Text = "Tray type:";
+
             // groupBox1
             // 
+			this.groupBox1.Controls.Add(this.labelTrayDisplayMode);
+			this.groupBox1.Controls.Add(this.radioButtonTrayDisplayAllDesktops);
+			this.groupBox1.Controls.Add(this.radioButtonTrayDisplayNavigation);
             this.groupBox1.Controls.Add(this.checkBoxStatusOverlayShowOnAllMonitors);
             this.groupBox1.Controls.Add(this.panel4);
             this.groupBox1.Controls.Add(this.label2);
@@ -126,7 +168,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox1.Size = new System.Drawing.Size(757, 674);
+            this.groupBox1.Size = new System.Drawing.Size(757, 717);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Features";
@@ -137,7 +179,7 @@ namespace WindowsVirtualDesktopHelper {
             this.panel3.Controls.Add(this.radioButtonUseHotKeysToJumpToDesktopAltShift);
             this.panel3.Controls.Add(this.radioButtonUseHotKeysToJumpToDesktopCtrlAlt);
             this.panel3.Controls.Add(this.radioButtonUseHotKeysToJumpToDesktopCtrl);
-            this.panel3.Location = new System.Drawing.Point(73, 567);
+            this.panel3.Location = new System.Drawing.Point(73, 610);
             this.panel3.Margin = new System.Windows.Forms.Padding(6);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(660, 46);
@@ -198,7 +240,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxUseHotKeysToJumpToDesktop
             // 
             this.checkBoxUseHotKeysToJumpToDesktop.AutoSize = true;
-            this.checkBoxUseHotKeysToJumpToDesktop.Location = new System.Drawing.Point(28, 539);
+            this.checkBoxUseHotKeysToJumpToDesktop.Location = new System.Drawing.Point(28, 582);
             this.checkBoxUseHotKeysToJumpToDesktop.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxUseHotKeysToJumpToDesktop.Name = "checkBoxUseHotKeysToJumpToDesktop";
             this.checkBoxUseHotKeysToJumpToDesktop.Size = new System.Drawing.Size(331, 29);
@@ -210,7 +252,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxUseHotKeyToOpenTaskView
             // 
             this.checkBoxUseHotKeyToOpenTaskView.AutoSize = true;
-            this.checkBoxUseHotKeyToOpenTaskView.Location = new System.Drawing.Point(28, 625);
+            this.checkBoxUseHotKeyToOpenTaskView.Location = new System.Drawing.Point(28, 668);
             this.checkBoxUseHotKeyToOpenTaskView.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxUseHotKeyToOpenTaskView.Name = "checkBoxUseHotKeyToOpenTaskView";
             this.checkBoxUseHotKeyToOpenTaskView.Size = new System.Drawing.Size(334, 29);
@@ -222,7 +264,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxOverlayShowOnAllMonitors
             // 
             this.checkBoxOverlayShowOnAllMonitors.AutoSize = true;
-            this.checkBoxOverlayShowOnAllMonitors.Location = new System.Drawing.Point(79, 246);
+            this.checkBoxOverlayShowOnAllMonitors.Location = new System.Drawing.Point(79, 289);
             this.checkBoxOverlayShowOnAllMonitors.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxOverlayShowOnAllMonitors.Name = "checkBoxOverlayShowOnAllMonitors";
             this.checkBoxOverlayShowOnAllMonitors.Size = new System.Drawing.Size(219, 29);
@@ -234,7 +276,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxShowDesktopNameInitial
             // 
             this.checkBoxShowDesktopNameInitial.AutoSize = true;
-            this.checkBoxShowDesktopNameInitial.Location = new System.Drawing.Point(28, 498);
+            this.checkBoxShowDesktopNameInitial.Location = new System.Drawing.Point(28, 541);
             this.checkBoxShowDesktopNameInitial.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxShowDesktopNameInitial.Name = "checkBoxShowDesktopNameInitial";
             this.checkBoxShowDesktopNameInitial.Size = new System.Drawing.Size(378, 29);
@@ -246,7 +288,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxClickDesktopNumberTaskView
             // 
             this.checkBoxClickDesktopNumberTaskView.AutoSize = true;
-            this.checkBoxClickDesktopNumberTaskView.Location = new System.Drawing.Point(28, 458);
+            this.checkBoxClickDesktopNumberTaskView.Location = new System.Drawing.Point(28, 501);
             this.checkBoxClickDesktopNumberTaskView.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxClickDesktopNumberTaskView.Name = "checkBoxClickDesktopNumberTaskView";
             this.checkBoxClickDesktopNumberTaskView.Size = new System.Drawing.Size(521, 29);
@@ -261,7 +303,7 @@ namespace WindowsVirtualDesktopHelper {
             this.panel2.Controls.Add(this.radioButtonOverlayLongDuration);
             this.panel2.Controls.Add(this.radioButtonOverlayMediumDuration);
             this.panel2.Controls.Add(this.radioButtonOverlayShortDuration);
-            this.panel2.Location = new System.Drawing.Point(73, 114);
+            this.panel2.Location = new System.Drawing.Point(73, 157);
             this.panel2.Margin = new System.Windows.Forms.Padding(6);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(660, 46);
@@ -330,7 +372,7 @@ namespace WindowsVirtualDesktopHelper {
             this.panel1.Controls.Add(this.radioButtonPositionTopRight);
             this.panel1.Controls.Add(this.radioButtonPositionTopCenter);
             this.panel1.Controls.Add(this.radioButtonPositionTopLeft);
-            this.panel1.Location = new System.Drawing.Point(438, 164);
+            this.panel1.Location = new System.Drawing.Point(438, 207);
             this.panel1.Margin = new System.Windows.Forms.Padding(6);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(114, 109);
@@ -447,7 +489,7 @@ namespace WindowsVirtualDesktopHelper {
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(351, 165);
+            this.label1.Location = new System.Drawing.Point(351, 208);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(87, 25);
@@ -457,7 +499,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxOverlayTranslucent
             // 
             this.checkBoxOverlayTranslucent.AutoSize = true;
-            this.checkBoxOverlayTranslucent.Location = new System.Drawing.Point(79, 205);
+            this.checkBoxOverlayTranslucent.Location = new System.Drawing.Point(79, 248);
             this.checkBoxOverlayTranslucent.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxOverlayTranslucent.Name = "checkBoxOverlayTranslucent";
             this.checkBoxOverlayTranslucent.Size = new System.Drawing.Size(141, 29);
@@ -469,7 +511,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxOverlayAnimate
             // 
             this.checkBoxOverlayAnimate.AutoSize = true;
-            this.checkBoxOverlayAnimate.Location = new System.Drawing.Point(79, 162);
+            this.checkBoxOverlayAnimate.Location = new System.Drawing.Point(79, 205);
             this.checkBoxOverlayAnimate.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxOverlayAnimate.Name = "checkBoxOverlayAnimate";
             this.checkBoxOverlayAnimate.Size = new System.Drawing.Size(169, 29);
@@ -481,7 +523,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxShowOverlay
             // 
             this.checkBoxShowOverlay.AutoSize = true;
-            this.checkBoxShowOverlay.Location = new System.Drawing.Point(28, 78);
+            this.checkBoxShowOverlay.Location = new System.Drawing.Point(28, 121);
             this.checkBoxShowOverlay.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxShowOverlay.Name = "checkBoxShowOverlay";
             this.checkBoxShowOverlay.Size = new System.Drawing.Size(375, 29);
@@ -502,7 +544,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox2.Controls.Add(this.textBoxIconBackgroundColor);
             this.groupBox2.Controls.Add(this.labelIconBackgroundColor);
             this.groupBox2.Controls.Add(this.checkBoxStartupWithWindows);
-            this.groupBox2.Location = new System.Drawing.Point(22, 708);
+            this.groupBox2.Location = new System.Drawing.Point(22, 751);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
@@ -616,7 +658,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxStatusOverlayShowOnAllMonitors
             // 
             this.checkBoxStatusOverlayShowOnAllMonitors.AutoSize = true;
-            this.checkBoxStatusOverlayShowOnAllMonitors.Location = new System.Drawing.Point(79, 412);
+            this.checkBoxStatusOverlayShowOnAllMonitors.Location = new System.Drawing.Point(79, 455);
             this.checkBoxStatusOverlayShowOnAllMonitors.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxStatusOverlayShowOnAllMonitors.Name = "checkBoxStatusOverlayShowOnAllMonitors";
             this.checkBoxStatusOverlayShowOnAllMonitors.Size = new System.Drawing.Size(219, 29);
@@ -636,7 +678,7 @@ namespace WindowsVirtualDesktopHelper {
             this.panel4.Controls.Add(this.radioButtonStatusOverlayPositionTopRight);
             this.panel4.Controls.Add(this.radioButtonStatusOverlayPositionTopCenter);
             this.panel4.Controls.Add(this.radioButtonStatusOverlayPositionTopLeft);
-            this.panel4.Location = new System.Drawing.Point(438, 330);
+            this.panel4.Location = new System.Drawing.Point(438, 373);
             this.panel4.Margin = new System.Windows.Forms.Padding(6);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(114, 109);
@@ -753,7 +795,7 @@ namespace WindowsVirtualDesktopHelper {
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(351, 331);
+            this.label2.Location = new System.Drawing.Point(351, 374);
             this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(87, 25);
@@ -763,7 +805,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxStatusOverlayTranslucent
             // 
             this.checkBoxStatusOverlayTranslucent.AutoSize = true;
-            this.checkBoxStatusOverlayTranslucent.Location = new System.Drawing.Point(79, 371);
+            this.checkBoxStatusOverlayTranslucent.Location = new System.Drawing.Point(79, 414);
             this.checkBoxStatusOverlayTranslucent.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxStatusOverlayTranslucent.Name = "checkBoxStatusOverlayTranslucent";
             this.checkBoxStatusOverlayTranslucent.Size = new System.Drawing.Size(141, 29);
@@ -775,7 +817,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxStatusOverlayAnimate
             // 
             this.checkBoxStatusOverlayAnimate.AutoSize = true;
-            this.checkBoxStatusOverlayAnimate.Location = new System.Drawing.Point(79, 328);
+            this.checkBoxStatusOverlayAnimate.Location = new System.Drawing.Point(79, 371);
             this.checkBoxStatusOverlayAnimate.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxStatusOverlayAnimate.Name = "checkBoxStatusOverlayAnimate";
             this.checkBoxStatusOverlayAnimate.Size = new System.Drawing.Size(110, 29);
@@ -787,7 +829,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxShowStatusOverlay
             // 
             this.checkBoxShowStatusOverlay.AutoSize = true;
-            this.checkBoxShowStatusOverlay.Location = new System.Drawing.Point(28, 287);
+            this.checkBoxShowStatusOverlay.Location = new System.Drawing.Point(28, 330);
             this.checkBoxShowStatusOverlay.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxShowStatusOverlay.Name = "checkBoxShowStatusOverlay";
             this.checkBoxShowStatusOverlay.Size = new System.Drawing.Size(261, 29);
@@ -800,7 +842,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(805, 895);
+            this.ClientSize = new System.Drawing.Size(805, 938);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -831,6 +873,9 @@ namespace WindowsVirtualDesktopHelper {
 
         #endregion
         private System.Windows.Forms.CheckBox checkBoxShowPrevNextIcons;
+		private System.Windows.Forms.RadioButton radioButtonTrayDisplayNavigation;
+		private System.Windows.Forms.RadioButton radioButtonTrayDisplayAllDesktops;
+		private System.Windows.Forms.Label labelTrayDisplayMode;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox checkBoxStartupWithWindows;

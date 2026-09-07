@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -8,6 +9,7 @@ namespace WindowsVirtualDesktopHelper {
 	public partial class AppForm : Form {
 
 		private bool _startupDone = false;
+		private readonly List<NotifyIcon> _desktopNotifyIcons = new List<NotifyIcon>();
 
 		public AppForm() {
 			// Init UI
@@ -86,6 +88,7 @@ namespace WindowsVirtualDesktopHelper {
 				Hide();
 			} else if(e.CloseReason == CloseReason.ApplicationExitCall || e.CloseReason == CloseReason.WindowsShutDown || e.CloseReason == CloseReason.TaskManagerClosing) {
 				// Remove all notif icons
+				DisposeDesktopNotifyIcons();
 				notifyIconName.Visible = false;
 				notifyIconNumber.Visible = false;
 				notifyIconPrev.Visible = false;
@@ -159,6 +162,42 @@ namespace WindowsVirtualDesktopHelper {
 					App.Instance.OpenTaskView();
 				}
 			}
+		}
+
+		internal void UpdateDesktopNotifyIcons(string theme, int desktopCount, uint currentDesktopNumber, int dpi) {
+			var count = Math.Max(1, desktopCount);
+			if(_desktopNotifyIcons.Count != count) {
+				DisposeDesktopNotifyIcons();
+				for(var i = 0; i < count; i++) {
+					var desktopNumber = i;
+					var notifyIcon = new NotifyIcon(this.components) {
+						ContextMenuStrip = this.contextMenuStrip1,
+						Text = "Desktop " + (desktopNumber + 1),
+						Icon = Util.Icons.GenerateNotificationIcon((desktopNumber + 1).ToString(), theme, dpi, false, 1.0, desktopNumber != currentDesktopNumber),
+						Visible = true
+					};
+					notifyIcon.MouseClick += (sender, e) => {
+						if(e.Button == MouseButtons.Left) App.Instance.SwitchToDesktop(desktopNumber);
+					};
+					_desktopNotifyIcons.Add(notifyIcon);
+				}
+			}
+
+			for(var i = 0; i < _desktopNotifyIcons.Count; i++) {
+				var notifyIcon = _desktopNotifyIcons[i];
+				notifyIcon.Icon = Util.Icons.GenerateNotificationIcon((i + 1).ToString(), theme, dpi, false, 1.0, i != currentDesktopNumber);
+				notifyIcon.Text = "Desktop " + (i + 1);
+				notifyIcon.Visible = true;
+			}
+		}
+
+		internal void DisposeDesktopNotifyIcons() {
+			for(var i = _desktopNotifyIcons.Count - 1; i >= 0; i--) {
+				var notifyIcon = _desktopNotifyIcons[i];
+				notifyIcon.Visible = false;
+				notifyIcon.Dispose();
+			}
+			_desktopNotifyIcons.Clear();
 		}
 
 		#endregion
