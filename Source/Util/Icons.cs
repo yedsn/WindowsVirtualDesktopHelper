@@ -18,7 +18,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 		[DllImport("user32.dll", SetLastError = true)]
 		private static extern bool DestroyIcon(IntPtr hIcon);
 
-		public static Icon GenerateNotificationIcon(string text, string theme, int dpi, bool drawAsSymbol, double opacity = 1.0, bool lightenBackground = false) {
+		public static Icon GenerateNotificationIcon(string text, string theme, int dpi, bool drawAsSymbol, double opacity = 1.0, bool lightenBackground = false, bool fillBackground = false) {
 			// Init
 			var size = 16;
 			if (dpi > 96) size = 64;
@@ -50,7 +50,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			var fgColorSetting = drawAsSymbol ? Settings.GetString("theme.icons.symbolFG." + theme) : Settings.GetString("theme.icons.iconFG." + theme);
 
 			// Cache hit?
-			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity + "_" + lightenBackground;
+			var cacheKey = textToRender + "_" + textSize + "_" + size + "_" + theme + "_" + fontFamily + "_" + fontStyle + "_" + bgColorSetting + "_" + fgColorSetting + "_" + drawAsSymbol + "_" + opacity + "_" + lightenBackground + "_" + fillBackground;
 			Icon cachedIcon;
 			if (_cache.TryGetValue(cacheKey, out cachedIcon)) {
 				return cachedIcon;
@@ -83,7 +83,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 					g.Clear(Color.Transparent);
 					if(!drawAsSymbol) {
-						DrawBadgeBackground(g, renderSize, bgColor);
+						DrawBadgeBackground(g, renderSize, bgColor, fillBackground ? 0.0f : renderSize * 0.025f);
 					}
 
 					format.Alignment = StringAlignment.Center;
@@ -124,7 +124,10 @@ namespace WindowsVirtualDesktopHelper.Util {
 					g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 					g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 					g.SmoothingMode = SmoothingMode.AntiAlias;
-					g.DrawImage(bitmap, 0, 0, size, size);
+					using(var attributes = new System.Drawing.Imaging.ImageAttributes()) {
+						attributes.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+						g.DrawImage(bitmap, new Rectangle(0, 0, size, size), 0, 0, renderSize, renderSize, GraphicsUnit.Pixel, attributes);
+					}
 					g.Flush();
 				}
 
@@ -145,6 +148,63 @@ namespace WindowsVirtualDesktopHelper.Util {
 			// Register in cache
 			_cache[cacheKey] = icon;
 
+			return icon;
+		}
+
+		public static Icon GenerateDesktopManagerIcon(string theme, int dpi) {
+			var size = dpi > 96 ? 64 : 16;
+			var cacheKey = "desktopManager_" + size + "_" + theme;
+			Icon cachedIcon;
+			if(_cache.TryGetValue(cacheKey, out cachedIcon)) return cachedIcon;
+
+			var renderSize = 128;
+			var paneColor = Color.FromArgb(225, 0, 120, 212);
+
+			Icon icon;
+			using(var bitmap = new Bitmap(renderSize, renderSize, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+			using(var bitmapScaledDown = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb)) {
+				using(var g = Graphics.FromImage(bitmap)) {
+					g.CompositingQuality = CompositingQuality.HighQuality;
+					g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+					g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
+					g.Clear(Color.Transparent);
+
+					var gap = renderSize * 0.06f;
+					var left = 0.0f;
+					var top = 0.0f;
+					var paneWidth = (renderSize - gap) / 2.0f;
+					var paneHeight = paneWidth;
+					using(var paneBrush = new SolidBrush(paneColor)) {
+						g.FillRectangle(paneBrush, left, top, paneWidth, paneHeight);
+						g.FillRectangle(paneBrush, left + paneWidth + gap, top, paneWidth, paneHeight);
+						g.FillRectangle(paneBrush, left, top + paneHeight + gap, paneWidth, paneHeight);
+						g.FillRectangle(paneBrush, left + paneWidth + gap, top + paneHeight + gap, paneWidth, paneHeight);
+					}
+				}
+
+				using(var g = Graphics.FromImage(bitmapScaledDown)) {
+					g.CompositingQuality = CompositingQuality.HighQuality;
+					g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+					g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
+					using(var attributes = new System.Drawing.Imaging.ImageAttributes()) {
+						attributes.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+						g.DrawImage(bitmap, new Rectangle(0, 0, size, size), 0, 0, renderSize, renderSize, GraphicsUnit.Pixel, attributes);
+					}
+				}
+
+				var hIcon = bitmapScaledDown.GetHicon();
+				try {
+					using(var tempIcon = Icon.FromHandle(hIcon)) {
+						icon = (Icon)tempIcon.Clone();
+					}
+				} finally {
+					DestroyIcon(hIcon);
+				}
+			}
+
+			_cache[cacheKey] = icon;
 			return icon;
 		}
 
@@ -177,8 +237,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 			fgColor = configuredFgColor;
 		}
 
-		private static void DrawBadgeBackground(Graphics g, int renderSize, Color bgColor) {
-			var inset = renderSize * 0.025f;
+		private static void DrawBadgeBackground(Graphics g, int renderSize, Color bgColor, float inset) {
 			var rect = new RectangleF(inset, inset, renderSize - inset * 2, renderSize - inset * 2);
 
 			using (var bgBrush = new SolidBrush(bgColor)) {

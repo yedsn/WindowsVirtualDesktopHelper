@@ -43,7 +43,7 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 | feature.showSplashScreen | ``true`` | If enabled, a splash screen is shown on startup of the app. Overlays must be enabled. |
 | feature.showSplashScreen.duration | ``2000`` | Splash duration in milliseconds. |
 | feature.showSplashScreen.text | ``"Virtual Desktop Helper"`` | The splash text to show. |
-| feature.iconTray.desktopDisplayMode | ``"navigation"`` | Controls the desktop tray layout. Use ``"navigation"`` for the previous, current, and next desktop icons, or ``"all-desktops"`` to show one numbered icon per virtual desktop. In ``"all-desktops"`` mode, left-clicking an icon switches directly to that desktop. |
+| feature.iconTray.desktopDisplayMode | ``"navigation"`` | Controls the desktop tray layout. Use ``"navigation"`` for the previous, current, and next desktop icons, or ``"all-desktops"`` to show one numbered icon per virtual desktop plus a Desktop Manager icon. In ``"all-desktops"`` mode, left-clicking a numbered icon switches directly to that desktop and clicking Desktop Manager opens Windows Task View. |
 | feature.showPrevNextIcons | ``true`` | If enabled, a previous and next arrow will appear in the icons tray of Windows to allow easy switching between desktops. |
 | feature.showPrevNextIcons.automaticallyHidePrevNextOnBounds | ``false`` | If enabled, the prev/next icon will automatically hide if there is no prev/next desktop. |
 | feature.showPrevNextIcons.nextChar | ``"\u203A"`` | Defines the character to use for next desktop icon (typically a unicode character like the chevron, for example \xE101 = skip forward (player style),  = next (arrow style), \xe26b = next (chevron style), \u02C3 = next (chevron style), \u203A = next (chevron style)) |
@@ -70,7 +70,7 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 | feature.useHotKeyToOpenTaskView | ``false`` |  |
 | feature.useHotKeyToOpenTaskView.hotkey | ``"Alt + D"`` |  |
 | feature.showDesktopNumberInIconTray | ``true`` |  |
-| feature.showDesktopNumberInIconTray.clickToOpenTaskView | ``true`` |  |
+| feature.showDesktopNumberInIconTray.clickToOpenTaskView | ``true`` | If enabled, clicking the desktop number or name tray icon opens Windows Task View. |
 | feature.showDesktopNameInIconTray | ``false`` |  |
 
 ### Config File
