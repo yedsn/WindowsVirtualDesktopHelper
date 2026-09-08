@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
@@ -71,6 +72,18 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 
 		internal static int GetDesktopCount() {
 			return GetDesktopIndices().Count;
+		}
+
+		internal static List<string> GetDesktopNames() {
+			var desktopNames = new List<string>();
+			foreach(var pair in GetDesktopIndices().OrderBy(pair => pair.Value)) {
+				string desktopName = null;
+				using(var desktopKey = Registry.CurrentUser.OpenSubKey(VirtualDesktopsPath + @"\Desktops\{" + pair.Key + "}")) {
+					desktopName = desktopKey == null ? null : desktopKey.GetValue("Name") as string;
+				}
+				desktopNames.Add(string.IsNullOrEmpty(desktopName) ? "Desktop " + (pair.Value + 1) : desktopName);
+			}
+			return desktopNames;
 		}
 
 		internal static bool TryGetDesktopId(int desktopIndex, out Guid desktopId) {

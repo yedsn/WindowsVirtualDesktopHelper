@@ -342,6 +342,10 @@ namespace WindowsVirtualDesktopHelper {
 			return Math.Max(1, Math.Max(CurrentVDDisplayCount, VirtualDesktopRegistry.GetDesktopCount()));
 		}
 
+		public List<string> GetWindowOverviewDesktopNames() {
+			return VirtualDesktopRegistry.GetDesktopNames();
+		}
+
 		public string ActivateOverviewWindow(WindowOverviewItem item) {
 			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
 			try {
@@ -871,6 +875,7 @@ namespace WindowsVirtualDesktopHelper {
 			WindowOverviewForm.BringToFront();
 			WindowOverviewForm.Activate();
 			WindowOverviewForm.RefreshSnapshot();
+			WindowOverviewForm.FocusSearchBox();
 		}
 
 		public void ShowSplash() {

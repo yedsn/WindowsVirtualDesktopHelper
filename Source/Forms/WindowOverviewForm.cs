@@ -19,6 +19,7 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly Label _statusLabel;
 		private readonly System.Windows.Forms.Timer _searchDebounceTimer;
 		private List<WindowOverviewItem> _items = new List<WindowOverviewItem>();
+		private List<string> _desktopNames = new List<string>();
 		private readonly List<ListView> _windowLists = new List<ListView>();
 		private int _desktopCount = 1;
 		private int _refreshVersion;
@@ -84,6 +85,17 @@ namespace WindowsVirtualDesktopHelper {
 			Icon = Util.Icons.GenerateDesktopManagerIcon(theme, dpi);
 		}
 
+		public void FocusSearchBox() {
+			if(IsDisposed || !IsHandleCreated) return;
+			try {
+				BeginInvoke((Action)(() => {
+					if(IsDisposed || !Visible) return;
+					ActiveControl = _searchBox;
+					_searchBox.Focus();
+				}));
+			} catch(InvalidOperationException) { }
+		}
+
 		public void RefreshSnapshot() {
 			if(_isRefreshing) return;
 			_isRefreshing = true;
@@ -103,21 +115,23 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void ReadSnapshot(int refreshVersion) {
 			List<WindowOverviewItem> items = null;
+			List<string> desktopNames = null;
 			var desktopCount = 1;
 			Exception error = null;
 			try {
 				items = App.Instance.GetWindowOverviewSnapshot();
+				desktopNames = App.Instance.GetWindowOverviewDesktopNames();
 				desktopCount = App.Instance.GetWindowOverviewDesktopCount();
 			} catch(Exception e) {
 				error = e;
 			}
 			if(IsDisposed || !IsHandleCreated) return;
 			try {
-				BeginInvoke((Action)(() => ApplySnapshot(refreshVersion, items, desktopCount, error)));
+				BeginInvoke((Action)(() => ApplySnapshot(refreshVersion, items, desktopNames, desktopCount, error)));
 			} catch(InvalidOperationException) { }
 		}
 
-		private void ApplySnapshot(int refreshVersion, List<WindowOverviewItem> items, int desktopCount, Exception error) {
+		private void ApplySnapshot(int refreshVersion, List<WindowOverviewItem> items, List<string> desktopNames, int desktopCount, Exception error) {
 			if(refreshVersion != _refreshVersion) return;
 			_isRefreshing = false;
 			_refreshButton.Enabled = true;
@@ -130,6 +144,7 @@ namespace WindowsVirtualDesktopHelper {
 				return;
 			}
 			_items = items;
+			_desktopNames = desktopNames ?? new List<string>();
 			_desktopCount = Math.Max(1, desktopCount);
 			_selectedItem = null;
 			_statusLabel.Text = _items.Count + " window" + (_items.Count == 1 ? "" : "s") + " found";
@@ -158,7 +173,7 @@ namespace WindowsVirtualDesktopHelper {
 				for(var row = 0; row < rowCount; row++) _desktopGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rowCount));
 				var cardIndex = 0;
 				for(var desktopIndex = 0; desktopIndex < _desktopCount; desktopIndex++) {
-					AddDesktopCard("Desktop " + (desktopIndex + 1), matchingItems.Where(item => item.DesktopIndex == desktopIndex || item.IsShownOnAllDesktops), cardIndex++, desktopIndex);
+					AddDesktopCard(GetDesktopTitle(desktopIndex), matchingItems.Where(item => item.DesktopIndex == desktopIndex || item.IsShownOnAllDesktops), cardIndex++, desktopIndex);
 				}
 
 				if(unresolved.Count > 0) AddDesktopCard("Other windows", unresolved, cardIndex++, -1);
@@ -171,6 +186,12 @@ namespace WindowsVirtualDesktopHelper {
 
 		private SkeletonLoadingPanel CreateLoadingOverlay() {
 			return new SkeletonLoadingPanel { Dock = DockStyle.Fill, Visible = false, DesktopCount = _desktopCount };
+		}
+
+		private string GetDesktopTitle(int desktopIndex) {
+			var defaultTitle = "Desktop " + (desktopIndex + 1);
+			if(desktopIndex < 0 || desktopIndex >= _desktopNames.Count || string.IsNullOrEmpty(_desktopNames[desktopIndex]) || _desktopNames[desktopIndex] == defaultTitle) return defaultTitle;
+			return defaultTitle + " - " + _desktopNames[desktopIndex];
 		}
 
 		private void AddDesktopCard(string title, IEnumerable<WindowOverviewItem> items, int cardIndex, int desktopIndex) {
