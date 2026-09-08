@@ -25,6 +25,7 @@ the software as okay/safe, this warning will go away.
 * Show desktop name when switching desktops
 * Show prev/next desktop by clicking icons in notification area
 * Show desktop initial in notification area
+* View and clean up application windows across all virtual desktops from the tray menu
 * Custom hot keys for virtual desktop actions
 * Autostart with Windows
 * Simple and lightweight

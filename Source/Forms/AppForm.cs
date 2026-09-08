@@ -106,6 +106,7 @@ namespace WindowsVirtualDesktopHelper {
 			if(e.ClickedItem.Tag.ToString().StartsWith("desktop:")) App.Instance.SwitchToDesktop(int.Parse(e.ClickedItem.Tag.ToString().Replace("desktop:", "")));
 			else if(e.ClickedItem.Tag.ToString() == "exit") App.Instance.Exit();
 			else if(e.ClickedItem.Tag.ToString() == "settings") App.Instance.ShowSettings();
+			else if(e.ClickedItem.Tag.ToString() == "all-windows") App.Instance.ShowWindowOverview();
 			else if(e.ClickedItem.Tag.ToString() == "about") App.Instance.ShowAbout();
 			else if(e.ClickedItem.Tag.ToString() == "donate") App.Instance.OpenDonatePage();
 		}

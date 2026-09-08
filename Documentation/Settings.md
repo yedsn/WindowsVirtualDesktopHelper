@@ -8,6 +8,10 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 
 ### Settings
 
+### All Windows Overview
+
+Every notification-area icon has an **All Windows...** command in its right-click menu. It opens a searchable snapshot of application windows across every virtual desktop, grouped by desktop. Select a window to activate it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. The overview does not provide batch close or force-terminate applications.
+
 |Config|Default|Description|
 | --- | --- | --- |
 | debug.singleInstance | ``true`` | If true, the app will prevent multiple instances of the app from starting.  Most users won't need to change this option. |

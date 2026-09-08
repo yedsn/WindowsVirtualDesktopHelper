@@ -26,6 +26,7 @@ namespace WindowsVirtualDesktopHelper {
 		public uint CurrentVDDisplayNumber = 0;
 		public int CurrentVDDisplayCount = 1;
 		public SettingsForm SettingsForm;
+		public WindowOverviewForm WindowOverviewForm;
 		public AppForm AppForm;
 		public string CurrentSystemThemeName = null;
 		public static string DetectedVDImplementation = null;
@@ -311,6 +312,39 @@ namespace WindowsVirtualDesktopHelper {
 					return;
 				}
 			}
+		}
+
+		public List<WindowOverviewItem> GetWindowOverviewSnapshot() {
+			var items = new List<WindowOverviewItem>();
+			var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices();
+			using(var desktopLookup = new WindowDesktopLookup()) foreach(var window in Util.WindowEnumerator.GetApplicationWindows()) {
+				var desktopIndex = -1;
+				Guid desktopId;
+				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId)) {
+					desktopIndices.TryGetValue(desktopId, out desktopIndex);
+				}
+				items.Add(new WindowOverviewItem(window, desktopIndex));
+			}
+			return items;
+		}
+
+		public string ActivateOverviewWindow(WindowOverviewItem item) {
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
+			try {
+				if(item.DesktopIndex >= 0 && item.DesktopIndex != (int)CurrentVDDisplayNumber) {
+					SwitchToDesktop(item.DesktopIndex);
+					Thread.Sleep(150);
+				}
+				return Util.WindowEnumerator.TryActivate(item.Window.Handle) ? "Window activated." : "Windows did not allow that window to be activated.";
+			} catch(Exception e) {
+				Util.Logging.WriteLine("App: ActivateOverviewWindow: " + e.Message);
+				return "Could not activate the selected window.";
+			}
+		}
+
+		public string CloseOverviewWindow(WindowOverviewItem item) {
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
+			return Util.WindowEnumerator.TryClose(item.Window.Handle) ? "Close request sent." : "Could not send a close request to the selected window.";
 		}
 
 		public void UpdateStatusOverlayWindows() {
@@ -792,6 +826,14 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void ShowSettings() {
 			this.SettingsForm.Show();
+		}
+
+		public void ShowWindowOverview() {
+			if(WindowOverviewForm == null || WindowOverviewForm.IsDisposed) WindowOverviewForm = new WindowOverviewForm();
+			if(!WindowOverviewForm.Visible) WindowOverviewForm.Show();
+			WindowOverviewForm.BringToFront();
+			WindowOverviewForm.Activate();
+			WindowOverviewForm.RefreshSnapshot();
 		}
 
 		public void ShowSplash() {

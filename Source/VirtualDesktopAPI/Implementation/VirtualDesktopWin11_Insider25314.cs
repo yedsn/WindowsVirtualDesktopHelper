@@ -57,6 +57,13 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI.Implementation {
 			return (uint)DesktopManager.GetTotalVDCount();
 		}
 
+		public int GetDesktopIndex(Guid desktopId) {
+			for(var i = 0; i < DesktopManager.GetTotalVDCount(); i++) {
+				if(DesktopManager.GetDesktop(i).GetId() == desktopId) return i;
+			}
+			return -1;
+		}
+
 		public void SwitchToDesktop(int number) {
 			var desktop = DesktopManager.GetDesktop(number);
 

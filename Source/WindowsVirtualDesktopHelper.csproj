@@ -83,6 +83,7 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="App\App.cs" />
+    <Compile Include="App\WindowOverview.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Forms\ErrorForm.cs">
       <SubType>Form</SubType>
@@ -122,10 +123,12 @@
     <Compile Include="Forms\SwitchNotificationForm.Designer.cs">
       <DependentUpon>SwitchNotificationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\WindowOverviewForm.cs" />
     <Compile Include="Util\Emoji.cs" />
     <Compile Include="Util\Icons.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\OS.cs" />
+    <Compile Include="Util\WindowEnumerator.cs" />
     <Compile Include="VirtualDesktopAPI\Implementation\VirtualDesktopServer2022.cs" />
     <Compile Include="VirtualDesktopAPI\Implementation\VirtualDesktopWin10.cs" />
     <Compile Include="VirtualDesktopAPI\Implementation\VirtualDesktopWin11_Insider25314.cs" />
@@ -137,6 +140,7 @@
     <Compile Include="VirtualDesktopAPI\Implementation\VirtualDesktopWin11_21H2.cs" />
     <Compile Include="VirtualDesktopAPI\IVirtualDesktopManager.cs" />
     <Compile Include="VirtualDesktopAPI\Loader.cs" />
+    <Compile Include="VirtualDesktopAPI\WindowDesktopManager.cs" />
     <Compile Include="WindowsHotKeyAPI\KeyboardHook.cs" />
     <Compile Include="WindowsInputAPI\IInputDeviceStateAdaptor.cs" />
     <Compile Include="WindowsInputAPI\IInputMessageDispatcher.cs" />
