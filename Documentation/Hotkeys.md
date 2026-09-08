@@ -24,13 +24,13 @@ hotkeys.myCustomKey1: "Alt + W = DesktopForward"
 hotkeys.myCustomKey2: "Alt + Q = DesktopBackward"
 ```
 
-or open Windows Task View:
+or open the configured window manager:
 
 ```
 hotkeys.openTaskView: "Alt + D = TaskView"
 ```
 
-or enable the built-in Task View hotkey setting:
+or enable the built-in window manager hotkey setting:
 
 ```
 feature.useHotKeyToOpenTaskView: true

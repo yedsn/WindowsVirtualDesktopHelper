@@ -30,6 +30,7 @@ namespace WindowsVirtualDesktopHelper {
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripSeparatorDesktops = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemAllWindows = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemSystemTaskView = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemDonate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSettings = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +54,7 @@ namespace WindowsVirtualDesktopHelper {
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemAllWindows,
+			this.toolStripMenuItemSystemTaskView,
             this.toolStripSeparatorDesktops,
             this.toolStripMenuItemAbout,
             this.toolStripMenuItemDonate,
@@ -69,6 +71,13 @@ namespace WindowsVirtualDesktopHelper {
 			this.toolStripMenuItemAllWindows.Size = new System.Drawing.Size(180, 36);
 			this.toolStripMenuItemAllWindows.Tag = "all-windows";
 			this.toolStripMenuItemAllWindows.Text = "All Windows...";
+			//
+			// toolStripMenuItemSystemTaskView
+			//
+			this.toolStripMenuItemSystemTaskView.Name = "toolStripMenuItemSystemTaskView";
+			this.toolStripMenuItemSystemTaskView.Size = new System.Drawing.Size(180, 36);
+			this.toolStripMenuItemSystemTaskView.Tag = "system-task-view";
+			this.toolStripMenuItemSystemTaskView.Text = "Windows Task View";
 			//
             // toolStripSeparatorDesktops
             // 
@@ -152,6 +161,7 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSettings;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDonate;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAllWindows;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTaskView;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorDesktops;
 		public System.Windows.Forms.NotifyIcon notifyIconNumber;
 		public System.Windows.Forms.ContextMenuStrip contextMenuStrip1;

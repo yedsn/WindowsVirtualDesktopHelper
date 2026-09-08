@@ -38,7 +38,9 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxUseHotKeyToOpenTaskView = new System.Windows.Forms.CheckBox();
             this.checkBoxOverlayShowOnAllMonitors = new System.Windows.Forms.CheckBox();
             this.checkBoxShowDesktopNameInitial = new System.Windows.Forms.CheckBox();
-            this.checkBoxClickDesktopNumberTaskView = new System.Windows.Forms.CheckBox();
+			this.labelWindowManager = new System.Windows.Forms.Label();
+			this.radioButtonWindowManagerBuiltIn = new System.Windows.Forms.RadioButton();
+			this.radioButtonWindowManagerSystem = new System.Windows.Forms.RadioButton();
             this.panel2 = new System.Windows.Forms.Panel();
             this.radioButtonOverlayMicroDuration = new System.Windows.Forms.RadioButton();
             this.radioButtonOverlayLongDuration = new System.Windows.Forms.RadioButton();
@@ -156,7 +158,9 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox1.Controls.Add(this.checkBoxUseHotKeyToOpenTaskView);
             this.groupBox1.Controls.Add(this.checkBoxOverlayShowOnAllMonitors);
             this.groupBox1.Controls.Add(this.checkBoxShowDesktopNameInitial);
-            this.groupBox1.Controls.Add(this.checkBoxClickDesktopNumberTaskView);
+			this.groupBox1.Controls.Add(this.labelWindowManager);
+			this.groupBox1.Controls.Add(this.radioButtonWindowManagerBuiltIn);
+			this.groupBox1.Controls.Add(this.radioButtonWindowManagerSystem);
             this.groupBox1.Controls.Add(this.panel2);
             this.groupBox1.Controls.Add(this.panel1);
             this.groupBox1.Controls.Add(this.label1);
@@ -257,7 +261,7 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxUseHotKeyToOpenTaskView.Name = "checkBoxUseHotKeyToOpenTaskView";
             this.checkBoxUseHotKeyToOpenTaskView.Size = new System.Drawing.Size(334, 29);
             this.checkBoxUseHotKeyToOpenTaskView.TabIndex = 30;
-            this.checkBoxUseHotKeyToOpenTaskView.Text = "Use Alt+D to Open Task View";
+			this.checkBoxUseHotKeyToOpenTaskView.Text = "Use Alt+D to Open Window Manager";
             this.checkBoxUseHotKeyToOpenTaskView.UseVisualStyleBackColor = true;
             this.checkBoxUseHotKeyToOpenTaskView.CheckedChanged += new System.EventHandler(this.checkBoxUseHotKeyToOpenTaskView_CheckedChanged);
             // 
@@ -285,17 +289,41 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxShowDesktopNameInitial.UseVisualStyleBackColor = true;
             this.checkBoxShowDesktopNameInitial.CheckedChanged += new System.EventHandler(this.checkBoxShowDesktopNameInitial_CheckedChanged);
             // 
-            // checkBoxClickDesktopNumberTaskView
-            // 
-            this.checkBoxClickDesktopNumberTaskView.AutoSize = true;
-            this.checkBoxClickDesktopNumberTaskView.Location = new System.Drawing.Point(28, 501);
-            this.checkBoxClickDesktopNumberTaskView.Margin = new System.Windows.Forms.Padding(6);
-            this.checkBoxClickDesktopNumberTaskView.Name = "checkBoxClickDesktopNumberTaskView";
-            this.checkBoxClickDesktopNumberTaskView.Size = new System.Drawing.Size(521, 29);
-            this.checkBoxClickDesktopNumberTaskView.TabIndex = 20;
-            this.checkBoxClickDesktopNumberTaskView.Text = "Clicking Desktop Number in Icon Tray opens Task View";
-            this.checkBoxClickDesktopNumberTaskView.UseVisualStyleBackColor = true;
-            this.checkBoxClickDesktopNumberTaskView.CheckedChanged += new System.EventHandler(this.checkBoxClickDesktopNumberTaskView_CheckedChanged);
+			// labelWindowManager
+			//
+			this.labelWindowManager.AutoSize = true;
+			this.labelWindowManager.Location = new System.Drawing.Point(28, 503);
+			this.labelWindowManager.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+			this.labelWindowManager.Name = "labelWindowManager";
+			this.labelWindowManager.Size = new System.Drawing.Size(168, 25);
+			this.labelWindowManager.TabIndex = 20;
+			this.labelWindowManager.Text = "Window manager:";
+			//
+			// radioButtonWindowManagerBuiltIn
+			//
+			this.radioButtonWindowManagerBuiltIn.AutoSize = true;
+			this.radioButtonWindowManagerBuiltIn.Location = new System.Drawing.Point(211, 501);
+			this.radioButtonWindowManagerBuiltIn.Margin = new System.Windows.Forms.Padding(6);
+			this.radioButtonWindowManagerBuiltIn.Name = "radioButtonWindowManagerBuiltIn";
+			this.radioButtonWindowManagerBuiltIn.Size = new System.Drawing.Size(99, 29);
+			this.radioButtonWindowManagerBuiltIn.TabIndex = 34;
+			this.radioButtonWindowManagerBuiltIn.TabStop = true;
+			this.radioButtonWindowManagerBuiltIn.Text = "Built-in";
+			this.radioButtonWindowManagerBuiltIn.UseVisualStyleBackColor = true;
+			this.radioButtonWindowManagerBuiltIn.CheckedChanged += new System.EventHandler(this.radioButtonWindowManager_CheckedChanged);
+			//
+			// radioButtonWindowManagerSystem
+			//
+			this.radioButtonWindowManagerSystem.AutoSize = true;
+			this.radioButtonWindowManagerSystem.Location = new System.Drawing.Point(330, 501);
+			this.radioButtonWindowManagerSystem.Margin = new System.Windows.Forms.Padding(6);
+			this.radioButtonWindowManagerSystem.Name = "radioButtonWindowManagerSystem";
+			this.radioButtonWindowManagerSystem.Size = new System.Drawing.Size(96, 29);
+			this.radioButtonWindowManagerSystem.TabIndex = 35;
+			this.radioButtonWindowManagerSystem.TabStop = true;
+			this.radioButtonWindowManagerSystem.Text = "System";
+			this.radioButtonWindowManagerSystem.UseVisualStyleBackColor = true;
+			this.radioButtonWindowManagerSystem.CheckedChanged += new System.EventHandler(this.radioButtonWindowManager_CheckedChanged);
             // 
             // panel2
             // 
@@ -897,7 +925,9 @@ namespace WindowsVirtualDesktopHelper {
         private System.Windows.Forms.RadioButton radioButtonPositionTopCenter;
         private System.Windows.Forms.RadioButton radioButtonPositionTopLeft;
         private System.Windows.Forms.RadioButton radioButtonOverlayMicroDuration;
-        private System.Windows.Forms.CheckBox checkBoxClickDesktopNumberTaskView;
+		private System.Windows.Forms.Label labelWindowManager;
+		private System.Windows.Forms.RadioButton radioButtonWindowManagerBuiltIn;
+		private System.Windows.Forms.RadioButton radioButtonWindowManagerSystem;
 		private System.Windows.Forms.CheckBox checkBoxShowDesktopNameInitial;
 		private System.Windows.Forms.CheckBox checkBoxOverlayShowOnAllMonitors;
 		private System.Windows.Forms.Panel panel3;

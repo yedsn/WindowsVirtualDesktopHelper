@@ -54,7 +54,8 @@ namespace WindowsVirtualDesktopHelper {
 			this.radioButtonPositionBottomCenter.Checked = Settings.GetString("feature.showDesktopSwitchOverlay.position") == "bottomcenter";
 			this.radioButtonPositionBottomRight.Checked = Settings.GetString("feature.showDesktopSwitchOverlay.position") == "bottomright";
 			
-			this.checkBoxClickDesktopNumberTaskView.Checked = Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView");
+			this.radioButtonWindowManagerBuiltIn.Checked = App.Instance.GetTrayWindowManagerMode() == "built-in";
+			this.radioButtonWindowManagerSystem.Checked = !this.radioButtonWindowManagerBuiltIn.Checked;
 			this.checkBoxUseHotKeysToJumpToDesktop.Checked = Settings.GetBool("feature.useHotKeyToJumpToDesktopNumber");
 			this.checkBoxUseHotKeyToOpenTaskView.Checked = Settings.GetBool("feature.useHotKeyToOpenTaskView");
 
@@ -152,7 +153,6 @@ namespace WindowsVirtualDesktopHelper {
 		private void UpdateTrayDisplayModeControls() {
 			var navigationMode = this.radioButtonTrayDisplayNavigation.Checked;
 			this.checkBoxShowPrevNextIcons.Enabled = navigationMode;
-			this.checkBoxClickDesktopNumberTaskView.Enabled = navigationMode;
 			this.checkBoxShowDesktopNameInitial.Enabled = navigationMode;
 		}
 
@@ -163,9 +163,10 @@ namespace WindowsVirtualDesktopHelper {
 			App.Instance.UIUpdate();
 		}
 
-		private void checkBoxClickDesktopNumberTaskView_CheckedChanged(object sender, EventArgs e) {
+		private void radioButtonWindowManager_CheckedChanged(object sender, EventArgs e) {
 			if(IsLoading) return;
-			Settings.SetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView", this.checkBoxClickDesktopNumberTaskView.Checked);
+			if(this.radioButtonWindowManagerBuiltIn.Checked) Settings.SetString("feature.iconTray.windowManager", "built-in");
+			else if(this.radioButtonWindowManagerSystem.Checked) Settings.SetString("feature.iconTray.windowManager", "system");
 		}
 
 		private void textBoxIconColor_TextChanged(object sender, EventArgs e) {

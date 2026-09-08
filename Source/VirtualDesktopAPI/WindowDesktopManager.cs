@@ -34,6 +34,18 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 			}
 		}
 
+		internal bool TryMoveWindowToDesktop(IntPtr windowHandle, Guid desktopId, out string error) {
+			error = null;
+			try {
+				if(_manager == null || desktopId == Guid.Empty) return false;
+				_manager.MoveWindowToDesktop(windowHandle, ref desktopId);
+				return true;
+			} catch(Exception e) {
+				error = e.GetType().Name + ": " + e.Message;
+				return false;
+			}
+		}
+
 		public void Dispose() {
 			if(_manager != null && Marshal.IsComObject(_manager)) Marshal.ReleaseComObject(_manager);
 			_manager = null;
@@ -59,6 +71,16 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 
 		internal static int GetDesktopCount() {
 			return GetDesktopIndices().Count;
+		}
+
+		internal static bool TryGetDesktopId(int desktopIndex, out Guid desktopId) {
+			desktopId = Guid.Empty;
+			foreach(var pair in GetDesktopIndices()) {
+				if(pair.Value != desktopIndex) continue;
+				desktopId = pair.Key;
+				return true;
+			}
+			return false;
 		}
 	}
 }

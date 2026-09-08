@@ -107,6 +107,7 @@ namespace WindowsVirtualDesktopHelper {
 			else if(e.ClickedItem.Tag.ToString() == "exit") App.Instance.Exit();
 			else if(e.ClickedItem.Tag.ToString() == "settings") App.Instance.ShowSettings();
 			else if(e.ClickedItem.Tag.ToString() == "all-windows") App.Instance.ShowWindowOverview();
+			else if(e.ClickedItem.Tag.ToString() == "system-task-view") App.Instance.OpenTaskView();
 			else if(e.ClickedItem.Tag.ToString() == "about") App.Instance.ShowAbout();
 			else if(e.ClickedItem.Tag.ToString() == "donate") App.Instance.OpenDonatePage();
 		}
@@ -151,19 +152,11 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private void notifyIconName_MouseClick(object sender, MouseEventArgs e) {
-			if(Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView")) {
-				if(e.Button == MouseButtons.Left) {
-					App.Instance.OpenTaskView();
-				}
-			}
+			if(e.Button == MouseButtons.Left) App.Instance.OpenConfiguredWindowManager();
 		}
 
 		private void notifyIconNumber_MouseClick(object sender, MouseEventArgs e) {
-			if (Settings.GetBool("feature.showDesktopNumberInIconTray.clickToOpenTaskView")) {
-				if(e.Button == MouseButtons.Left) {
-					App.Instance.OpenTaskView();
-				}
-			}
+			if(e.Button == MouseButtons.Left) App.Instance.OpenConfiguredWindowManager();
 		}
 
 		internal void UpdateDesktopNotifyIcons(string theme, int desktopCount, uint currentDesktopNumber, int dpi) {
@@ -202,7 +195,7 @@ namespace WindowsVirtualDesktopHelper {
 					Visible = true
 				};
 				_desktopManagerNotifyIcon.MouseClick += (sender, e) => {
-					if(e.Button == MouseButtons.Left) App.Instance.OpenTaskView();
+					if(e.Button == MouseButtons.Left) App.Instance.OpenConfiguredWindowManager();
 				};
 			}
 			_desktopManagerNotifyIcon.Icon = Util.Icons.GenerateDesktopManagerIcon(theme, dpi);

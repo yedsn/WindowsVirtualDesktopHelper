@@ -10,7 +10,7 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 
 ### All Windows Overview
 
-Every notification-area icon has an **All Windows...** command in its right-click menu. It opens a searchable snapshot of application windows across every virtual desktop, shown as separate desktop cards even when a desktop has no windows. Each window row includes its application icon, process identity, and window title. Select a window to activate it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. The overview does not provide batch close or force-terminate applications.
+Every notification-area icon has both an **All Windows...** command and a **Windows Task View** command in its right-click menu. The first opens a searchable snapshot of application windows across every virtual desktop, shown as separate desktop cards even when a desktop has no windows. Each window row includes its application icon, process identity, and window title. Select a window to activate it, drag it to another desktop card to move it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. The overview does not provide batch close or force-terminate applications. Window moves use the system desktop API and a version-matched application-view fallback; protected or elevated windows may still be rejected by Windows.
 
 |Config|Default|Description|
 | --- | --- | --- |
@@ -47,7 +47,8 @@ Every notification-area icon has an **All Windows...** command in its right-clic
 | feature.showSplashScreen | ``true`` | If enabled, a splash screen is shown on startup of the app. Overlays must be enabled. |
 | feature.showSplashScreen.duration | ``2000`` | Splash duration in milliseconds. |
 | feature.showSplashScreen.text | ``"Virtual Desktop Helper"`` | The splash text to show. |
-| feature.iconTray.desktopDisplayMode | ``"navigation"`` | Controls the desktop tray layout. Use ``"navigation"`` for the previous, current, and next desktop icons, or ``"all-desktops"`` to show one numbered icon per virtual desktop plus a Desktop Manager icon. In ``"all-desktops"`` mode, left-clicking a numbered icon switches directly to that desktop and clicking Desktop Manager opens Windows Task View. |
+| feature.iconTray.desktopDisplayMode | ``"navigation"`` | Controls the desktop tray layout. Use ``"navigation"`` for the previous, current, and next controls, or ``"all-desktops"`` to show one numbered icon per virtual desktop plus a Desktop Manager icon. In ``"all-desktops"`` mode, left-clicking a numbered icon switches directly to that desktop; Desktop Manager opens the configured window manager. |
+| feature.iconTray.windowManager | ``"system"`` | Controls the window manager opened by the tray manager icon: ``"system"`` opens Windows Task View; ``"built-in"`` opens the All Windows overview. |
 | feature.showPrevNextIcons | ``true`` | If enabled, a previous and next arrow will appear in the icons tray of Windows to allow easy switching between desktops. |
 | feature.showPrevNextIcons.automaticallyHidePrevNextOnBounds | ``false`` | If enabled, the prev/next icon will automatically hide if there is no prev/next desktop. |
 | feature.showPrevNextIcons.nextChar | ``"\u203A"`` | Defines the character to use for next desktop icon (typically a unicode character like the chevron, for example \xE101 = skip forward (player style),  = next (arrow style), \xe26b = next (chevron style), \u02C3 = next (chevron style), \u203A = next (chevron style)) |
@@ -71,10 +72,9 @@ Every notification-area icon has an **All Windows...** command in its right-clic
 | feature.useHotKeyToSwitchDesktopForward.hotkey | ``"Alt + Right"`` |  |
 | feature.useHotKeyToSwitchDesktopBackward | ``false`` |  |
 | feature.useHotKeyToSwitchDesktopBackward.hotkey | ``"Alt + Left"`` |  |
-| feature.useHotKeyToOpenTaskView | ``false`` |  |
-| feature.useHotKeyToOpenTaskView.hotkey | ``"Alt + D"`` |  |
+| feature.useHotKeyToOpenTaskView | ``false`` | Uses the configured window manager. |
+| feature.useHotKeyToOpenTaskView.hotkey | ``"Alt + D"`` | Hotkey for the configured window manager. |
 | feature.showDesktopNumberInIconTray | ``true`` |  |
-| feature.showDesktopNumberInIconTray.clickToOpenTaskView | ``true`` | If enabled, clicking the desktop number or name tray icon opens Windows Task View. |
 | feature.showDesktopNameInIconTray | ``false`` |  |
 
 ### Config File

@@ -14,7 +14,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public string DisplayName {
 			get {
-				return string.IsNullOrEmpty(Window.Title) ? Window.ProcessName : Window.ProcessName + " - " + Window.Title;
+				return string.IsNullOrEmpty(Window.Title) ? Window.ProcessName : Window.Title + " - " + Window.ProcessName;
 			}
 		}
 	}

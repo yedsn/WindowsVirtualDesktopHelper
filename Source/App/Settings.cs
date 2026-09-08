@@ -108,12 +108,12 @@ namespace WindowsVirtualDesktopHelper {
 			RegisterDefault("feature.useHotKeyToSwitchDesktopBackward.hotkey", "Alt + Left");
 
 			// Feature: useHotKeyToOpenTaskView
-			RegisterDefault("feature.useHotKeyToOpenTaskView", false);
-			RegisterDefault("feature.useHotKeyToOpenTaskView.hotkey", "Alt + D");
+			RegisterDefault("feature.useHotKeyToOpenTaskView", false, "Uses the configured window manager.");
+			RegisterDefault("feature.useHotKeyToOpenTaskView.hotkey", "Alt + D", "Hotkey for the configured window manager.");
 
 			// Feature: showDesktopNumberInIconTray
 			RegisterDefault("feature.showDesktopNumberInIconTray", true);
-			RegisterDefault("feature.showDesktopNumberInIconTray.clickToOpenTaskView", true);
+			RegisterDefault("feature.iconTray.windowManager", "system", "Controls which window manager opens when the tray manager icon is clicked: system opens Windows Task View; built-in opens the All Windows overview.");
 
 			// Feature: showDesktopNameInIconTray
 			RegisterDefault("feature.showDesktopNameInIconTray", false);

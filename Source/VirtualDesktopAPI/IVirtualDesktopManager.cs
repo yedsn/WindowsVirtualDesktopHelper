@@ -5,6 +5,10 @@
 using System;
 
 namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
+	internal interface IWindowDesktopMover {
+		void MoveWindowToDesktop(IntPtr windowHandle, int desktopIndex);
+	}
+
 	public interface IVirtualDesktopManager {
 		uint Current();
 

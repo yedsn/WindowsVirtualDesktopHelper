@@ -288,6 +288,15 @@ namespace WindowsVirtualDesktopHelper {
 			}).Start();
 		}
 
+		public void OpenConfiguredWindowManager() {
+			if(GetTrayWindowManagerMode() == "built-in") ShowWindowOverview();
+			else OpenTaskView();
+		}
+
+		public string GetTrayWindowManagerMode() {
+			return Settings.GetString("feature.iconTray.windowManager", "system") == "built-in" ? "built-in" : "system";
+		}
+
 		public void SwitchToDesktop(int number) {
 			// Explicitly store the last focused window
 			try {
@@ -350,6 +359,28 @@ namespace WindowsVirtualDesktopHelper {
 		public string CloseOverviewWindow(WindowOverviewItem item) {
 			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
 			return Util.WindowEnumerator.TryClose(item.Window.Handle) ? "Close request sent." : "Could not send a close request to the selected window.";
+		}
+
+		public string MoveOverviewWindow(WindowOverviewItem item, int targetDesktopIndex) {
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
+			if(item.IsShownOnAllDesktops) return "Windows shown on all desktops cannot be moved.";
+			if(item.DesktopIndex == targetDesktopIndex) return "The window is already on that desktop.";
+			Guid desktopId;
+			if(!VirtualDesktopRegistry.TryGetDesktopId(targetDesktopIndex, out desktopId)) return "The target desktop is no longer available.";
+			try {
+				using(var desktopLookup = new WindowDesktopLookup()) {
+					string error;
+					if(desktopLookup.TryMoveWindowToDesktop(item.Window.Handle, desktopId, out error)) return "Window moved to Desktop " + (targetDesktopIndex + 1) + ".";
+					Util.Logging.WriteLine("App: MoveOverviewWindow: public move failed: " + error);
+				}
+				var privateMover = VDAPI as IWindowDesktopMover;
+				if(privateMover == null) return "Windows did not allow that window to be moved.";
+				privateMover.MoveWindowToDesktop(item.Window.Handle, targetDesktopIndex);
+				return "Window moved to Desktop " + (targetDesktopIndex + 1) + ".";
+			} catch(Exception e) {
+				Util.Logging.WriteLine("App: MoveOverviewWindow: " + e.Message);
+				return "Could not move the selected window.";
+			}
 		}
 
 		public void UpdateStatusOverlayWindows() {
@@ -473,7 +504,7 @@ namespace WindowsVirtualDesktopHelper {
 					this.SwitchToPreviousDesktop();
 					return null;
 				} else if(action == "taskview") {
-					this.OpenTaskView();
+					this.OpenConfiguredWindowManager();
 					return null;
 				} else if(action.StartsWith("desktop")) {
 					var desktopNumber = 0;
@@ -835,6 +866,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void ShowWindowOverview() {
 			if(WindowOverviewForm == null || WindowOverviewForm.IsDisposed) WindowOverviewForm = new WindowOverviewForm();
+			WindowOverviewForm.UpdateWindowIcon(CurrentSystemThemeName, AppForm.DeviceDpi);
 			if(!WindowOverviewForm.Visible) WindowOverviewForm.Show();
 			WindowOverviewForm.BringToFront();
 			WindowOverviewForm.Activate();

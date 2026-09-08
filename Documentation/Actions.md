@@ -16,4 +16,4 @@ The following actions are supported:
 - ``PreviousDesktop``
 - ``TaskView``
 
-``TaskView`` opens Windows Task View using the same behavior as clicking the desktop number tray icon when Task View click handling is enabled.
+``TaskView`` opens the configured window manager. Set ``feature.iconTray.windowManager`` to ``"system"`` for Windows Task View or ``"built-in"`` for the All Windows overview.
