@@ -27,6 +27,10 @@ namespace WindowsVirtualDesktopHelper {
 		private bool _hasSnapshot;
 		private bool _isClearingSearch;
 		private bool _isUpdatingSelection;
+		private readonly List<Keys> _pendingNavigation = new List<Keys>();
+		private IntPtr _selectionHandle = IntPtr.Zero;
+		private int _selectionListIndex = -1;
+		private int _selectionItemIndex = -1;
 		private WindowOverviewItem _selectedItem;
 
 		public WindowOverviewForm() {
@@ -146,16 +150,17 @@ namespace WindowsVirtualDesktopHelper {
 			_items = items;
 			_desktopNames = desktopNames ?? new List<string>();
 			_desktopCount = Math.Max(1, desktopCount);
-			_selectedItem = null;
 			_statusLabel.Text = _items.Count + " window" + (_items.Count == 1 ? "" : "s") + " found";
 			PopulateGrid();
 			_hasSnapshot = true;
 			_loadingOverlay.Visible = false;
 			_desktopGrid.Visible = true;
+			ApplyPendingNavigation();
 		}
 
 		private void PopulateGrid() {
 			if(_desktopGrid.ClientSize.Width <= 0) return;
+			CaptureSelectionPosition();
 			var searchText = _searchBox.Text.Trim();
 			var matchingItems = _items.Where(item => string.IsNullOrEmpty(searchText)
 				|| item.Window.ProcessName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0
@@ -181,7 +186,40 @@ namespace WindowsVirtualDesktopHelper {
 			} finally {
 				_desktopGrid.EndGridUpdate();
 			}
+			RestoreSelectionPosition();
 			UpdateActionButtons();
+		}
+
+		private void CaptureSelectionPosition() {
+			_selectionHandle = IntPtr.Zero;
+			_selectionListIndex = -1;
+			_selectionItemIndex = -1;
+			_selectedItem = null;
+			for(var listIndex = 0; listIndex < _windowLists.Count; listIndex++) {
+				var list = _windowLists[listIndex];
+				if(list.SelectedItems.Count == 0) continue;
+				_selectionListIndex = listIndex;
+				_selectionItemIndex = list.SelectedIndices[0];
+				var item = list.SelectedItems[0].Tag as WindowOverviewItem;
+				if(item != null) _selectionHandle = item.Window.Handle;
+				return;
+			}
+		}
+
+		private void RestoreSelectionPosition() {
+			if(_selectionListIndex < 0 || _windowLists.Count == 0) return;
+			var targetListIndex = Math.Min(_selectionListIndex, _windowLists.Count - 1);
+			var targetList = _windowLists[targetListIndex];
+			if(_selectionHandle != IntPtr.Zero) {
+				for(var itemIndex = 0; itemIndex < targetList.Items.Count; itemIndex++) {
+					var item = targetList.Items[itemIndex].Tag as WindowOverviewItem;
+					if(item != null && item.Window.Handle == _selectionHandle) {
+						SelectListItem(targetList, itemIndex);
+						return;
+					}
+				}
+			}
+			if(targetList.Items.Count > 0) SelectListItem(targetList, Math.Min(_selectionItemIndex, targetList.Items.Count - 1));
 		}
 
 		private SkeletonLoadingPanel CreateLoadingOverlay() {
@@ -306,8 +344,19 @@ namespace WindowsVirtualDesktopHelper {
 				if(MoveSelection(e.KeyCode)) {
 					e.Handled = true;
 					e.SuppressKeyPress = true;
+				} else if(!_hasSnapshot) {
+					_pendingNavigation.Add(e.KeyCode);
+					e.Handled = true;
+					e.SuppressKeyPress = true;
 				}
 			}
+		}
+
+		private void ApplyPendingNavigation() {
+			if(_pendingNavigation.Count == 0) return;
+			var pendingNavigation = _pendingNavigation.ToList();
+			_pendingNavigation.Clear();
+			foreach(var key in pendingNavigation) MoveSelection(key);
 		}
 
 		private bool MoveSelection(Keys key) {
@@ -370,6 +419,7 @@ namespace WindowsVirtualDesktopHelper {
 		private void WindowOverviewForm_FormClosing(object sender, FormClosingEventArgs e) {
 			if(e.CloseReason == CloseReason.UserClosing) {
 				ClearSearch();
+				_pendingNavigation.Clear();
 				ActiveControl = _searchBox;
 				_searchBox.Focus();
 				_refreshVersion++;
