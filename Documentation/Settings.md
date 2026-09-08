@@ -10,7 +10,7 @@ Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 
 ### All Windows Overview
 
-Every notification-area icon has an **All Windows...** command in its right-click menu. It opens a searchable snapshot of application windows across every virtual desktop, grouped by desktop. Select a window to activate it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. The overview does not provide batch close or force-terminate applications.
+Every notification-area icon has an **All Windows...** command in its right-click menu. It opens a searchable snapshot of application windows across every virtual desktop, shown as separate desktop cards even when a desktop has no windows. Each window row includes its application icon, process identity, and window title. Select a window to activate it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. The overview does not provide batch close or force-terminate applications.
 
 |Config|Default|Description|
 | --- | --- | --- |

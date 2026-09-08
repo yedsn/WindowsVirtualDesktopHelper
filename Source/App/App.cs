@@ -319,11 +319,12 @@ namespace WindowsVirtualDesktopHelper {
 			var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices();
 			using(var desktopLookup = new WindowDesktopLookup()) foreach(var window in Util.WindowEnumerator.GetApplicationWindows()) {
 				var desktopIndex = -1;
+				var isShownOnAllDesktops = false;
 				Guid desktopId;
 				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId)) {
-					desktopIndices.TryGetValue(desktopId, out desktopIndex);
+					if(!desktopIndices.TryGetValue(desktopId, out desktopIndex)) isShownOnAllDesktops = desktopId != Guid.Empty;
 				}
-				items.Add(new WindowOverviewItem(window, desktopIndex));
+				items.Add(new WindowOverviewItem(window, desktopIndex, isShownOnAllDesktops));
 			}
 			return items;
 		}
