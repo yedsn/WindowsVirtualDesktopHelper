@@ -241,7 +241,7 @@ namespace WindowsVirtualDesktopHelper {
 			list.Columns.Add("Window", -2);
 			for(var i = 0; i < cardItems.Count; i++) list.Items.Add(new ListViewItem(cardItems[i].DisplayName) { Tag = cardItems[i], ImageIndex = i, ForeColor = cardItems[i].IsShownOnAllDesktops ? Color.DimGray : SystemColors.WindowText });
 			list.SelectedIndexChanged += (sender, e) => SelectListItem(list);
-			list.DoubleClick += (sender, e) => ActivateSelectedWindow();
+			list.DoubleClick += (sender, e) => ActivateSelectedWindow(true);
 			list.ItemDrag += (sender, e) => BeginWindowDrag(e.Item as ListViewItem);
 			AttachDropHandlers(card, heading, list, desktopIndex);
 			card.Controls.Add(list);
