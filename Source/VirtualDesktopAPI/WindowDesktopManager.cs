@@ -56,5 +56,9 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 			}
 			return desktopIndices;
 		}
+
+		internal static int GetDesktopCount() {
+			return GetDesktopIndices().Count;
+		}
 	}
 }

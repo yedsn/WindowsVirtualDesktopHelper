@@ -328,6 +328,10 @@ namespace WindowsVirtualDesktopHelper {
 			return items;
 		}
 
+		public int GetWindowOverviewDesktopCount() {
+			return Math.Max(1, Math.Max(CurrentVDDisplayCount, VirtualDesktopRegistry.GetDesktopCount()));
+		}
+
 		public string ActivateOverviewWindow(WindowOverviewItem item) {
 			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
 			try {

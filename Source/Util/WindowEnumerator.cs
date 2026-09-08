@@ -66,6 +66,10 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool IsIconic(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool SetForegroundWindow(IntPtr hWnd);
 
 		[DllImport("user32.dll")]
@@ -84,7 +88,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 		public static bool TryActivate(IntPtr hWnd) {
 			if(!IsWindow(hWnd)) return false;
-			ShowWindow(hWnd, SW_RESTORE);
+			if(IsIconic(hWnd)) ShowWindow(hWnd, SW_RESTORE);
 			return SetForegroundWindow(hWnd);
 		}
 

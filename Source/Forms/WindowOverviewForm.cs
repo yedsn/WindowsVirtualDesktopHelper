@@ -14,6 +14,7 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly Button _closeButton;
 		private readonly Label _statusLabel;
 		private List<WindowOverviewItem> _items = new List<WindowOverviewItem>();
+		private int _desktopCount = 1;
 		private int _refreshVersion;
 		private bool _isRefreshing;
 
@@ -67,19 +68,21 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void ReadSnapshot(int refreshVersion) {
 			List<WindowOverviewItem> items = null;
+			var desktopCount = 1;
 			Exception error = null;
 			try {
 				items = App.Instance.GetWindowOverviewSnapshot();
+				desktopCount = App.Instance.GetWindowOverviewDesktopCount();
 			} catch(Exception e) {
 				error = e;
 			}
 			if(IsDisposed || !IsHandleCreated) return;
 			try {
-				BeginInvoke((Action)(() => ApplySnapshot(refreshVersion, items, error)));
+				BeginInvoke((Action)(() => ApplySnapshot(refreshVersion, items, desktopCount, error)));
 			} catch(InvalidOperationException) { }
 		}
 
-		private void ApplySnapshot(int refreshVersion, List<WindowOverviewItem> items, Exception error) {
+		private void ApplySnapshot(int refreshVersion, List<WindowOverviewItem> items, int desktopCount, Exception error) {
 			if(refreshVersion != _refreshVersion) return;
 			_isRefreshing = false;
 			_refreshButton.Enabled = true;
@@ -88,6 +91,7 @@ namespace WindowsVirtualDesktopHelper {
 				return;
 			}
 			_items = items;
+			_desktopCount = Math.Max(1, desktopCount);
 			_statusLabel.Text = _items.Count + " window" + (_items.Count == 1 ? "" : "s") + " found";
 			PopulateTree();
 		}
@@ -100,8 +104,9 @@ namespace WindowsVirtualDesktopHelper {
 
 			_windowsTree.BeginUpdate();
 			_windowsTree.Nodes.Clear();
-			foreach(var group in matchingItems.Where(item => item.DesktopIndex >= 0).GroupBy(item => item.DesktopIndex).OrderBy(group => group.Key)) {
-				AddGroup("Desktop " + (group.Key + 1) + " (" + group.Count() + ")", group);
+			for(var desktopIndex = 0; desktopIndex < _desktopCount; desktopIndex++) {
+				var groupItems = matchingItems.Where(item => item.DesktopIndex == desktopIndex).ToList();
+				AddGroup("Desktop " + (desktopIndex + 1) + " (" + groupItems.Count + ")", groupItems);
 			}
 
 			var unresolved = matchingItems.Where(item => item.DesktopIndex < 0).ToList();
