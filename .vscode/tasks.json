@@ -55,15 +55,6 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "prepare: release launch",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "stop: app",
-        "build: release unsigned"
-      ],
-      "problemMatcher": []
-    },
-    {
       "label": "package: release unsigned zip",
       "type": "shell",
       "dependsOn": "build: release unsigned",

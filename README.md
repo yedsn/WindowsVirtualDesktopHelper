@@ -208,6 +208,18 @@ up with all the Windows updates for the basic features.
 
 Install Visual Studio 2022 or later with ".NET desktop development" feature set, and open the solution file WindowsVirtualDesktopHelper.sln. You can then build the project.
 
+### Publishing a release
+
+In VS Code, run the `release` launch configuration. It prompts for a version and branch; the default version increments the current patch version and the default branch is `main`.
+
+To use it from a terminal, run:
+
+```powershell
+.\Scripts\release.ps1 -Push
+```
+
+Use `-Version 2.2.0` and `-Branch main` to bypass either prompt. The command updates the application version, commits the current working-tree changes, creates a `v2.2.0` tag, then pushes the branch and tag to every configured Git remote. The tag triggers the GitHub Actions release workflow.
+
 Note: The Setup project which creates the MSI installer will require the following extension to be installed: [Microsoft Visual Studio Installer Projects 2022](https://marketplace.visualstudio.com/items?itemName=VisualStudioClient.MicrosoftVisualStudio2022InstallerProjects)
 
 Note: Building in Release mode will automatically sign the executable with the designated code-signing certificate, which will not work on your machine. If you really must build your own release, you can remove the post-build event.
