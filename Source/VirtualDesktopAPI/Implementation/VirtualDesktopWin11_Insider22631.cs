@@ -83,6 +83,10 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI.Implementation {
 			return (uint)DesktopManager.GetTotalVDCount();
 		}
 
+		public void CreateDesktop() {
+			DesktopManager.VirtualDesktopManagerInternal.CreateDesktop();
+		}
+
 		public int GetDesktopIndex(Guid desktopId) {
 			for(var i = 0; i < DesktopManager.GetTotalVDCount(); i++) {
 				if(DesktopManager.GetDesktop(i).GetId() == desktopId) return i;

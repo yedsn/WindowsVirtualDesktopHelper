@@ -14,6 +14,7 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly Panel _gridHost;
 		private readonly SkeletonLoadingPanel _loadingOverlay;
 		private readonly Button _refreshButton;
+		private readonly Button _snapshotsButton;
 		private readonly Button _activateButton;
 		private readonly Button _closeButton;
 		private readonly Label _statusLabel;
@@ -44,9 +45,11 @@ namespace WindowsVirtualDesktopHelper {
 			var topPanel = new Panel { Dock = DockStyle.Top, Height = 44, Padding = new Padding(10, 9, 10, 5) };
 			_searchBox = new TextBox { Dock = DockStyle.Fill, AccessibleName = "Search windows" };
 			_refreshButton = new Button { Text = "Refresh", Dock = DockStyle.Right, Width = 86 };
+			_snapshotsButton = new Button { Text = "Snapshot", Dock = DockStyle.Right, Width = 88 };
 			_searchDebounceTimer = new System.Windows.Forms.Timer { Interval = 250 };
 			topPanel.Controls.Add(_searchBox);
 			topPanel.Controls.Add(_refreshButton);
+			topPanel.Controls.Add(_snapshotsButton);
 
 			_gridHost = new Panel { Dock = DockStyle.Fill, BackColor = SystemColors.Control };
 			_desktopGrid = new BufferedTableLayoutPanel { Dock = DockStyle.Fill, AutoScroll = false, Padding = new Padding(10), BackColor = SystemColors.Control, ColumnCount = GridColumnCount, GrowStyle = TableLayoutPanelGrowStyle.FixedSize };
@@ -79,6 +82,7 @@ namespace WindowsVirtualDesktopHelper {
 				PopulateGrid();
 			};
 			_refreshButton.Click += (sender, e) => RefreshSnapshot();
+			_snapshotsButton.Click += (sender, e) => App.Instance.ShowDesktopLayoutSnapshots();
 			_activateButton.Click += (sender, e) => ActivateSelectedWindow();
 			_closeButton.Click += (sender, e) => CloseSelectedWindow();
 			KeyDown += WindowOverviewForm_KeyDown;

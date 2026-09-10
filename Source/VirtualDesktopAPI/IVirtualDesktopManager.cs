@@ -24,6 +24,8 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 
 		uint GetVDCount();
 
+		void CreateDesktop();
+
 		// Returns the zero-based desktop position for an ownership ID, or -1 when it
 		// is not part of the current desktop collection.
 		int GetDesktopIndex(Guid desktopId);

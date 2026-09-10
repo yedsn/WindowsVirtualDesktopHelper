@@ -27,7 +27,9 @@ namespace WindowsVirtualDesktopHelper {
 		public int CurrentVDDisplayCount = 1;
 		public SettingsForm SettingsForm;
 		public WindowOverviewForm WindowOverviewForm;
+		public DesktopLayoutSnapshotForm DesktopLayoutSnapshotForm;
 		public AppForm AppForm;
+		public DesktopLayoutSnapshotService DesktopLayoutSnapshots;
 		public string CurrentSystemThemeName = null;
 		public static string DetectedVDImplementation = null;
 
@@ -88,6 +90,7 @@ namespace WindowsVirtualDesktopHelper {
 
 			// Create the app form, which acts as our ui main thread (we need such a main thread form for many of the win api calls)
 			this.AppForm = new AppForm();
+			this.DesktopLayoutSnapshots = new DesktopLayoutSnapshotService(this);
 
 			// Create settings form
 			this.SettingsForm = new SettingsForm();
@@ -384,6 +387,37 @@ namespace WindowsVirtualDesktopHelper {
 			} catch(Exception e) {
 				Util.Logging.WriteLine("App: MoveOverviewWindow: " + e.Message);
 				return "Could not move the selected window.";
+			}
+		}
+
+		public void EnsureDesktopCount(int count) {
+			count = Math.Max(1, count);
+			var attempts = 0;
+			while(VirtualDesktopRegistry.GetDesktopCount() < count && attempts++ < count * 10) {
+				VDAPI.CreateDesktop();
+				Thread.Sleep(100);
+			}
+			if(VirtualDesktopRegistry.GetDesktopCount() < count) throw new InvalidOperationException("Windows did not create the required virtual desktops.");
+			CurrentVDDisplayCount = GetVDDisplayCount();
+			if(AppForm != null) UIUpdateIcons();
+		}
+
+		public bool TryMoveWindowToDesktop(IntPtr windowHandle, int targetDesktopIndex, out string error) {
+			error = null;
+			Guid desktopId;
+			if(!VirtualDesktopRegistry.TryGetDesktopId(targetDesktopIndex, out desktopId)) { error = "The target desktop is no longer available."; return false; }
+			try {
+				using(var desktopLookup = new WindowDesktopLookup()) {
+					if(desktopLookup.TryMoveWindowToDesktop(windowHandle, desktopId, out error)) return true;
+				}
+				var privateMover = VDAPI as IWindowDesktopMover;
+				if(privateMover == null) { error = "Windows did not allow that window to be moved."; return false; }
+				privateMover.MoveWindowToDesktop(windowHandle, targetDesktopIndex);
+				return true;
+			} catch(Exception e) {
+				Util.Logging.WriteLine("App: TryMoveWindowToDesktop: " + e.Message);
+				error = "Could not move the window: " + e.Message;
+				return false;
 			}
 		}
 
@@ -876,6 +910,24 @@ namespace WindowsVirtualDesktopHelper {
 			WindowOverviewForm.Activate();
 			WindowOverviewForm.RefreshSnapshot();
 			WindowOverviewForm.FocusSearchBox();
+		}
+
+		public void ShowDesktopLayoutSnapshots() {
+			if(DesktopLayoutSnapshotForm == null || DesktopLayoutSnapshotForm.IsDisposed) DesktopLayoutSnapshotForm = new DesktopLayoutSnapshotForm();
+			if(!DesktopLayoutSnapshotForm.Visible) DesktopLayoutSnapshotForm.Show();
+			DesktopLayoutSnapshotForm.BringToFront();
+			DesktopLayoutSnapshotForm.Activate();
+			DesktopLayoutSnapshotForm.RefreshSnapshots();
+		}
+
+		public void CreateDesktopLayoutSnapshot() {
+			ShowDesktopLayoutSnapshots();
+			DesktopLayoutSnapshotForm.CreateNewSnapshot();
+		}
+
+		public void RestoreMostRecentDesktopLayoutSnapshot() {
+			ShowDesktopLayoutSnapshots();
+			DesktopLayoutSnapshotForm.RestoreMostRecent();
 		}
 
 		public void ShowSplash() {

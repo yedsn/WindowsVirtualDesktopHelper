@@ -25,11 +25,15 @@ namespace WindowsVirtualDesktopHelper {
 		/// </summary>
 		private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AppForm));
             this.notifyIconNumber = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripSeparatorDesktops = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemAllWindows = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemDesktopLayoutSnapshots = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemNewSnapshot = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemRestoreMostRecentSnapshot = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemManageSnapshots = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemWindowManager = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemSystemTaskView = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemDonate = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,7 +48,7 @@ namespace WindowsVirtualDesktopHelper {
             // notifyIconNumber
             // 
             this.notifyIconNumber.ContextMenuStrip = this.contextMenuStrip1;
-            this.notifyIconNumber.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconNumber.Icon")));
+            this.notifyIconNumber.Icon = System.Drawing.SystemIcons.Application;
             this.notifyIconNumber.Text = "Desktop Number";
             this.notifyIconNumber.Visible = true;
             this.notifyIconNumber.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconNumber_MouseClick);
@@ -53,8 +57,8 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemAllWindows,
-			this.toolStripMenuItemSystemTaskView,
+			this.toolStripMenuItemDesktopLayoutSnapshots,
+			this.toolStripMenuItemWindowManager,
             this.toolStripSeparatorDesktops,
             this.toolStripMenuItemAbout,
             this.toolStripMenuItemDonate,
@@ -69,15 +73,57 @@ namespace WindowsVirtualDesktopHelper {
 			//
 			this.toolStripMenuItemAllWindows.Name = "toolStripMenuItemAllWindows";
 			this.toolStripMenuItemAllWindows.Size = new System.Drawing.Size(180, 36);
-			this.toolStripMenuItemAllWindows.Tag = "all-windows";
-			this.toolStripMenuItemAllWindows.Text = "All Windows...";
+			this.toolStripMenuItemAllWindows.Text = "Built-in Manager";
+			this.toolStripMenuItemAllWindows.Click += new System.EventHandler(this.toolStripMenuItemAllWindows_Click);
+			//
+			// toolStripMenuItemDesktopLayoutSnapshots
+			//
+			this.toolStripMenuItemDesktopLayoutSnapshots.Name = "toolStripMenuItemDesktopLayoutSnapshots";
+			this.toolStripMenuItemDesktopLayoutSnapshots.Size = new System.Drawing.Size(180, 36);
+			this.toolStripMenuItemDesktopLayoutSnapshots.Text = "Snapshot";
+			this.toolStripMenuItemDesktopLayoutSnapshots.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+				this.toolStripMenuItemNewSnapshot,
+				this.toolStripMenuItemRestoreMostRecentSnapshot,
+				this.toolStripMenuItemManageSnapshots
+			});
+			//
+			// toolStripMenuItemNewSnapshot
+			//
+			this.toolStripMenuItemNewSnapshot.Name = "toolStripMenuItemNewSnapshot";
+			this.toolStripMenuItemNewSnapshot.Size = new System.Drawing.Size(220, 36);
+			this.toolStripMenuItemNewSnapshot.Text = "New Snapshot";
+			this.toolStripMenuItemNewSnapshot.Click += new System.EventHandler(this.toolStripMenuItemNewSnapshot_Click);
+			//
+			// toolStripMenuItemRestoreMostRecentSnapshot
+			//
+			this.toolStripMenuItemRestoreMostRecentSnapshot.Name = "toolStripMenuItemRestoreMostRecentSnapshot";
+			this.toolStripMenuItemRestoreMostRecentSnapshot.Size = new System.Drawing.Size(220, 36);
+			this.toolStripMenuItemRestoreMostRecentSnapshot.Text = "Restore Most Recent";
+			this.toolStripMenuItemRestoreMostRecentSnapshot.Click += new System.EventHandler(this.toolStripMenuItemRestoreMostRecentSnapshot_Click);
+			//
+			// toolStripMenuItemManageSnapshots
+			//
+			this.toolStripMenuItemManageSnapshots.Name = "toolStripMenuItemManageSnapshots";
+			this.toolStripMenuItemManageSnapshots.Size = new System.Drawing.Size(220, 36);
+			this.toolStripMenuItemManageSnapshots.Text = "Manage Snapshots";
+			this.toolStripMenuItemManageSnapshots.Click += new System.EventHandler(this.toolStripMenuItemManageSnapshots_Click);
+			//
+			// toolStripMenuItemWindowManager
+			//
+			this.toolStripMenuItemWindowManager.Name = "toolStripMenuItemWindowManager";
+			this.toolStripMenuItemWindowManager.Size = new System.Drawing.Size(180, 36);
+			this.toolStripMenuItemWindowManager.Text = "Window Manager";
+			this.toolStripMenuItemWindowManager.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+				this.toolStripMenuItemAllWindows,
+				this.toolStripMenuItemSystemTaskView
+			});
 			//
 			// toolStripMenuItemSystemTaskView
 			//
 			this.toolStripMenuItemSystemTaskView.Name = "toolStripMenuItemSystemTaskView";
 			this.toolStripMenuItemSystemTaskView.Size = new System.Drawing.Size(180, 36);
-			this.toolStripMenuItemSystemTaskView.Tag = "system-task-view";
-			this.toolStripMenuItemSystemTaskView.Text = "Windows Task View";
+			this.toolStripMenuItemSystemTaskView.Text = "System Manager";
+			this.toolStripMenuItemSystemTaskView.Click += new System.EventHandler(this.toolStripMenuItemSystemTaskView_Click);
 			//
             // toolStripSeparatorDesktops
             // 
@@ -114,20 +160,20 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // notifyIconPrev
             // 
-            this.notifyIconPrev.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconPrev.Icon")));
+            this.notifyIconPrev.Icon = System.Drawing.SystemIcons.Application;
             this.notifyIconPrev.Text = "Previous Desktop";
             this.notifyIconPrev.Click += new System.EventHandler(this.notifyIconPrev_Click);
             // 
             // notifyIconNext
             // 
-            this.notifyIconNext.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconNext.Icon")));
+            this.notifyIconNext.Icon = System.Drawing.SystemIcons.Application;
             this.notifyIconNext.Text = "Next Desktop";
             this.notifyIconNext.Click += new System.EventHandler(this.notifyIconNext_Click);
             // 
             // notifyIconName
             // 
             this.notifyIconName.ContextMenuStrip = this.contextMenuStrip1;
-            this.notifyIconName.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconName.Icon")));
+            this.notifyIconName.Icon = System.Drawing.SystemIcons.Application;
             this.notifyIconName.Text = "Desktop Name";
             this.notifyIconName.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconName_MouseClick);
             // 
@@ -161,6 +207,11 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSettings;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDonate;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAllWindows;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDesktopLayoutSnapshots;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemNewSnapshot;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRestoreMostRecentSnapshot;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemManageSnapshots;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemWindowManager;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTaskView;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorDesktops;
 		public System.Windows.Forms.NotifyIcon notifyIconNumber;

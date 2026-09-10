@@ -10,13 +10,21 @@ namespace WindowsVirtualDesktopHelper.Util {
 		public IntPtr Handle { get; private set; }
 		public int ProcessId { get; private set; }
 		public string ProcessName { get; private set; }
+		public string ProcessPath { get; private set; }
+		public DateTime? ProcessStartTimeUtc { get; private set; }
+		public string ClassName { get; private set; }
+		public string AppUserModelId { get; private set; }
 		public string Title { get; private set; }
 		public Icon Icon { get; private set; }
 
-		internal ApplicationWindow(IntPtr handle, int processId, string processName, string title, Icon icon) {
+		internal ApplicationWindow(IntPtr handle, int processId, string processName, string processPath, DateTime? processStartTimeUtc, string className, string appUserModelId, string title, Icon icon) {
 			Handle = handle;
 			ProcessId = processId;
 			ProcessName = processName;
+			ProcessPath = processPath;
+			ProcessStartTimeUtc = processStartTimeUtc;
+			ClassName = className;
+			AppUserModelId = appUserModelId;
 			Title = title;
 			Icon = icon;
 		}
@@ -57,6 +65,9 @@ namespace WindowsVirtualDesktopHelper.Util {
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
 		private static extern int GetClassName(IntPtr hWnd, StringBuilder className, int maxCount);
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+		private static extern int GetApplicationUserModelId(IntPtr processHandle, ref uint applicationUserModelIdLength, StringBuilder applicationUserModelId);
 
 		[DllImport("user32.dll")]
 		private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
@@ -124,14 +135,33 @@ namespace WindowsVirtualDesktopHelper.Util {
 			if(processId == 0 || processId == (uint)Process.GetCurrentProcess().Id) return false;
 
 			var processName = "Unknown application";
+			string processPath = null;
+			DateTime? processStartTimeUtc = null;
+			string appUserModelId = null;
 			try {
 				using(var process = Process.GetProcessById((int)processId)) {
 					processName = process.ProcessName;
+					try { processPath = process.MainModule.FileName; } catch { }
+					try { processStartTimeUtc = process.StartTime.ToUniversalTime(); } catch { }
+					try { appUserModelId = GetProcessAppUserModelId(process.Handle); } catch { }
 				}
 			} catch { }
 
-			window = new ApplicationWindow(hWnd, (int)processId, processName, GetTitle(hWnd), GetSmallIcon(hWnd));
+			window = new ApplicationWindow(hWnd, (int)processId, processName, processPath, processStartTimeUtc, GetClassName(hWnd), appUserModelId, GetTitle(hWnd), GetSmallIcon(hWnd));
 			return true;
+		}
+
+		private static string GetClassName(IntPtr hWnd) {
+			var className = new StringBuilder(256);
+			return GetClassName(hWnd, className, className.Capacity) == 0 ? null : className.ToString();
+		}
+
+		private static string GetProcessAppUserModelId(IntPtr processHandle) {
+			uint length = 0;
+			var result = GetApplicationUserModelId(processHandle, ref length, null);
+			if(result != 122 || length == 0) return null;
+			var appUserModelId = new StringBuilder((int)length);
+			return GetApplicationUserModelId(processHandle, ref length, appUserModelId) == 0 ? appUserModelId.ToString() : null;
 		}
 
 		private static long GetExtendedStyle(IntPtr hWnd) {

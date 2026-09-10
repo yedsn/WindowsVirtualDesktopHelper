@@ -83,6 +83,7 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="App\App.cs" />
+    <Compile Include="App\DesktopLayoutSnapshots.cs" />
     <Compile Include="App\WindowOverview.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Forms\ErrorForm.cs">
@@ -124,6 +125,7 @@
       <DependentUpon>SwitchNotificationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\WindowOverviewForm.cs" />
+    <Compile Include="Forms\DesktopLayoutSnapshotForm.cs" />
     <Compile Include="Util\Emoji.cs" />
     <Compile Include="Util\Icons.cs" />
     <Compile Include="Util\Logging.cs" />
@@ -183,6 +185,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+	<Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>

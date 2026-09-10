@@ -26,6 +26,7 @@ the software as okay/safe, this warning will go away.
 * Show prev/next desktop by clicking icons in notification area
 * Show desktop initial in notification area
 * View and clean up application windows across all virtual desktops from the tray menu
+* Save and safely restore named desktop layout snapshots for already-open application windows
 * Custom hot keys for virtual desktop actions
 * Autostart with Windows
 * Simple and lightweight
@@ -190,6 +191,12 @@ WindowsVirtualDesktopHelper.exe --theme.overlay.overlayBG.dark "red" --feature.s
 ```
 
 Command line arguments take precedence over the config file settings.
+
+### Desktop Layout Snapshots
+
+Use the tray menu's **Desktop Layout Snapshots** submenu to save the current assignment of eligible application windows to virtual desktops. A saved snapshot includes window identity information and the desktop layout, but does not save files, browser tabs, application content, window size, or position.
+
+Restoring a snapshot first shows a preview. The app moves only an already-open window with one reliable match; it leaves missing and ambiguous windows unchanged. It never starts or closes applications, never moves windows outside the selected snapshot, and never deletes current virtual desktops. Missing target desktops are created when required, while any extra current desktops are preserved. The restore result provides a per-window explanation for moved, already-correct, missing, ambiguous, and failed items.
 
 
 
