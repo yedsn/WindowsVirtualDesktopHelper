@@ -163,6 +163,9 @@ namespace WindowsVirtualDesktopHelper {
 				progress.ShowDialog(this);
 			}
 			RefreshSnapshots();
+			Hide();
+			var windowManager = App.Instance.WindowOverviewForm;
+			if(windowManager != null && !windowManager.IsDisposed && windowManager.Visible) windowManager.RefreshSnapshot();
 		}
 
 		private void InspectSelected() {
