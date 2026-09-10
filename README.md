@@ -198,6 +198,18 @@ Use the tray menu's **Desktop Layout Snapshots** submenu to save the current ass
 
 Restoring a snapshot first shows a preview. The app moves only an already-open window with one reliable match; it leaves missing and ambiguous windows unchanged. It never starts or closes applications, never moves windows outside the selected snapshot, and never deletes current virtual desktops. Missing target desktops are created when required, while any extra current desktops are preserved. The restore result provides a per-window explanation for moved, already-correct, missing, ambiguous, and failed items.
 
+For applications with dynamic window titles, select a snapshot and choose **Edit Window Rules**. You can edit the saved **Target desktop**, **Window**, and **Application** fields. Target desktop controls where a matched window is moved. Edit the saved **Window** name directly, then enable **Use regular expression** when the title changes. When the option is disabled, the window name is matched exactly. Changing **Application** uses the entered process name for matching.
+
+Choose **Delete Rule** to remove a selected window from the snapshot. The application window is not closed or changed; it is simply excluded from future restores of that snapshot.
+
+| Rule | Matches |
+| --- | --- |
+| `Project Alpha` | Any title containing `Project Alpha` |
+| `^Project Alpha.*` | A title starting with `Project Alpha` |
+| `^Project Alpha.* - Visual Studio$` | The full Visual Studio title, including a variable middle section |
+
+A regular expression only narrows matches for the same application identity; it does not match unrelated applications. If a rule matches more than one eligible window, the restore preview marks it ambiguous and does not move any of them.
+
 
 
 ## 🔧 How it works

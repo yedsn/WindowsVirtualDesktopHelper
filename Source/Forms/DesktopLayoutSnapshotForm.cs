@@ -12,6 +12,8 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly Button _restoreButton;
 		private readonly Button _updateButton;
 		private readonly Button _inspectButton;
+		private readonly Button _editWindowRulesButton;
+		private readonly Button _copyButton;
 		private readonly Button _renameButton;
 		private readonly Button _deleteButton;
 		private readonly Label _status;
@@ -36,7 +38,9 @@ namespace WindowsVirtualDesktopHelper {
 			_newButton = AddButton(actions, "New Snapshot", (sender, e) => CreateSnapshot());
 			_restoreButton = AddButton(actions, "Restore", (sender, e) => RestoreSelected());
 			_updateButton = AddButton(actions, "Update", (sender, e) => UpdateSelected());
+			_copyButton = AddButton(actions, "Copy", (sender, e) => CopySelected());
 			_inspectButton = AddButton(actions, "View Details", (sender, e) => InspectSelected());
+			_editWindowRulesButton = AddButton(actions, "Edit Window Rules", (sender, e) => EditWindowRules());
 			_renameButton = AddButton(actions, "Rename", (sender, e) => RenameSelected());
 			_deleteButton = AddButton(actions, "Delete", (sender, e) => DeleteSelected());
 			_status = new Label { Dock = DockStyle.Bottom, Height = 28, Padding = new Padding(12, 4, 12, 0), TextAlign = ContentAlignment.MiddleLeft };
@@ -90,7 +94,9 @@ namespace WindowsVirtualDesktopHelper {
 			var selected = SelectedSnapshot != null;
 			_restoreButton.Enabled = selected;
 			_updateButton.Enabled = selected;
+			_copyButton.Enabled = selected;
 			_inspectButton.Enabled = selected;
+			_editWindowRulesButton.Enabled = selected;
 			_renameButton.Enabled = selected;
 			_deleteButton.Enabled = selected;
 		}
@@ -165,6 +171,31 @@ namespace WindowsVirtualDesktopHelper {
 			using(var details = new SnapshotDetailsForm(selected.Name, DescribeSavedWindows(selected))) details.ShowDialog(this);
 		}
 
+		private void CopySelected() {
+			var selected = SelectedSnapshot;
+			if(selected == null) return;
+			using(var dialog = new Form { Text = "Copy Snapshot", StartPosition = FormStartPosition.CenterParent, Size = new Size(430, 145), FormBorderStyle = FormBorderStyle.FixedDialog, MinimizeBox = false, MaximizeBox = false }) {
+				var name = new TextBox { Dock = DockStyle.Top, Text = "Copy of " + selected.Name, Margin = new Padding(12) };
+				var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 44, Padding = new Padding(12, 8, 12, 8), FlowDirection = FlowDirection.RightToLeft };
+				var copy = AddButton(buttons, "Copy", null); copy.DialogResult = DialogResult.OK;
+				var cancel = AddButton(buttons, "Cancel", null); cancel.DialogResult = DialogResult.Cancel;
+				dialog.Controls.Add(name); dialog.Controls.Add(buttons); dialog.AcceptButton = copy; dialog.CancelButton = cancel;
+				if(dialog.ShowDialog(this) != DialogResult.OK || string.IsNullOrWhiteSpace(name.Text)) return;
+				try { App.Instance.DesktopLayoutSnapshots.Copy(selected, name.Text); RefreshSnapshots(); _status.Text = "Copied \"" + selected.Name + "\"."; }
+				catch(Exception e) { ShowError("Could not copy the snapshot.", e); }
+			}
+		}
+
+		private void EditWindowRules() {
+			var selected = SelectedSnapshot;
+			if(selected == null) return;
+			using(var dialog = new WindowRulesForm(selected)) {
+				if(dialog.ShowDialog(this) != DialogResult.OK) return;
+			}
+			try { App.Instance.DesktopLayoutSnapshots.Update(selected); RefreshSnapshots(); _status.Text = "Updated window matching rules for \"" + selected.Name + "\"."; }
+			catch(Exception e) { ShowError("Could not save window matching rules.", e); }
+		}
+
 		private void RenameSelected() {
 			var selected = SelectedSnapshot;
 			if(selected == null) return;
@@ -188,8 +219,105 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private static string DefaultName() { return "Snapshot " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"); }
-		internal static string DescribeSavedWindows(DesktopLayoutSnapshot snapshot) { return string.Join(Environment.NewLine, snapshot.Desktops.OrderBy(desktop => desktop.Index).Select(desktop => "Desktop " + (desktop.Index + 1) + (string.IsNullOrEmpty(desktop.Name) ? "" : " - " + desktop.Name) + Environment.NewLine + string.Join(Environment.NewLine, snapshot.Windows.Where(window => window.DesktopIndex == desktop.Index).Select(window => "  " + window.DisplayName)))); }
+		internal static string DescribeSavedWindows(DesktopLayoutSnapshot snapshot) { return string.Join(Environment.NewLine, snapshot.Desktops.OrderBy(desktop => desktop.Index).Select(desktop => "Desktop " + (desktop.Index + 1) + (string.IsNullOrEmpty(desktop.Name) ? "" : " - " + desktop.Name) + Environment.NewLine + string.Join(Environment.NewLine, snapshot.Windows.Where(window => window.DesktopIndex == desktop.Index).Select(window => "  " + window.DisplayName + (window.WindowTitleIsRegex ? " [regular expression]" : ""))))); }
 		private void ShowError(string message, Exception error) { _status.Text = message; MessageBox.Show(this, message + "\r\n\r\n" + error.Message, "Desktop Layout Snapshots", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+	}
+
+	internal sealed class WindowRulesForm : Form {
+		private readonly DesktopLayoutSnapshot _snapshot;
+		private readonly ListView _windows;
+		private readonly NumericUpDown _desktopNumber;
+		private readonly TextBox _windowTitle;
+		private readonly TextBox _applicationName;
+		private readonly CheckBox _useRegularExpression;
+		private readonly Dictionary<SnapshotWindow, WindowRuleState> _originalRules;
+		private readonly List<SnapshotWindow> _originalWindows;
+
+		private sealed class WindowRuleState {
+			public int DesktopIndex;
+			public string DesktopId;
+			public string WindowTitle;
+			public bool WindowTitleIsRegex;
+			public string ProcessName;
+			public bool ApplicationNameIsOverride;
+		}
+
+		internal WindowRulesForm(DesktopLayoutSnapshot snapshot) {
+			_snapshot = snapshot;
+			Text = "Window Matching Rules - " + snapshot.Name;
+			StartPosition = FormStartPosition.CenterParent;
+			MinimumSize = new Size(780, 470);
+			Size = new Size(940, 620);
+			_windows = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, HideSelection = false, MultiSelect = false };
+			_windows.Columns.Add("Target desktop", 100);
+			_windows.Columns.Add("Window", 450);
+			_windows.Columns.Add("Application", 280);
+			_originalWindows = snapshot.Windows.ToList();
+			_originalRules = _originalWindows.ToDictionary(window => window, window => new WindowRuleState { DesktopIndex = window.DesktopIndex, DesktopId = window.DesktopId, WindowTitle = window.WindowTitle, WindowTitleIsRegex = window.WindowTitleIsRegex, ProcessName = window.ProcessName, ApplicationNameIsOverride = window.ApplicationNameIsOverride });
+			foreach(var window in snapshot.Windows.OrderBy(item => item.DesktopIndex).ThenBy(item => item.DisplayName)) _windows.Items.Add(CreateItem(window));
+			var help = new Label { Dock = DockStyle.Top, Height = 92, Padding = new Padding(12, 8, 12, 0), Text = "Edit the selected rule fields below. Target desktop is where the matched window will be moved.\r\nEnable regular expressions when only part of a changing window title should match. Examples: Project Alpha; ^Project Alpha.*; ^Project Alpha.* - Visual Studio$.\r\nChanging Application uses the entered process name as the application match. Matching ignores case; multiple matching windows are shown as ambiguous and are not moved." };
+			var editor = new TableLayoutPanel { Dock = DockStyle.Bottom, Height = 106, Padding = new Padding(12, 8, 12, 8), ColumnCount = 4, RowCount = 2 };
+			editor.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize)); editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); editor.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize)); editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+			editor.RowStyles.Add(new RowStyle(SizeType.Percent, 50)); editor.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+			_desktopNumber = new NumericUpDown { Minimum = 1, Maximum = 999, Anchor = AnchorStyles.Left | AnchorStyles.Right };
+			_windowTitle = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
+			_applicationName = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
+			_useRegularExpression = new CheckBox { AutoSize = true, Anchor = AnchorStyles.Left, Text = "Use regular expression", TextAlign = ContentAlignment.MiddleLeft };
+			var apply = new Button { Anchor = AnchorStyles.Right, Width = 72, Text = "Apply" };
+			var delete = new Button { Anchor = AnchorStyles.Right, Width = 72, Text = "Delete" };
+			var ruleActions = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
+			ruleActions.Controls.Add(apply); ruleActions.Controls.Add(delete);
+			editor.Controls.Add(new Label { AutoSize = true, Anchor = AnchorStyles.Left, Text = "Target desktop", TextAlign = ContentAlignment.MiddleLeft }, 0, 0); editor.Controls.Add(_desktopNumber, 1, 0);
+			editor.Controls.Add(new Label { AutoSize = true, Anchor = AnchorStyles.Left, Text = "Application", TextAlign = ContentAlignment.MiddleLeft }, 2, 0); editor.Controls.Add(_applicationName, 3, 0);
+			editor.Controls.Add(new Label { AutoSize = true, Anchor = AnchorStyles.Left, Text = "Window", TextAlign = ContentAlignment.MiddleLeft }, 0, 1); editor.Controls.Add(_windowTitle, 1, 1);
+			editor.Controls.Add(_useRegularExpression, 2, 1); editor.Controls.Add(ruleActions, 3, 1);
+			var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 46, Padding = new Padding(12, 8, 12, 8), FlowDirection = FlowDirection.RightToLeft };
+			var save = new Button { Text = "Save", AutoSize = true };
+			var cancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, AutoSize = true };
+			buttons.Controls.Add(save); buttons.Controls.Add(cancel);
+			Controls.Add(_windows); Controls.Add(editor); Controls.Add(buttons); Controls.Add(help);
+			_windows.SelectedIndexChanged += (sender, e) => ShowSelectedRule();
+			apply.Click += (sender, e) => ApplyRule();
+			delete.Click += (sender, e) => DeleteSelectedRule();
+			save.Click += (sender, e) => { if(ApplyRule()) DialogResult = DialogResult.OK; };
+			FormClosing += (sender, e) => { if(DialogResult != DialogResult.OK) { _snapshot.Windows.Clear(); _snapshot.Windows.AddRange(_originalWindows); foreach(var rule in _originalRules) { rule.Key.DesktopIndex = rule.Value.DesktopIndex; rule.Key.DesktopId = rule.Value.DesktopId; rule.Key.WindowTitle = rule.Value.WindowTitle; rule.Key.WindowTitleIsRegex = rule.Value.WindowTitleIsRegex; rule.Key.ProcessName = rule.Value.ProcessName; rule.Key.ApplicationNameIsOverride = rule.Value.ApplicationNameIsOverride; } } };
+			if(_windows.Items.Count > 0) _windows.Items[0].Selected = true;
+			AcceptButton = save;
+			CancelButton = cancel;
+		}
+
+		private ListViewItem CreateItem(SnapshotWindow window) { return new ListViewItem(new[] { (window.DesktopIndex + 1).ToString(), window.WindowTitle ?? "", window.ProcessName ?? "" }) { Tag = window }; }
+		private SnapshotWindow SelectedWindow { get { return _windows.SelectedItems.Count == 0 ? null : _windows.SelectedItems[0].Tag as SnapshotWindow; } }
+		private void ShowSelectedRule() { var window = SelectedWindow; _desktopNumber.Value = window == null ? 1 : Math.Min(_desktopNumber.Maximum, window.DesktopIndex + 1); _desktopNumber.Enabled = window != null; _windowTitle.Text = window == null ? "" : window.WindowTitle ?? ""; _windowTitle.Enabled = window != null; _applicationName.Text = window == null ? "" : window.ProcessName ?? ""; _applicationName.Enabled = window != null; _useRegularExpression.Checked = window != null && window.WindowTitleIsRegex; _useRegularExpression.Enabled = window != null; }
+		private void DeleteSelectedRule() {
+			var window = SelectedWindow;
+			if(window == null) return;
+			if(MessageBox.Show(this, "Remove this window rule from the snapshot? The window will no longer be restored by this snapshot.", "Delete Rule", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+			var index = _windows.SelectedIndices[0];
+			_snapshot.Windows.Remove(window);
+			_windows.Items.RemoveAt(index);
+			if(_windows.Items.Count > 0) _windows.Items[Math.Min(index, _windows.Items.Count - 1)].Selected = true;
+		}
+		private bool ApplyRule() {
+			var window = SelectedWindow;
+			if(window == null) return true;
+			var title = _windowTitle.Text.Trim();
+			var application = _applicationName.Text.Trim();
+			if(string.IsNullOrEmpty(title)) { MessageBox.Show(this, "A window name is required.", "Window Matching Rules", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
+			if(string.IsNullOrEmpty(application)) { MessageBox.Show(this, "An application name is required.", "Window Matching Rules", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
+			if(_useRegularExpression.Checked) try { new System.Text.RegularExpressions.Regex(title, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(250)); }
+			catch(ArgumentException e) { MessageBox.Show(this, "The title regular expression is invalid.\r\n\r\n" + e.Message, "Window Matching Rules", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
+			window.DesktopIndex = Decimal.ToInt32(_desktopNumber.Value) - 1;
+			window.DesktopId = null;
+			window.WindowTitle = title;
+			window.WindowTitleIsRegex = _useRegularExpression.Checked;
+			window.ProcessName = application;
+			window.ApplicationNameIsOverride = window.ApplicationNameIsOverride || !string.Equals(application, _originalRules[window].ProcessName, StringComparison.OrdinalIgnoreCase);
+			_windows.SelectedItems[0].SubItems[0].Text = (window.DesktopIndex + 1).ToString();
+			_windows.SelectedItems[0].SubItems[1].Text = window.WindowTitle;
+			_windows.SelectedItems[0].SubItems[2].Text = window.ProcessName;
+			return true;
+		}
 	}
 
 	internal sealed class SnapshotDetailsForm : Form {

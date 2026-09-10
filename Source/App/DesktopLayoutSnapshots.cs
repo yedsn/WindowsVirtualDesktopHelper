@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using WindowsVirtualDesktopHelper.Util;
 using WindowsVirtualDesktopHelper.VirtualDesktopAPI;
 
@@ -40,9 +41,12 @@ namespace WindowsVirtualDesktopHelper {
 		[DataMember] public string DesktopId;
 		[DataMember] public string ProcessPath;
 		[DataMember] public string ProcessName;
+		[DataMember] public bool ApplicationNameIsOverride;
 		[DataMember] public string AppUserModelId;
 		[DataMember] public string WindowClassName;
 		[DataMember] public string WindowTitle;
+		[DataMember] public bool WindowTitleIsRegex;
+		[DataMember(Name = "WindowTitleRegex", EmitDefaultValue = false)] public string LegacyWindowTitleRegex;
 		[DataMember] public DateTime? ProcessStartTimeUtc;
 		[DataMember] public int ProcessId;
 		[DataMember] public long WindowHandle;
@@ -86,7 +90,7 @@ namespace WindowsVirtualDesktopHelper {
 				using(var stream = File.OpenRead(_path)) {
 					var document = (DesktopLayoutSnapshotDocument)new DataContractJsonSerializer(typeof(DesktopLayoutSnapshotDocument)).ReadObject(stream);
 					if(document == null || document.Version != SupportedVersion || document.Snapshots == null) throw new InvalidDataException("The snapshot file has an unsupported format.");
-					foreach(var snapshot in document.Snapshots) Validate(snapshot);
+					foreach(var snapshot in document.Snapshots) { Normalize(snapshot); Validate(snapshot); }
 					return document.Snapshots.OrderByDescending(snapshot => snapshot.UpdatedAtUtc).ToList();
 				}
 			} catch(Exception e) when(e is SerializationException || e is InvalidDataException || e is IOException || e is UnauthorizedAccessException) {
@@ -96,7 +100,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void Save(List<DesktopLayoutSnapshot> snapshots) {
 			if(snapshots == null) throw new ArgumentNullException("snapshots");
-			foreach(var snapshot in snapshots) Validate(snapshot);
+			foreach(var snapshot in snapshots) { Normalize(snapshot); Validate(snapshot); }
 			var directory = Path.GetDirectoryName(_path);
 			Directory.CreateDirectory(directory);
 			var temporaryPath = _path + ".tmp";
@@ -111,6 +115,16 @@ namespace WindowsVirtualDesktopHelper {
 
 		private static void Validate(DesktopLayoutSnapshot snapshot) {
 			if(snapshot == null || string.IsNullOrWhiteSpace(snapshot.Id) || string.IsNullOrWhiteSpace(snapshot.Name) || snapshot.Desktops == null || snapshot.Windows == null) throw new InvalidDataException("A desktop layout snapshot is incomplete.");
+		}
+
+		private static void Normalize(DesktopLayoutSnapshot snapshot) {
+			if(snapshot == null || snapshot.Windows == null) return;
+			foreach(var window in snapshot.Windows) {
+				if(window == null || string.IsNullOrWhiteSpace(window.LegacyWindowTitleRegex)) continue;
+				window.WindowTitle = window.LegacyWindowTitleRegex;
+				window.WindowTitleIsRegex = true;
+				window.LegacyWindowTitleRegex = null;
+			}
 		}
 	}
 
@@ -143,6 +157,15 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public void Create(DesktopLayoutSnapshot snapshot) { var snapshots = List(); snapshots.Add(snapshot); _repository.Save(snapshots); }
+		public DesktopLayoutSnapshot Copy(DesktopLayoutSnapshot source, string name) {
+			if(source == null) throw new ArgumentNullException("source");
+			if(string.IsNullOrWhiteSpace(name)) throw new ArgumentException("A snapshot name is required.");
+			var copy = new DesktopLayoutSnapshot { Id = Guid.NewGuid().ToString("N"), Name = name.Trim(), CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
+			foreach(var desktop in source.Desktops) copy.Desktops.Add(new SnapshotDesktop { Index = desktop.Index, Id = desktop.Id, Name = desktop.Name });
+			foreach(var window in source.Windows) copy.Windows.Add(new SnapshotWindow { DesktopIndex = window.DesktopIndex, DesktopId = window.DesktopId, ProcessPath = window.ProcessPath, ProcessName = window.ProcessName, ApplicationNameIsOverride = window.ApplicationNameIsOverride, AppUserModelId = window.AppUserModelId, WindowClassName = window.WindowClassName, WindowTitle = window.WindowTitle, WindowTitleIsRegex = window.WindowTitleIsRegex, ProcessStartTimeUtc = window.ProcessStartTimeUtc, ProcessId = window.ProcessId, WindowHandle = window.WindowHandle });
+			Create(copy);
+			return copy;
+		}
 		public void Update(DesktopLayoutSnapshot snapshot) { var snapshots = List(); var old = snapshots.FirstOrDefault(item => item.Id == snapshot.Id); if(old == null) throw new InvalidOperationException("The snapshot no longer exists."); snapshot.CreatedAtUtc = old.CreatedAtUtc; snapshot.UpdatedAtUtc = DateTime.UtcNow; snapshots[snapshots.IndexOf(old)] = snapshot; _repository.Save(snapshots); }
 		public void Rename(string id, string name) { if(string.IsNullOrWhiteSpace(name)) throw new ArgumentException("A snapshot name is required."); var snapshots = List(); var snapshot = snapshots.FirstOrDefault(item => item.Id == id); if(snapshot == null) throw new InvalidOperationException("The snapshot no longer exists."); snapshot.Name = name.Trim(); snapshot.UpdatedAtUtc = DateTime.UtcNow; _repository.Save(snapshots); }
 		public void Delete(string id) { var snapshots = List(); var snapshot = snapshots.FirstOrDefault(item => item.Id == id); if(snapshot == null) return; snapshots.Remove(snapshot); _repository.Save(snapshots); }
@@ -160,9 +183,10 @@ namespace WindowsVirtualDesktopHelper {
 			foreach(var saved in snapshot.Windows) {
 				var target = ResolveExistingTarget(saved, snapshot, desktopIndices);
 				var candidates = current.Where(item => StableIdentityMatches(saved, item.Item1) && !reservedHandles.Contains(item.Item1.Handle)).ToList();
-				var matches = SelectDiscriminatedMatches(saved, candidates);
+				string matchError;
+				var matches = SelectDiscriminatedMatches(saved, candidates, out matchError);
 				var result = new SnapshotRestoreItem { SavedWindow = saved, TargetDesktopIndex = target };
-				if(matches.Count == 0) { result.Status = SnapshotRestoreStatus.NotFound; result.Reason = "No reliably matching open window was found."; }
+				if(matches.Count == 0) { result.Status = SnapshotRestoreStatus.NotFound; result.Reason = matchError ?? "No reliably matching open window was found."; }
 				else if(matches.Count > 1 && matches[0].Score == matches[1].Score) { result.Status = SnapshotRestoreStatus.Ambiguous; result.Reason = "More than one open window matches this saved window."; }
 				else { result.CurrentWindow = matches[0].Window; result.CurrentDesktopIndex = matches[0].DesktopIndex; reservedHandles.Add(result.CurrentWindow.Handle); if(matches[0].DesktopIndex == target) { result.Status = SnapshotRestoreStatus.AlreadyCorrect; result.Reason = "The window is already on its target desktop."; } else { result.Status = SnapshotRestoreStatus.CanRestore; result.Reason = "The window can be moved to its target desktop."; } }
 				preview.Items.Add(result);
@@ -173,7 +197,7 @@ namespace WindowsVirtualDesktopHelper {
 		public List<SnapshotRestoreItem> Restore(SnapshotRestorePreview preview, Action<int, int, SnapshotRestoreItem> progress) {
 			if(preview == null) throw new ArgumentNullException("preview");
 			var movable = preview.Items.Where(item => item.Status == SnapshotRestoreStatus.CanRestore).ToList();
-			var required = preview.Snapshot.Desktops.Count == 0 ? 0 : preview.Snapshot.Desktops.Max(desktop => desktop.Index);
+			var required = Math.Max(preview.Snapshot.Desktops.Count == 0 ? 0 : preview.Snapshot.Desktops.Max(desktop => desktop.Index), preview.Snapshot.Windows.Count == 0 ? 0 : preview.Snapshot.Windows.Max(window => window.DesktopIndex));
 			_app.EnsureDesktopCount(required + 1);
 			for(var i = 0; i < movable.Count; i++) {
 				var item = movable[i];
@@ -193,16 +217,29 @@ namespace WindowsVirtualDesktopHelper {
 
 		private static int Score(SnapshotWindow saved, ApplicationWindow candidate) {
 			var score = 0;
-			if(!string.IsNullOrEmpty(saved.ProcessPath) && Same(saved.ProcessPath, candidate.ProcessPath)) score += 400;
+			if(saved.ApplicationNameIsOverride && !string.IsNullOrEmpty(saved.ProcessName) && Same(saved.ProcessName, candidate.ProcessName)) score += 100;
+			else if(!string.IsNullOrEmpty(saved.ProcessPath) && Same(saved.ProcessPath, candidate.ProcessPath)) score += 400;
 			else if(!string.IsNullOrEmpty(saved.AppUserModelId) && Same(saved.AppUserModelId, candidate.AppUserModelId)) score += 300;
 			else if(!string.IsNullOrEmpty(saved.ProcessName) && Same(saved.ProcessName, candidate.ProcessName) && !string.IsNullOrEmpty(saved.WindowClassName) && Same(saved.WindowClassName, candidate.ClassName)) score += 100;
-			if(!string.IsNullOrEmpty(saved.WindowTitle) && Same(saved.WindowTitle, candidate.Title)) score += 40;
+			if(saved.WindowTitleIsRegex || (!string.IsNullOrEmpty(saved.WindowTitle) && Same(saved.WindowTitle, candidate.Title))) score += 40;
 			if(saved.ProcessStartTimeUtc.HasValue && candidate.ProcessStartTimeUtc.HasValue && saved.ProcessStartTimeUtc.Value == candidate.ProcessStartTimeUtc.Value) score += 20;
 			return score;
 		}
 
-		private static List<CandidateMatch> SelectDiscriminatedMatches(SnapshotWindow saved, List<Tuple<ApplicationWindow, int>> candidates) {
+		private static List<CandidateMatch> SelectDiscriminatedMatches(SnapshotWindow saved, List<Tuple<ApplicationWindow, int>> candidates, out string error) {
+			error = null;
 			var scored = candidates.Select(item => new CandidateMatch { Window = item.Item1, DesktopIndex = item.Item2, Score = Score(saved, item.Item1) }).ToList();
+			if(saved.WindowTitleIsRegex) {
+				try {
+					return scored.Where(item => Regex.IsMatch(item.Window.Title ?? "", saved.WindowTitle ?? "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(250))).OrderByDescending(item => item.Score).ToList();
+				} catch(ArgumentException) {
+					error = "The saved window-title regular expression is invalid.";
+					return new List<CandidateMatch>();
+				} catch(RegexMatchTimeoutException) {
+					error = "The saved window-title regular expression took too long to evaluate.";
+					return new List<CandidateMatch>();
+				}
+			}
 			if(!string.IsNullOrEmpty(saved.WindowTitle)) {
 				var exactTitle = scored.Where(item => Same(saved.WindowTitle, item.Window.Title)).ToList();
 				if(exactTitle.Count > 0) return exactTitle.OrderByDescending(item => item.Score).ToList();
@@ -220,6 +257,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private static bool StableIdentityMatches(SnapshotWindow saved, ApplicationWindow candidate) {
+			if(saved.ApplicationNameIsOverride) return !string.IsNullOrEmpty(saved.ProcessName) && Same(saved.ProcessName, candidate.ProcessName);
 			if(!string.IsNullOrEmpty(saved.ProcessPath) && Same(saved.ProcessPath, candidate.ProcessPath)) return true;
 			if(!string.IsNullOrEmpty(saved.AppUserModelId) && Same(saved.AppUserModelId, candidate.AppUserModelId)) return true;
 			return !string.IsNullOrEmpty(saved.ProcessName) && Same(saved.ProcessName, candidate.ProcessName)
