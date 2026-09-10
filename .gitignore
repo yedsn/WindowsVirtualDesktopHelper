@@ -384,6 +384,9 @@ FodyWeavers.xsd
 !.vscode/extensions.json
 *.code-workspace
 
+# Local deployment configuration
+.env
+
 # Local History for Visual Studio Code
 .history/
 
