@@ -95,5 +95,14 @@ namespace WindowsVirtualDesktopHelper.VirtualDesktopAPI {
 			}
 			return false;
 		}
+
+		internal static void SetDesktopName(int desktopIndex, string name) {
+			Guid desktopId;
+			if(!TryGetDesktopId(desktopIndex, out desktopId)) throw new InvalidOperationException("The virtual desktop is no longer available.");
+			using(var key = Registry.CurrentUser.CreateSubKey(VirtualDesktopsPath + @"\Desktops\{" + desktopId + "}")) {
+				if(key == null) throw new InvalidOperationException("Windows did not allow the desktop name to be updated.");
+				key.SetValue("Name", name ?? string.Empty, RegistryValueKind.String);
+			}
+		}
 	}
 }

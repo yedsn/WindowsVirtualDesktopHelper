@@ -84,10 +84,25 @@ namespace WindowsVirtualDesktopHelper {
 			checkBoxUseHotKeysToJumpToDesktop_CheckedChanged(this, null);
 			UpdateTrayDisplayModeControls();
 		}
+
+		public void ReloadSettings() {
+			IsLoading = true;
+			try { LoadSettingsIntoUI(); }
+			finally { IsLoading = false; }
+		}
 		
 		private void SaveSettingsFromUI() {
 			// Save user settings to storage
 			Settings.SaveConfig();
+		}
+
+		private void buttonExportConfigurationBackup_Click(object sender, EventArgs e) {
+			var message = ConfigurationBackupWorkflow.Export(App.Instance, this);
+			if(message != null) MessageBox.Show(this, message, "Configuration Backup", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}
+
+		private void buttonImportConfigurationBackup_Click(object sender, EventArgs e) {
+			ConfigurationBackupWorkflow.Import(App.Instance, this);
 		}
 
 

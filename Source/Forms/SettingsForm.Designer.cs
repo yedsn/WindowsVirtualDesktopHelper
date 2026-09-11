@@ -86,6 +86,8 @@ namespace WindowsVirtualDesktopHelper {
             this.labelSwitchIconTextColor = new System.Windows.Forms.Label();
             this.textBoxSwitchIconTextColor = new System.Windows.Forms.TextBox();
             this.buttonSwitchIconTextColor = new System.Windows.Forms.Button();
+            this.buttonExportConfigurationBackup = new System.Windows.Forms.Button();
+            this.buttonImportConfigurationBackup = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -562,6 +564,8 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // groupBox2
             // 
+			this.groupBox2.Controls.Add(this.buttonImportConfigurationBackup);
+			this.groupBox2.Controls.Add(this.buttonExportConfigurationBackup);
             this.groupBox2.Controls.Add(this.buttonSwitchIconTextColor);
             this.groupBox2.Controls.Add(this.textBoxSwitchIconTextColor);
             this.groupBox2.Controls.Add(this.labelSwitchIconTextColor);
@@ -576,7 +580,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox2.Size = new System.Drawing.Size(757, 164);
+            this.groupBox2.Size = new System.Drawing.Size(757, 218);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Settings";
@@ -593,6 +597,28 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxStartupWithWindows.UseVisualStyleBackColor = true;
             this.checkBoxStartupWithWindows.CheckedChanged += new System.EventHandler(this.checkBoxStartupWithWindows_CheckedChanged);
             // 
+			// buttonExportConfigurationBackup
+			//
+			this.buttonExportConfigurationBackup.Location = new System.Drawing.Point(262, 164);
+			this.buttonExportConfigurationBackup.Margin = new System.Windows.Forms.Padding(6);
+			this.buttonExportConfigurationBackup.Name = "buttonExportConfigurationBackup";
+			this.buttonExportConfigurationBackup.Size = new System.Drawing.Size(180, 36);
+			this.buttonExportConfigurationBackup.TabIndex = 10;
+			this.buttonExportConfigurationBackup.Text = "Export Backup";
+			this.buttonExportConfigurationBackup.UseVisualStyleBackColor = true;
+			this.buttonExportConfigurationBackup.Click += new System.EventHandler(this.buttonExportConfigurationBackup_Click);
+			//
+			// buttonImportConfigurationBackup
+			//
+			this.buttonImportConfigurationBackup.Location = new System.Drawing.Point(454, 164);
+			this.buttonImportConfigurationBackup.Margin = new System.Windows.Forms.Padding(6);
+			this.buttonImportConfigurationBackup.Name = "buttonImportConfigurationBackup";
+			this.buttonImportConfigurationBackup.Size = new System.Drawing.Size(180, 36);
+			this.buttonImportConfigurationBackup.TabIndex = 11;
+			this.buttonImportConfigurationBackup.Text = "Import Backup";
+			this.buttonImportConfigurationBackup.UseVisualStyleBackColor = true;
+			this.buttonImportConfigurationBackup.Click += new System.EventHandler(this.buttonImportConfigurationBackup_Click);
+			//
             // labelIconBackgroundColor
             // 
             this.labelIconBackgroundColor.AutoSize = true;
@@ -870,13 +896,15 @@ namespace WindowsVirtualDesktopHelper {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(805, 938);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(805, 992);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(821, 1031);
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
@@ -962,5 +990,7 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.Label labelSwitchIconTextColor;
 		private System.Windows.Forms.TextBox textBoxSwitchIconTextColor;
 		private System.Windows.Forms.Button buttonSwitchIconTextColor;
+		private System.Windows.Forms.Button buttonExportConfigurationBackup;
+		private System.Windows.Forms.Button buttonImportConfigurationBackup;
 	}
 }

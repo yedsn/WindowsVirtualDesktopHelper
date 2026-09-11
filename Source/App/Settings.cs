@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using WindowsInput.Native;
 
 namespace WindowsVirtualDesktopHelper {
@@ -19,7 +20,13 @@ namespace WindowsVirtualDesktopHelper {
 	/// feature.showSplashScreen.text: "Virtual \nDesktop Helper"
 	/// ```
 	/// </summary>
-	class Settings {
+	internal class Settings {
+		[DataContract]
+		internal sealed class PersistedSetting {
+			[DataMember] public string Key;
+			[DataMember] public string Type;
+			[DataMember] public string Value;
+		}
 
 		#region Defaults
 
@@ -159,35 +166,28 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public static void SaveConfig() {
-			// Get the config file path
-			var path = _getConfigPath();
-
-			// Create a merged dictionary of all config and defaults settings
 			var allSettings = _createMergedSettingsDictionary(false, true);
+			var lines = allSettings.OrderBy(pair => pair.Key.TrimStart('#'), StringComparer.Ordinal).Select(pair => pair.Key + ": " + _serializeValAsType(pair.Value)).ToArray();
+			WriteConfigLines(lines);
+		}
 
-			// Serialize _settingsConfig to text, each setting on a line split by colon, sorting each line by trimming # comments out (ie sorting with comments inline)
-			var lines = new List<string>();
-			foreach(var kvp in allSettings) {
-				var key = kvp.Key;
-				var val = _serializeValAsType(kvp.Value);
-				lines.Add($"{key}: {val}");
-			}
-            // Sort the lines by key but so that parent keys appear first (ie feature.showSplashScreen appears before feature.showSplashScreen.duration)
-            lines.Sort((a, b) => {
-                var aKey = a.Trim().StartsWith("#") ? a.Trim().Substring(1) : a.Trim();
-                var bKey = b.Trim().StartsWith("#") ? b.Trim().Substring(1) : b.Trim();
+		public static List<PersistedSetting> ExportPersistedSettings() {
+			return _settingsConfig.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => new PersistedSetting {
+				Key = pair.Key,
+				Type = GetPersistedSettingType(pair.Value),
+				Value = _serializeValAsType(pair.Value)
+			}).ToList();
+		}
 
-                // Check if aKey and bKey have the same parent key
-                var aParentKey = aKey.Substring(0, aKey.LastIndexOf('.'));
-                var bParentKey = bKey.Substring(0, bKey.LastIndexOf('.'));
-                if(aParentKey == bParentKey) {
-                    return string.Compare(aKey, bKey, StringComparison.Ordinal);
-                } else {
-                    return string.Compare(aParentKey, bParentKey, StringComparison.Ordinal);
-                }
-            });
-			// Write the lines to the config file
-			System.IO.File.WriteAllLines(path, lines);
+		public static void ReplacePersistedSettings(IEnumerable<PersistedSetting> settings) {
+			var replacement = ParsePersistedSettings(settings);
+			WritePersistedSettings(replacement, true);
+			DeleteAdditionalConfigFiles();
+			_settingsConfig = replacement;
+		}
+
+		public static void ValidatePersistedSettings(IEnumerable<PersistedSetting> settings) {
+			ParsePersistedSettings(settings);
 		}
 
 		public static void RegisterLaunchArgs(string[] args) {
@@ -403,6 +403,84 @@ namespace WindowsVirtualDesktopHelper {
 			}
 			path = System.IO.Path.Combine(path, _getMainConfigFile());
 			return path;
+		}
+
+		private static Dictionary<string, object> ParsePersistedSettings(IEnumerable<PersistedSetting> settings) {
+			if(settings == null) throw new ArgumentException("The backup does not contain settings.");
+			var parsed = new Dictionary<string, object>();
+			foreach(var setting in settings) {
+				if(setting == null || string.IsNullOrWhiteSpace(setting.Key) || string.IsNullOrWhiteSpace(setting.Type) || setting.Value == null) throw new ArgumentException("The backup contains an incomplete setting.");
+				if(parsed.ContainsKey(setting.Key)) throw new ArgumentException("The backup contains duplicate setting keys.");
+				parsed[setting.Key] = ParsePersistedSettingValue(setting);
+			}
+			return parsed;
+		}
+
+		private static object ParsePersistedSettingValue(PersistedSetting setting) {
+			switch(setting.Type) {
+				case "bool":
+					bool boolValue;
+					if(!bool.TryParse(setting.Value, out boolValue)) throw new ArgumentException("The backup contains an invalid boolean setting.");
+					return boolValue;
+				case "int":
+					int intValue;
+					if(!int.TryParse(setting.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out intValue)) throw new ArgumentException("The backup contains an invalid integer setting.");
+					return intValue;
+				case "float":
+					float floatValue;
+					if(!float.TryParse(setting.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out floatValue)) throw new ArgumentException("The backup contains an invalid decimal setting.");
+					return floatValue;
+				case "double":
+					double doubleValue;
+					if(!double.TryParse(setting.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out doubleValue)) throw new ArgumentException("The backup contains an invalid decimal setting.");
+					return doubleValue;
+				case "string":
+					var stringValue = _parseValAsType(setting.Value) as string;
+					if(stringValue == null) throw new ArgumentException("The backup contains an invalid text setting.");
+					return stringValue;
+				default:
+					throw new ArgumentException("The backup contains an unsupported setting value type.");
+			}
+		}
+
+		private static string GetPersistedSettingType(object value) {
+			if(value is bool) return "bool";
+			if(value is int) return "int";
+			if(value is float) return "float";
+			if(value is double) return "double";
+			return "string";
+		}
+
+		private static void WritePersistedSettings(Dictionary<string, object> settings, bool atomic) {
+			if(settings == null) throw new ArgumentNullException("settings");
+			var lines = settings.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => pair.Key + ": " + _serializeValAsType(pair.Value)).ToArray();
+			if(atomic) WriteConfigLines(lines);
+			else System.IO.File.WriteAllLines(_getConfigPath(), lines);
+		}
+
+		private static void WriteConfigLines(string[] lines) {
+			var path = _getConfigPath();
+			var temporaryPath = path + ".tmp";
+			try {
+				System.IO.File.WriteAllLines(temporaryPath, lines);
+				if(System.IO.File.Exists(path)) System.IO.File.Replace(temporaryPath, path, null);
+				else System.IO.File.Move(temporaryPath, path);
+			} catch {
+				if(System.IO.File.Exists(temporaryPath)) System.IO.File.Delete(temporaryPath);
+				throw;
+			}
+		}
+
+		private static void DeleteAdditionalConfigFiles() {
+			var primaryPath = _getConfigPath();
+			var directory = System.IO.Path.GetDirectoryName(primaryPath);
+			if(!System.IO.Directory.Exists(directory)) return;
+			foreach(var path in System.IO.Directory.GetFiles(directory, "*.config")) {
+				if(string.Equals(path, primaryPath, StringComparison.OrdinalIgnoreCase)) continue;
+				System.IO.File.Delete(path);
+			}
+			_settingsConfigFilesUsed.Clear();
+			if(System.IO.File.Exists(primaryPath)) _settingsConfigFilesUsed.Add(primaryPath);
 		}
 
 		private static string _unescapeString(string str) {

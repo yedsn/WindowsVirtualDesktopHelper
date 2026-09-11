@@ -210,6 +210,12 @@ Choose **Delete Rule** to remove a selected window from the snapshot. The applic
 
 A regular expression only narrows matches for the same application identity; it does not match unrelated applications. If a rule matches more than one eligible window, the restore preview marks it ambiguous and does not move any of them.
 
+### Configuration Backup
+
+The **Settings** window provides **Export Backup** and **Import Backup**. A backup contains saved settings and custom hotkeys, virtual desktop names and order, and all saved snapshots with their matching rules. Before import, the app shows the backup's date and item counts for confirmation.
+
+Import replaces the application's saved settings and snapshot collection, creates only missing desktops, and restores names for the backed-up desktop positions. It keeps any additional local desktops untouched and never moves, starts, or closes application windows. Use a restored snapshot separately if you want to restore window placement.
+
 
 
 ## 🔧 How it works

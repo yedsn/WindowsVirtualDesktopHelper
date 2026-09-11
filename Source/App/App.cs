@@ -30,6 +30,7 @@ namespace WindowsVirtualDesktopHelper {
 		public DesktopLayoutSnapshotForm DesktopLayoutSnapshotForm;
 		public AppForm AppForm;
 		public DesktopLayoutSnapshotService DesktopLayoutSnapshots;
+		public ConfigurationBackupService ConfigurationBackups;
 		public string CurrentSystemThemeName = null;
 		public static string DetectedVDImplementation = null;
 
@@ -91,6 +92,7 @@ namespace WindowsVirtualDesktopHelper {
 			// Create the app form, which acts as our ui main thread (we need such a main thread form for many of the win api calls)
 			this.AppForm = new AppForm();
 			this.DesktopLayoutSnapshots = new DesktopLayoutSnapshotService(this);
+			this.ConfigurationBackups = new ConfigurationBackupService(this);
 
 			// Create settings form
 			this.SettingsForm = new SettingsForm();
@@ -400,6 +402,36 @@ namespace WindowsVirtualDesktopHelper {
 			if(VirtualDesktopRegistry.GetDesktopCount() < count) throw new InvalidOperationException("Windows did not create the required virtual desktops.");
 			CurrentVDDisplayCount = GetVDDisplayCount();
 			if(AppForm != null) UIUpdateIcons();
+		}
+
+		public void RestoreDesktopConfiguration(IList<string> desktopNames, IList<string> errors) {
+			if(desktopNames == null) throw new ArgumentNullException("desktopNames");
+			try {
+				EnsureDesktopCount(Math.Max(1, desktopNames.Count));
+			} catch(Exception e) {
+				errors?.Add("Could not create the required virtual desktops: " + e.Message);
+			}
+			var availableDesktopCount = VirtualDesktopRegistry.GetDesktopCount();
+			for(var i = 0; i < desktopNames.Count && i < availableDesktopCount; i++) {
+				try {
+					VirtualDesktopRegistry.SetDesktopName(i, desktopNames[i]);
+				} catch(Exception e) {
+					errors?.Add("Could not name Desktop " + (i + 1) + ": " + e.Message);
+				}
+			}
+			for(var i = availableDesktopCount; i < desktopNames.Count; i++) errors?.Add("Desktop " + (i + 1) + " could not be created or named.");
+			try { LoadVDDisplayInfo(); } catch(Exception e) { errors?.Add("Could not refresh desktop information: " + e.Message); }
+		}
+
+		public void ApplyImportedConfiguration() {
+			try {
+				CurrentSystemThemeName = GetSystemThemeName();
+				SetupHotKeys();
+				UIUpdate();
+				SettingsForm?.ReloadSettings();
+			} catch(Exception e) {
+				Util.Logging.WriteLine("App: ApplyImportedConfiguration: " + e.Message);
+			}
 		}
 
 		public bool TryMoveWindowToDesktop(IntPtr windowHandle, int targetDesktopIndex, out string error) {

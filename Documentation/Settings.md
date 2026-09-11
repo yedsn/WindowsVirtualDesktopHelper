@@ -84,6 +84,14 @@ as a ``.config`` file, and can be edited with any text editor.
 
 Note: configuration lines that start with ``#`` are comments and ignored by the configuration system.
 
+### Configuration Backup
+
+Open **Settings** and choose **Export Backup** to create one portable backup file. The backup includes saved application settings and custom hotkeys, the current virtual desktop names and order, and every saved desktop layout snapshot with its window matching rules.
+
+Choose **Import Backup** from Settings, select a backup file, review its counts, and confirm the replacement. Import replaces the saved application settings and snapshot collection. It creates missing virtual desktops and restores names for the backed-up desktop positions. Extra local desktops are retained unchanged. Import does not start, close, move, or otherwise change open application windows; restore an imported snapshot separately when you want to restore its window layout.
+
+If the backup cannot be read or is from an unsupported format version, no local data changes. The startup-with-Windows registration is not changed during import; confirm that option in Settings or restart the application after import if it needs to be reconciled.
+
 ### Command Line Arguments
 
 The app can be run with command line arguments to specificy any configuration setting. For example, one could

@@ -113,8 +113,18 @@ namespace WindowsVirtualDesktopHelper {
 			}
 		}
 
+		public void Replace(List<DesktopLayoutSnapshot> snapshots) {
+			Save(snapshots ?? throw new ArgumentNullException("snapshots"));
+		}
+
+		public void ValidateForImport(List<DesktopLayoutSnapshot> snapshots) {
+			if(snapshots == null) throw new ArgumentNullException("snapshots");
+			foreach(var snapshot in snapshots) { Normalize(snapshot); Validate(snapshot); }
+		}
+
 		private static void Validate(DesktopLayoutSnapshot snapshot) {
 			if(snapshot == null || string.IsNullOrWhiteSpace(snapshot.Id) || string.IsNullOrWhiteSpace(snapshot.Name) || snapshot.Desktops == null || snapshot.Windows == null) throw new InvalidDataException("A desktop layout snapshot is incomplete.");
+			if(snapshot.Desktops.Any(desktop => desktop == null || desktop.Index < 0) || snapshot.Windows.Any(window => window == null || window.DesktopIndex < 0)) throw new InvalidDataException("A desktop layout snapshot contains invalid desktop or window data.");
 		}
 
 		private static void Normalize(DesktopLayoutSnapshot snapshot) {
@@ -140,6 +150,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		internal DesktopLayoutSnapshotService(App app) { _app = app; _repository = new DesktopLayoutSnapshotRepository(); }
 		public List<DesktopLayoutSnapshot> List() { return _repository.Load(); }
+		public void ReplaceAll(List<DesktopLayoutSnapshot> snapshots) { _repository.Replace(snapshots); }
 
 		public DesktopLayoutSnapshot Capture(string name) {
 			if(string.IsNullOrWhiteSpace(name)) throw new ArgumentException("A snapshot name is required.");

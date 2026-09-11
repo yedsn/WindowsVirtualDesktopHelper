@@ -83,6 +83,7 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="App\App.cs" />
+    <Compile Include="App\ConfigurationBackup.cs" />
     <Compile Include="App\DesktopLayoutSnapshots.cs" />
     <Compile Include="App\WindowOverview.cs" />
     <Compile Include="AssemblyInfo.cs" />
