@@ -15,6 +15,7 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly SkeletonLoadingPanel _loadingOverlay;
 		private readonly Button _refreshButton;
 		private readonly Button _snapshotsButton;
+		private readonly Button _manageLockRulesButton;
 		private readonly Button _lockAllButton;
 		private readonly Button _cleanupButton;
 		private readonly Button _activateButton;
@@ -71,12 +72,14 @@ namespace WindowsVirtualDesktopHelper {
 			selectedWindowActions.Controls.Add(_activateButton);
 			selectedWindowActions.Controls.Add(_closeButton);
 			var actionGroupGap = new Panel { Dock = DockStyle.Right, Width = 10 };
-			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 248 };
+			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 384 };
 			_lockAllButton = new Button { Text = Localizer.L("Lock All"), Dock = DockStyle.Left, Width = 88 };
+			_manageLockRulesButton = new Button { Text = Localizer.L("Manage Lock Rules"), Dock = DockStyle.Left, Width = 136 };
 			var cleanupPanel = new Panel { Dock = DockStyle.Fill };
 			_cleanupButton = new Button { Text = string.Format(Localizer.L("One-click Cleanup ({0})"), 0), Dock = DockStyle.Fill };
 			cleanupPanel.Controls.Add(_cleanupButton);
 			cleanupActions.Controls.Add(cleanupPanel);
+			cleanupActions.Controls.Add(_manageLockRulesButton);
 			cleanupActions.Controls.Add(_lockAllButton);
 			bottomPanel.Controls.Add(_statusLabel);
 			bottomPanel.Controls.Add(selectedWindowActions);
@@ -98,6 +101,7 @@ namespace WindowsVirtualDesktopHelper {
 			};
 			_refreshButton.Click += (sender, e) => RefreshSnapshot();
 			_snapshotsButton.Click += (sender, e) => App.Instance.ShowDesktopLayoutSnapshots();
+			_manageLockRulesButton.Click += (sender, e) => ManageLockRules();
 			_lockAllButton.Click += (sender, e) => LockAllWindows();
 			_cleanupButton.Click += (sender, e) => BeginCleanupAllDesktops();
 			_activateButton.Click += (sender, e) => ActivateSelectedWindow();
@@ -115,6 +119,7 @@ namespace WindowsVirtualDesktopHelper {
 			_searchBox.AccessibleName = Localizer.L(_searchBox.AccessibleName);
 			_refreshButton.Text = Localizer.L(_refreshButton.Text);
 			_snapshotsButton.Text = Localizer.L(_snapshotsButton.Text);
+			_manageLockRulesButton.Text = Localizer.L(_manageLockRulesButton.Text);
 			_lockAllButton.Text = Localizer.L(_lockAllButton.Text);
 			_closeButton.Text = Localizer.L(_closeButton.Text);
 			_activateButton.Text = Localizer.L(_activateButton.Text);
@@ -148,6 +153,12 @@ namespace WindowsVirtualDesktopHelper {
 			var thread = new Thread(() => ReadSnapshot(refreshVersion)) { IsBackground = true };
 			thread.SetApartmentState(ApartmentState.STA);
 			thread.Start();
+		}
+
+		private void ManageLockRules() {
+			using(var dialog = new WindowCleanupLockRulesForm()) {
+				if(dialog.ShowDialog(this) == DialogResult.OK) RefreshSnapshot();
+			}
 		}
 
 		private void ReadSnapshot(int refreshVersion) {
