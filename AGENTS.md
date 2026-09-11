@@ -41,3 +41,19 @@ Runtime configuration is stored under `%APPDATA%\WindowsVirtualDesktopHelper`. P
 ## Debug Process Restart
 
 After completing any code or configuration change, restart the Debug application process used by the `Debug WindowsVirtualDesktopHelper` entry in `.vscode/launch.json`. Run its equivalent sequence: stop `WindowsVirtualDesktopHelper`, build `Debug | Any CPU` with the release post-build event disabled, then start `Source\bin\Debug\WindowsVirtualDesktopHelper.exe` with that directory as the working directory. Confirm that a new process is running before reporting completion.
+
+Use a normal GUI launch for this WinForms application. Do not pass `-WindowStyle Hidden` to `Start-Process`; hiding the process at startup can prevent the built-in window manager from being displayed correctly. A PowerShell equivalent is:
+
+```powershell
+Get-Process -Name WindowsVirtualDesktopHelper -ErrorAction SilentlyContinue | Stop-Process -Force
+
+$vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+$vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+$msbuild = Join-Path $vsPath 'MSBuild\Current\Bin\MSBuild.exe'
+& $msbuild "$PWD\WindowsVirtualDesktopHelper.sln" /t:Rebuild /p:Configuration=Debug /p:Platform='Any CPU' /p:PostBuildEvent= /m
+
+$debugDir = Join-Path $PWD 'Source\bin\Debug'
+Start-Process -FilePath (Join-Path $debugDir 'WindowsVirtualDesktopHelper.exe') -WorkingDirectory $debugDir
+```
+
+After startup, verify that the new process is responding and that the configured entry point works. For the built-in manager, confirm that the tray manager icon or `Alt + D` opens the `All Windows` overview; checking only that the process exists is insufficient.

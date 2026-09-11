@@ -31,6 +31,7 @@ namespace WindowsVirtualDesktopHelper {
 		public AppForm AppForm;
 		public DesktopLayoutSnapshotService DesktopLayoutSnapshots;
 		public ConfigurationBackupService ConfigurationBackups;
+		public WindowCleanupLockService WindowCleanupLocks;
 		public string CurrentSystemThemeName = null;
 		public static string DetectedVDImplementation = null;
 
@@ -93,6 +94,7 @@ namespace WindowsVirtualDesktopHelper {
 			this.AppForm = new AppForm();
 			this.DesktopLayoutSnapshots = new DesktopLayoutSnapshotService(this);
 			this.ConfigurationBackups = new ConfigurationBackupService(this);
+			this.WindowCleanupLocks = new WindowCleanupLockService();
 
 			// Create settings form
 			this.SettingsForm = new SettingsForm();
@@ -329,7 +331,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public List<WindowOverviewItem> GetWindowOverviewSnapshot() {
-			var items = new List<WindowOverviewItem>();
+			var snapshot = new List<Tuple<Util.ApplicationWindow, int, bool>>();
 			var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices();
 			using(var desktopLookup = new WindowDesktopLookup()) foreach(var window in Util.WindowEnumerator.GetApplicationWindows()) {
 				var desktopIndex = -1;
@@ -338,9 +340,71 @@ namespace WindowsVirtualDesktopHelper {
 				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId)) {
 					if(!desktopIndices.TryGetValue(desktopId, out desktopIndex)) isShownOnAllDesktops = desktopId != Guid.Empty;
 				}
-				items.Add(new WindowOverviewItem(window, desktopIndex, isShownOnAllDesktops));
+				snapshot.Add(Tuple.Create(window, desktopIndex, isShownOnAllDesktops));
 			}
+			var items = snapshot.Select(item => new WindowOverviewItem(item.Item1, item.Item2, item.Item3, WindowCleanupLocks.IsProtected(item.Item1))).ToList();
 			return items;
+		}
+
+		public bool ToggleOverviewWindowCleanupProtection(WindowOverviewItem item) {
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return false;
+			var currentWindow = Util.WindowEnumerator.GetApplicationWindows().FirstOrDefault(window => WindowCleanupLocks.Matches(item.Window, window));
+			return currentWindow != null && WindowCleanupLocks.Toggle(currentWindow);
+		}
+
+		public WindowCleanupBatch PrepareOverviewLockAll() {
+			var windows = GetEligibleOverviewWindowsOnAllDesktops();
+			WindowCleanupLocks.Protect(windows);
+			return new WindowCleanupBatch(-1, windows);
+		}
+
+		public WindowCleanupBatch PrepareOverviewCleanup() {
+			var windows = GetEligibleOverviewWindowsOnAllDesktops().Where(window => !WindowCleanupLocks.IsProtected(window)).ToList();
+			return new WindowCleanupBatch(-1, windows);
+		}
+
+		public WindowCleanupResult ExecuteOverviewCleanup(WindowCleanupBatch confirmedBatch) {
+			if(confirmedBatch == null) return new WindowCleanupResult(-1, 0, 0);
+			var requested = 0;
+			var failed = 0;
+			var accessDenied = 0;
+			foreach(var expectedWindow in confirmedBatch.Windows) {
+				Util.ApplicationWindow window;
+				if(!TryGetEligibleOverviewWindowOnAnyDesktop(expectedWindow, out window)) {
+					failed++;
+					continue;
+				}
+				if(WindowCleanupLocks.IsProtected(window)) continue;
+				var closeResult = Util.WindowEnumerator.RequestClose(window.Handle);
+				if(closeResult == Util.WindowCloseRequestResult.Sent) requested++;
+				else {
+					failed++;
+					if(closeResult == Util.WindowCloseRequestResult.AccessDenied) accessDenied++;
+				}
+			}
+			return new WindowCleanupResult(confirmedBatch.DesktopIndex, requested, failed, accessDenied);
+		}
+
+		private List<Util.ApplicationWindow> GetEligibleOverviewWindowsOnAllDesktops() {
+			var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices();
+			var windows = new List<Util.ApplicationWindow>();
+			using(var desktopLookup = new WindowDesktopLookup()) foreach(var window in Util.WindowEnumerator.GetApplicationWindows()) {
+				Guid desktopId;
+				int desktopIndex;
+				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && desktopIndices.TryGetValue(desktopId, out desktopIndex)) windows.Add(window);
+			}
+			return windows;
+		}
+
+		private bool TryGetEligibleOverviewWindowOnAnyDesktop(Util.ApplicationWindow expectedWindow, out Util.ApplicationWindow window) {
+			window = null;
+			if(expectedWindow == null || !Util.WindowEnumerator.TryGetCurrentApplicationWindow(expectedWindow.Handle, out window) || !WindowCleanupLocks.Matches(expectedWindow, window)) return false;
+			var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices();
+			using(var desktopLookup = new WindowDesktopLookup()) {
+				Guid desktopId;
+				int windowDesktopIndex;
+				return desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && desktopIndices.TryGetValue(desktopId, out windowDesktopIndex);
+			}
 		}
 
 		public int GetWindowOverviewDesktopCount() {
@@ -367,7 +431,12 @@ namespace WindowsVirtualDesktopHelper {
 
 		public string CloseOverviewWindow(WindowOverviewItem item) {
 			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return Localizer.L("The selected window is no longer available.");
-			return Util.WindowEnumerator.TryClose(item.Window.Handle) ? Localizer.L("Close request sent.") : Localizer.L("Could not send a close request to the selected window.");
+			switch(Util.WindowEnumerator.RequestClose(item.Window.Handle)) {
+				case Util.WindowCloseRequestResult.Sent: return Localizer.L("Close request sent.");
+				case Util.WindowCloseRequestResult.AccessDenied: return Localizer.L("Administrator permission is required to close this window.");
+				case Util.WindowCloseRequestResult.WindowUnavailable: return Localizer.L("The selected window is no longer available.");
+				default: return Localizer.L("Could not send a close request to the selected window.");
+			}
 		}
 
 		public string MoveOverviewWindow(WindowOverviewItem item, int targetDesktopIndex) {

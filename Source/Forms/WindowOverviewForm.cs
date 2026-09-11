@@ -15,6 +15,8 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly SkeletonLoadingPanel _loadingOverlay;
 		private readonly Button _refreshButton;
 		private readonly Button _snapshotsButton;
+		private readonly Button _lockAllButton;
+		private readonly Button _cleanupButton;
 		private readonly Button _activateButton;
 		private readonly Button _closeButton;
 		private readonly Label _statusLabel;
@@ -25,6 +27,7 @@ namespace WindowsVirtualDesktopHelper {
 		private int _desktopCount = 1;
 		private int _refreshVersion;
 		private bool _isRefreshing;
+		private bool _isBulkActionRunning;
 		private bool _hasSnapshot;
 		private bool _isClearingSearch;
 		private bool _isUpdatingSelection;
@@ -64,9 +67,17 @@ namespace WindowsVirtualDesktopHelper {
 			_statusLabel = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
 			_closeButton = new Button { Text = Localizer.L("Close Window"), Dock = DockStyle.Right, Width = 104, Enabled = false };
 			_activateButton = new Button { Text = Localizer.L("Activate"), Dock = DockStyle.Right, Width = 86, Enabled = false };
+			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 248 };
+			_lockAllButton = new Button { Text = Localizer.L("Lock All"), Dock = DockStyle.Left, Width = 88 };
+			var cleanupPanel = new Panel { Dock = DockStyle.Fill };
+			_cleanupButton = new Button { Text = string.Format(Localizer.L("One-click Cleanup ({0})"), 0), Dock = DockStyle.Fill };
+			cleanupPanel.Controls.Add(_cleanupButton);
+			cleanupActions.Controls.Add(cleanupPanel);
+			cleanupActions.Controls.Add(_lockAllButton);
 			bottomPanel.Controls.Add(_statusLabel);
 			bottomPanel.Controls.Add(_closeButton);
 			bottomPanel.Controls.Add(_activateButton);
+			bottomPanel.Controls.Add(cleanupActions);
 
 			Controls.Add(_gridHost);
 			Controls.Add(bottomPanel);
@@ -83,6 +94,8 @@ namespace WindowsVirtualDesktopHelper {
 			};
 			_refreshButton.Click += (sender, e) => RefreshSnapshot();
 			_snapshotsButton.Click += (sender, e) => App.Instance.ShowDesktopLayoutSnapshots();
+			_lockAllButton.Click += (sender, e) => LockAllWindows();
+			_cleanupButton.Click += (sender, e) => BeginCleanupAllDesktops();
 			_activateButton.Click += (sender, e) => ActivateSelectedWindow();
 			_closeButton.Click += (sender, e) => CloseSelectedWindow();
 			KeyDown += WindowOverviewForm_KeyDown;
@@ -98,8 +111,10 @@ namespace WindowsVirtualDesktopHelper {
 			_searchBox.AccessibleName = Localizer.L(_searchBox.AccessibleName);
 			_refreshButton.Text = Localizer.L(_refreshButton.Text);
 			_snapshotsButton.Text = Localizer.L(_snapshotsButton.Text);
+			_lockAllButton.Text = Localizer.L(_lockAllButton.Text);
 			_closeButton.Text = Localizer.L(_closeButton.Text);
 			_activateButton.Text = Localizer.L(_activateButton.Text);
+			UpdateCleanupTargetCount();
 			if(_hasSnapshot) PopulateGrid();
 		}
 
@@ -202,6 +217,14 @@ namespace WindowsVirtualDesktopHelper {
 			}
 			RestoreSelectionPosition();
 			UpdateActionButtons();
+			UpdateCleanupTargetCount();
+		}
+
+		private void UpdateCleanupTargetCount() {
+			var count = _items.Count(item => item.DesktopIndex >= 0 && !item.IsCleanupProtected);
+			_cleanupButton.Text = string.Format(Localizer.L("One-click Cleanup ({0})"), count);
+			_cleanupButton.ForeColor = count > 0 ? Color.Firebrick : SystemColors.ControlText;
+			_cleanupButton.AccessibleName = _cleanupButton.Text;
 		}
 
 		private void CaptureSelectionPosition() {
@@ -250,11 +273,16 @@ namespace WindowsVirtualDesktopHelper {
 			var cardItems = items.OrderBy(item => item.Window.ProcessName).ThenBy(item => item.Window.Title).ToList();
 			var card = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 10, 10), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White };
 			var heading = new Label { Text = title + " (" + cardItems.Count + ")", Dock = DockStyle.Top, Height = 30, Padding = new Padding(9, 7, 0, 0), Font = new Font(Font, FontStyle.Bold), BackColor = Color.FromArgb(240, 243, 247) };
-			var list = new ListView { Dock = DockStyle.Fill, View = View.Details, HeaderStyle = ColumnHeaderStyle.None, FullRowSelect = true, HideSelection = false, MultiSelect = false, BorderStyle = BorderStyle.None, SmallImageList = CreateImageList(cardItems) };
+			var list = new ListView { Dock = DockStyle.Fill, View = View.Details, HeaderStyle = ColumnHeaderStyle.None, FullRowSelect = true, HideSelection = false, MultiSelect = false, BorderStyle = BorderStyle.None, SmallImageList = CreateImageList(cardItems), StateImageList = CreateCleanupLockImageList(), ShowItemToolTips = true };
 			list.AllowDrop = true;
 			list.Columns.Add(Localizer.L("Window"), -2);
-			for(var i = 0; i < cardItems.Count; i++) list.Items.Add(new ListViewItem(cardItems[i].DisplayName) { Tag = cardItems[i], ImageIndex = i, ForeColor = cardItems[i].IsShownOnAllDesktops ? Color.DimGray : SystemColors.WindowText });
+			for(var i = 0; i < cardItems.Count; i++) {
+				var item = new ListViewItem(cardItems[i].DisplayName) { Tag = cardItems[i], ImageIndex = i, StateImageIndex = cardItems[i].IsCleanupProtected ? 2 : 1, ForeColor = cardItems[i].IsShownOnAllDesktops ? Color.DimGray : SystemColors.WindowText };
+				item.ToolTipText = Localizer.L(cardItems[i].IsCleanupProtected ? "Locked - protected from one-click cleanup" : "Unlocked - included in one-click cleanup");
+				list.Items.Add(item);
+			}
 			list.SelectedIndexChanged += (sender, e) => SelectListItem(list);
+			list.MouseUp += (sender, e) => ToggleCleanupProtectionFromStateImage(list, e);
 			list.DoubleClick += (sender, e) => ActivateSelectedWindow(true);
 			list.ItemDrag += (sender, e) => BeginWindowDrag(e.Item as ListViewItem);
 			AttachDropHandlers(card, heading, list, desktopIndex);
@@ -307,6 +335,43 @@ namespace WindowsVirtualDesktopHelper {
 			return images;
 		}
 
+		private ImageList CreateCleanupLockImageList() {
+			var images = new ImageList { ImageSize = new Size(20, 20), ColorDepth = ColorDepth.Depth32Bit };
+			var empty = new Bitmap(20, 20);
+			images.Images.Add(empty);
+			images.Images.Add(CreateCleanupLockImage(false));
+			images.Images.Add(CreateCleanupLockImage(true));
+			return images;
+		}
+
+		private static Bitmap CreateCleanupLockImage(bool locked) {
+			var bitmap = new Bitmap(20, 20);
+			using(var graphics = Graphics.FromImage(bitmap)) using(var pen = new Pen(locked ? Color.FromArgb(35, 112, 55) : Color.FromArgb(100, 100, 100), 2)) using(var brush = new SolidBrush(locked ? Color.FromArgb(75, 157, 93) : Color.FromArgb(220, 220, 220))) {
+				graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+				graphics.FillRectangle(brush, 5, 9, 10, 8);
+				graphics.DrawRectangle(pen, 5, 9, 10, 8);
+				if(locked) graphics.DrawArc(pen, 6, 3, 8, 10, 180, 180);
+				else {
+					graphics.DrawArc(pen, 6, 3, 8, 10, 180, 135);
+					graphics.DrawLine(pen, 13, 8, 16, 5);
+				}
+			}
+			return bitmap;
+		}
+
+		private void ToggleCleanupProtectionFromStateImage(ListView list, MouseEventArgs e) {
+			var hit = list.HitTest(e.Location);
+			if(hit.Item == null || (hit.Location & ListViewHitTestLocations.StateImage) == 0) return;
+			var overviewItem = hit.Item.Tag as WindowOverviewItem;
+			if(overviewItem == null) return;
+			var isProtected = App.Instance.ToggleOverviewWindowCleanupProtection(overviewItem);
+			overviewItem.SetCleanupProtection(isProtected);
+			hit.Item.StateImageIndex = isProtected ? 2 : 1;
+			hit.Item.ToolTipText = Localizer.L(isProtected ? "Locked - protected from one-click cleanup" : "Unlocked - included in one-click cleanup");
+			_statusLabel.Text = Localizer.L(isProtected ? "Window locked for cleanup." : "Window unlocked for cleanup.");
+			UpdateCleanupTargetCount();
+		}
+
 		private void SelectListItem(ListView list) {
 			if(_isUpdatingSelection) return;
 			_isUpdatingSelection = true;
@@ -341,6 +406,81 @@ namespace WindowsVirtualDesktopHelper {
 			RefreshSnapshot();
 		}
 
+		private void LockAllWindows() {
+			RunBulkAction(() => App.Instance.PrepareOverviewLockAll(), batch => {
+				_statusLabel.Text = string.Format(Localizer.L("Locked {0} windows on all desktops."), batch.Windows.Count);
+				RefreshSnapshot();
+			});
+		}
+
+		private void BeginCleanupAllDesktops() {
+			RunBulkAction(() => App.Instance.PrepareOverviewCleanup(), batch => {
+				if(batch.Windows.Count == 0) {
+					_statusLabel.Text = Localizer.L("No unprotected windows on any desktop.");
+					return;
+				}
+				if(!ConfirmCleanupTargets(batch)) return;
+				RunBulkAction(() => App.Instance.ExecuteOverviewCleanup(batch), result => {
+					_statusLabel.Text = string.Format(Localizer.L("Cleanup complete: {0} close requests sent; {1} could not be sent; {2} require administrator permission."), result.RequestedCloseCount, result.FailedCloseCount, result.AccessDeniedCloseCount);
+					RefreshSnapshot();
+				});
+			});
+		}
+
+		private bool ConfirmCleanupTargets(WindowCleanupBatch batch) {
+			using(var dialog = new Form { Text = Localizer.L("One-click Cleanup"), StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(760, 500), MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog, ShowInTaskbar = false }) {
+				var header = new Label {
+					Dock = DockStyle.Top,
+					Height = 58,
+					Padding = new Padding(12, 12, 12, 4),
+					Text = string.Format(Localizer.L("Review {0} windows across all desktops before cleanup."), batch.Windows.Count)
+				};
+				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				targets.Columns.Add(Localizer.L("Application"), 210);
+				targets.Columns.Add(Localizer.L("Window"), 490);
+				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }));
+
+				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
+				var confirm = new Button { Text = Localizer.L("Confirm Cleanup"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
+				buttons.Controls.Add(cancel);
+				buttons.Controls.Add(confirm);
+				dialog.Controls.Add(targets);
+				dialog.Controls.Add(buttons);
+				dialog.Controls.Add(header);
+				dialog.AcceptButton = confirm;
+				dialog.CancelButton = cancel;
+				return dialog.ShowDialog(this) == DialogResult.OK;
+			}
+		}
+
+		private void RunBulkAction<T>(Func<T> action, Action<T> completed) {
+			if(_isBulkActionRunning) return;
+			_isBulkActionRunning = true;
+			_lockAllButton.Enabled = false;
+			_cleanupButton.Enabled = false;
+			var thread = new Thread(() => {
+				T result = default(T);
+				Exception error = null;
+				try { result = action(); } catch(Exception e) { error = e; }
+				if(IsDisposed || !IsHandleCreated) return;
+				try {
+					BeginInvoke((Action)(() => {
+						_isBulkActionRunning = false;
+						_lockAllButton.Enabled = true;
+						_cleanupButton.Enabled = true;
+						if(error != null) {
+							_statusLabel.Text = (Localizer.IsChinese ? "操作失败：" : "Operation failed: ") + error.Message;
+							return;
+						}
+						completed(result);
+					}));
+				} catch(InvalidOperationException) { }
+			}) { IsBackground = true };
+			thread.SetApartmentState(ApartmentState.STA);
+			thread.Start();
+		}
+
 		private void WindowOverviewForm_KeyDown(object sender, KeyEventArgs e) {
 			if(e.KeyCode == Keys.Escape) {
 				e.Handled = true;
@@ -352,6 +492,15 @@ namespace WindowsVirtualDesktopHelper {
 				e.Handled = true;
 				e.SuppressKeyPress = true;
 				ActivateSelectedWindow(true);
+				return;
+			}
+			if(e.Control && e.KeyCode == Keys.L && _selectedItem != null) {
+				e.Handled = true;
+				e.SuppressKeyPress = true;
+				var isProtected = App.Instance.ToggleOverviewWindowCleanupProtection(_selectedItem);
+				_selectedItem.SetCleanupProtection(isProtected);
+				_statusLabel.Text = Localizer.L(isProtected ? "Window locked for cleanup." : "Window unlocked for cleanup.");
+				PopulateGrid();
 				return;
 			}
 			if(e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right) {

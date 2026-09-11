@@ -86,6 +86,7 @@
 	<Compile Include="App\Localizer.cs" />
     <Compile Include="App\ConfigurationBackup.cs" />
     <Compile Include="App\DesktopLayoutSnapshots.cs" />
+    <Compile Include="App\WindowCleanupLocks.cs" />
     <Compile Include="App\WindowOverview.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Forms\ErrorForm.cs">

@@ -27,6 +27,7 @@ the software as okay/safe, this warning will go away.
 * Show desktop initial in notification area
 * View and clean up application windows across all virtual desktops from the tray menu
 * Save and safely restore named desktop layout snapshots for already-open application windows
+* Lock working windows across desktops and clean up temporary unlocked windows across ordinary desktops with normal close requests
 * Custom hot keys for virtual desktop actions
 * Autostart with Windows
 * Simple and lightweight

@@ -6,6 +6,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace WindowsVirtualDesktopHelper.Util {
+	public enum WindowCloseRequestResult {
+		Sent,
+		WindowUnavailable,
+		AccessDenied,
+		Failed
+	}
+
 	public sealed class ApplicationWindow {
 		public IntPtr Handle { get; private set; }
 		public int ProcessId { get; private set; }
@@ -90,7 +97,7 @@ namespace WindowsVirtualDesktopHelper.Util {
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool PostMessage(IntPtr hWnd, uint message, IntPtr wParam, IntPtr lParam);
 
@@ -107,10 +114,16 @@ namespace WindowsVirtualDesktopHelper.Util {
 			var windows = new List<ApplicationWindow>();
 			EnumWindows((hWnd, lParam) => {
 				ApplicationWindow window;
-				if(TryGetApplicationWindow(hWnd, out window)) windows.Add(window);
+				if(TryGetApplicationWindow(hWnd, true, out window)) windows.Add(window);
 				return true;
 			}, IntPtr.Zero);
 			return windows;
+		}
+
+		// A confirmed cleanup target can be cloaked while it lives on another virtual
+		// desktop. Validate it directly instead of relying on the visible-window snapshot.
+		public static bool TryGetCurrentApplicationWindow(IntPtr hWnd, out ApplicationWindow window) {
+			return TryGetApplicationWindow(hWnd, false, out window);
 		}
 
 		public static bool TryActivate(IntPtr hWnd) {
@@ -119,15 +132,17 @@ namespace WindowsVirtualDesktopHelper.Util {
 			return SetForegroundWindow(hWnd);
 		}
 
-		public static bool TryClose(IntPtr hWnd) {
-			return IsWindow(hWnd) && PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+		public static WindowCloseRequestResult RequestClose(IntPtr hWnd) {
+			if(!IsWindow(hWnd)) return WindowCloseRequestResult.WindowUnavailable;
+			if(PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero)) return WindowCloseRequestResult.Sent;
+			return Marshal.GetLastWin32Error() == 5 ? WindowCloseRequestResult.AccessDenied : WindowCloseRequestResult.Failed;
 		}
 
-		private static bool TryGetApplicationWindow(IntPtr hWnd, out ApplicationWindow window) {
+		private static bool TryGetApplicationWindow(IntPtr hWnd, bool requireVisible, out ApplicationWindow window) {
 			window = null;
 			// Windows cloaks windows on non-current virtual desktops. They are the
 			// primary reason for this overview, so they must remain in the snapshot.
-			if(!IsWindowVisible(hWnd) || GetWindow(hWnd, 4) != IntPtr.Zero) return false;
+			if((requireVisible && !IsWindowVisible(hWnd)) || GetWindow(hWnd, 4) != IntPtr.Zero) return false;
 			if((GetExtendedStyle(hWnd) & WS_EX_TOOLWINDOW) != 0 || IsShellWindow(hWnd)) return false;
 
 			uint processId;
