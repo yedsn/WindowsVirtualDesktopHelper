@@ -88,6 +88,8 @@ namespace WindowsVirtualDesktopHelper {
             this.buttonSwitchIconTextColor = new System.Windows.Forms.Button();
             this.buttonExportConfigurationBackup = new System.Windows.Forms.Button();
             this.buttonImportConfigurationBackup = new System.Windows.Forms.Button();
+			this.labelLanguage = new System.Windows.Forms.Label();
+			this.comboBoxLanguage = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -566,6 +568,8 @@ namespace WindowsVirtualDesktopHelper {
             // 
 			this.groupBox2.Controls.Add(this.buttonImportConfigurationBackup);
 			this.groupBox2.Controls.Add(this.buttonExportConfigurationBackup);
+			this.groupBox2.Controls.Add(this.comboBoxLanguage);
+			this.groupBox2.Controls.Add(this.labelLanguage);
             this.groupBox2.Controls.Add(this.buttonSwitchIconTextColor);
             this.groupBox2.Controls.Add(this.textBoxSwitchIconTextColor);
             this.groupBox2.Controls.Add(this.labelSwitchIconTextColor);
@@ -580,7 +584,7 @@ namespace WindowsVirtualDesktopHelper {
             this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox2.Size = new System.Drawing.Size(757, 218);
+			this.groupBox2.Size = new System.Drawing.Size(757, 261);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Settings";
@@ -588,7 +592,7 @@ namespace WindowsVirtualDesktopHelper {
             // checkBoxStartupWithWindows
             // 
             this.checkBoxStartupWithWindows.AutoSize = true;
-            this.checkBoxStartupWithWindows.Location = new System.Drawing.Point(28, 35);
+            this.checkBoxStartupWithWindows.Location = new System.Drawing.Point(28, 78);
             this.checkBoxStartupWithWindows.Margin = new System.Windows.Forms.Padding(6);
             this.checkBoxStartupWithWindows.Name = "checkBoxStartupWithWindows";
             this.checkBoxStartupWithWindows.Size = new System.Drawing.Size(226, 29);
@@ -597,9 +601,31 @@ namespace WindowsVirtualDesktopHelper {
             this.checkBoxStartupWithWindows.UseVisualStyleBackColor = true;
             this.checkBoxStartupWithWindows.CheckedChanged += new System.EventHandler(this.checkBoxStartupWithWindows_CheckedChanged);
             // 
+			// labelLanguage
+			//
+			this.labelLanguage.AutoSize = true;
+			this.labelLanguage.Location = new System.Drawing.Point(28, 37);
+			this.labelLanguage.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+			this.labelLanguage.Name = "labelLanguage";
+			this.labelLanguage.Size = new System.Drawing.Size(104, 25);
+			this.labelLanguage.TabIndex = 12;
+			this.labelLanguage.Text = "Language:";
+			//
+			// comboBoxLanguage
+			//
+			this.comboBoxLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxLanguage.FormattingEnabled = true;
+			this.comboBoxLanguage.Items.AddRange(new object[] { "English", "Simplified Chinese" });
+			this.comboBoxLanguage.Location = new System.Drawing.Point(150, 33);
+			this.comboBoxLanguage.Margin = new System.Windows.Forms.Padding(6);
+			this.comboBoxLanguage.Name = "comboBoxLanguage";
+			this.comboBoxLanguage.Size = new System.Drawing.Size(192, 33);
+			this.comboBoxLanguage.TabIndex = 13;
+			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.comboBoxLanguage_SelectedIndexChanged);
+			//
 			// buttonExportConfigurationBackup
 			//
-			this.buttonExportConfigurationBackup.Location = new System.Drawing.Point(262, 164);
+			this.buttonExportConfigurationBackup.Location = new System.Drawing.Point(262, 207);
 			this.buttonExportConfigurationBackup.Margin = new System.Windows.Forms.Padding(6);
 			this.buttonExportConfigurationBackup.Name = "buttonExportConfigurationBackup";
 			this.buttonExportConfigurationBackup.Size = new System.Drawing.Size(180, 36);
@@ -610,7 +636,7 @@ namespace WindowsVirtualDesktopHelper {
 			//
 			// buttonImportConfigurationBackup
 			//
-			this.buttonImportConfigurationBackup.Location = new System.Drawing.Point(454, 164);
+			this.buttonImportConfigurationBackup.Location = new System.Drawing.Point(454, 207);
 			this.buttonImportConfigurationBackup.Margin = new System.Windows.Forms.Padding(6);
 			this.buttonImportConfigurationBackup.Name = "buttonImportConfigurationBackup";
 			this.buttonImportConfigurationBackup.Size = new System.Drawing.Size(180, 36);
@@ -622,7 +648,7 @@ namespace WindowsVirtualDesktopHelper {
             // labelIconBackgroundColor
             // 
             this.labelIconBackgroundColor.AutoSize = true;
-            this.labelIconBackgroundColor.Location = new System.Drawing.Point(28, 78);
+            this.labelIconBackgroundColor.Location = new System.Drawing.Point(28, 121);
             this.labelIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelIconBackgroundColor.Name = "labelIconBackgroundColor";
             this.labelIconBackgroundColor.Size = new System.Drawing.Size(173, 25);
@@ -631,7 +657,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // textBoxIconBackgroundColor
             // 
-            this.textBoxIconBackgroundColor.Location = new System.Drawing.Point(210, 74);
+            this.textBoxIconBackgroundColor.Location = new System.Drawing.Point(210, 117);
             this.textBoxIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxIconBackgroundColor.Name = "textBoxIconBackgroundColor";
             this.textBoxIconBackgroundColor.Size = new System.Drawing.Size(106, 29);
@@ -641,7 +667,7 @@ namespace WindowsVirtualDesktopHelper {
             // buttonIconBackgroundColor
             // 
             this.buttonIconBackgroundColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonIconBackgroundColor.Location = new System.Drawing.Point(328, 74);
+            this.buttonIconBackgroundColor.Location = new System.Drawing.Point(328, 117);
             this.buttonIconBackgroundColor.Margin = new System.Windows.Forms.Padding(6);
             this.buttonIconBackgroundColor.Name = "buttonIconBackgroundColor";
             this.buttonIconBackgroundColor.Size = new System.Drawing.Size(34, 29);
@@ -652,7 +678,7 @@ namespace WindowsVirtualDesktopHelper {
             // labelIconTextColor
             // 
             this.labelIconTextColor.AutoSize = true;
-            this.labelIconTextColor.Location = new System.Drawing.Point(390, 78);
+            this.labelIconTextColor.Location = new System.Drawing.Point(390, 121);
             this.labelIconTextColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelIconTextColor.Name = "labelIconTextColor";
             this.labelIconTextColor.Size = new System.Drawing.Size(101, 25);
@@ -661,7 +687,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // textBoxIconTextColor
             // 
-            this.textBoxIconTextColor.Location = new System.Drawing.Point(500, 74);
+            this.textBoxIconTextColor.Location = new System.Drawing.Point(500, 117);
             this.textBoxIconTextColor.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxIconTextColor.Name = "textBoxIconTextColor";
             this.textBoxIconTextColor.Size = new System.Drawing.Size(106, 29);
@@ -671,7 +697,7 @@ namespace WindowsVirtualDesktopHelper {
             // buttonIconTextColor
             // 
             this.buttonIconTextColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonIconTextColor.Location = new System.Drawing.Point(618, 74);
+            this.buttonIconTextColor.Location = new System.Drawing.Point(618, 117);
             this.buttonIconTextColor.Margin = new System.Windows.Forms.Padding(6);
             this.buttonIconTextColor.Name = "buttonIconTextColor";
             this.buttonIconTextColor.Size = new System.Drawing.Size(34, 29);
@@ -682,7 +708,7 @@ namespace WindowsVirtualDesktopHelper {
             // labelSwitchIconTextColor
             // 
             this.labelSwitchIconTextColor.AutoSize = true;
-            this.labelSwitchIconTextColor.Location = new System.Drawing.Point(28, 118);
+            this.labelSwitchIconTextColor.Location = new System.Drawing.Point(28, 161);
             this.labelSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelSwitchIconTextColor.Name = "labelSwitchIconTextColor";
             this.labelSwitchIconTextColor.Size = new System.Drawing.Size(165, 25);
@@ -691,7 +717,7 @@ namespace WindowsVirtualDesktopHelper {
             // 
             // textBoxSwitchIconTextColor
             // 
-            this.textBoxSwitchIconTextColor.Location = new System.Drawing.Point(210, 114);
+            this.textBoxSwitchIconTextColor.Location = new System.Drawing.Point(210, 157);
             this.textBoxSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxSwitchIconTextColor.Name = "textBoxSwitchIconTextColor";
             this.textBoxSwitchIconTextColor.Size = new System.Drawing.Size(106, 29);
@@ -701,7 +727,7 @@ namespace WindowsVirtualDesktopHelper {
             // buttonSwitchIconTextColor
             // 
             this.buttonSwitchIconTextColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonSwitchIconTextColor.Location = new System.Drawing.Point(328, 114);
+            this.buttonSwitchIconTextColor.Location = new System.Drawing.Point(328, 157);
             this.buttonSwitchIconTextColor.Margin = new System.Windows.Forms.Padding(6);
             this.buttonSwitchIconTextColor.Name = "buttonSwitchIconTextColor";
             this.buttonSwitchIconTextColor.Size = new System.Drawing.Size(34, 29);
@@ -897,14 +923,14 @@ namespace WindowsVirtualDesktopHelper {
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(805, 992);
+            this.ClientSize = new System.Drawing.Size(805, 1035);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(821, 1031);
+			this.MinimumSize = new System.Drawing.Size(821, 1074);
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
@@ -992,5 +1018,7 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.Button buttonSwitchIconTextColor;
 		private System.Windows.Forms.Button buttonExportConfigurationBackup;
 		private System.Windows.Forms.Button buttonImportConfigurationBackup;
+		private System.Windows.Forms.Label labelLanguage;
+		private System.Windows.Forms.ComboBox comboBoxLanguage;
 	}
 }

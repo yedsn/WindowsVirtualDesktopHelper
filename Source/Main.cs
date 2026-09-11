@@ -17,7 +17,7 @@ namespace WindowsVirtualDesktopHelper {
 				// Start app
 				using (Mutex mutex = new Mutex(false, "Mutex/WindowsVirtualDesktopHelper")) {
 					if (Settings.GetBool("debug.singleInstance") && !mutex.WaitOne(0)) {
-						MessageBox.Show("WindowsVirtualDesktopHelper is already running.", "Error", MessageBoxButtons.OK);
+						MessageBox.Show(Localizer.L("WindowsVirtualDesktopHelper is already running."), Localizer.L("Error"), MessageBoxButtons.OK);
 						return;
 					}
 

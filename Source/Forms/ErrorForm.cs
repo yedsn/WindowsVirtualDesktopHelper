@@ -7,6 +7,7 @@ namespace WindowsVirtualDesktopHelper {
 	public partial class ErrorForm : Form {
 		public ErrorForm() {
 			InitializeComponent();
+			Localizer.Apply(this);
 		}
 
 		public void UpdateUIForError(Exception e) {
@@ -89,14 +90,14 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void buttonOpenIssue_Click(object sender, EventArgs e) {
 
-			string message = "Before filing a GitHub issue, please make sure of the following:";
+			string message = Localizer.IsChinese ? "提交 GitHub 问题前，请确认：" : "Before filing a GitHub issue, please make sure of the following:";
 			message += "\n";
-			message += "\n- You are using the latest version";
-			message += "\n- Your issue doesn't already exist";
-			message += "\n- You are not using patched versions of Windows";
+			message += Localizer.IsChinese ? "\n- 正在使用最新版本" : "\n- You are using the latest version";
+			message += Localizer.IsChinese ? "\n- 此问题尚未被报告" : "\n- Your issue doesn't already exist";
+			message += Localizer.IsChinese ? "\n- 没有使用修改过的 Windows 版本" : "\n- You are not using patched versions of Windows";
 			message += "\n";
-			message += "\nContinue?";
-			string title = "Issue Checklist";
+			message += "\n" + Localizer.L("Continue?");
+			string title = Localizer.L("Issue Checklist");
 			MessageBoxButtons buttons = MessageBoxButtons.YesNo;
 			DialogResult result = MessageBox.Show(message, title, buttons);
 			if (result == DialogResult.Yes) {

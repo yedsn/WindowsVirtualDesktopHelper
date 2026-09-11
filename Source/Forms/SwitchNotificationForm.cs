@@ -21,6 +21,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public SwitchNotificationForm(int? screenNumber = null) {
 			InitializeComponent();
+			Text = Localizer.L(Text);
 
 			this.ScreenNumber = screenNumber;
 			this.FadeIn = Settings.GetBool("feature.showDesktopSwitchOverlay.animate");

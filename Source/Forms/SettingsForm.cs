@@ -14,6 +14,7 @@ namespace WindowsVirtualDesktopHelper {
 
 			// Init UI
 			InitializeComponent();
+			ApplyLocalizedText();
 			LoadSettingsIntoUI();
 
 
@@ -31,6 +32,7 @@ namespace WindowsVirtualDesktopHelper {
 			this.radioButtonTrayDisplayNavigation.Checked = !this.radioButtonTrayDisplayAllDesktops.Checked;
 			this.checkBoxShowDesktopNameInitial.Checked = Settings.GetBool("feature.showDesktopNameInIconTray");
 			this.checkBoxStartupWithWindows.Checked = Settings.GetBool("general.startupWithWindows");
+			this.comboBoxLanguage.SelectedIndex = Localizer.IsChinese ? 1 : 0;
 			this.textBoxIconBackgroundColor.Text = Settings.GetString("theme.icons.iconBG." + App.Instance.CurrentSystemThemeName);
 			this.textBoxIconTextColor.Text = Settings.GetString("theme.icons.iconFG." + App.Instance.CurrentSystemThemeName);
 			this.textBoxSwitchIconTextColor.Text = Settings.GetString("theme.icons.symbolFG." + App.Instance.CurrentSystemThemeName);
@@ -87,8 +89,16 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void ReloadSettings() {
 			IsLoading = true;
-			try { LoadSettingsIntoUI(); }
+			try { ApplyLocalizedText(); LoadSettingsIntoUI(); }
 			finally { IsLoading = false; }
+		}
+
+		private void ApplyLocalizedText() {
+			Localizer.Apply(this);
+			var selectedIndex = comboBoxLanguage.SelectedIndex < 0 ? (Localizer.IsChinese ? 1 : 0) : comboBoxLanguage.SelectedIndex;
+			comboBoxLanguage.Items[0] = Localizer.L("English");
+			comboBoxLanguage.Items[1] = Localizer.L("Simplified Chinese");
+			comboBoxLanguage.SelectedIndex = selectedIndex;
 		}
 		
 		private void SaveSettingsFromUI() {
@@ -148,6 +158,12 @@ namespace WindowsVirtualDesktopHelper {
 			} else {
 				App.Instance.DisableStartupWithWindows();
 			}
+		}
+
+		private void comboBoxLanguage_SelectedIndexChanged(object sender, EventArgs e) {
+			if(IsLoading || comboBoxLanguage.SelectedIndex < 0) return;
+			Settings.SetString("general.language", comboBoxLanguage.SelectedIndex == 1 ? "zh-CN" : "en");
+			App.Instance.ApplyLanguage();
 		}
 
 		private void checkBoxShowPrevNextIcons_CheckedChanged(object sender, EventArgs e) {

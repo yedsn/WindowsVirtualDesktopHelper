@@ -35,7 +35,7 @@ namespace WindowsVirtualDesktopHelper {
 		private WindowOverviewItem _selectedItem;
 
 		public WindowOverviewForm() {
-			Text = "All Windows";
+			Text = Localizer.L("All Windows");
 			StartPosition = FormStartPosition.CenterScreen;
 			MinimumSize = new Size(860, 460);
 			Size = new Size(1280, 800);
@@ -43,9 +43,9 @@ namespace WindowsVirtualDesktopHelper {
 			KeyPreview = true;
 
 			var topPanel = new Panel { Dock = DockStyle.Top, Height = 44, Padding = new Padding(10, 9, 10, 5) };
-			_searchBox = new TextBox { Dock = DockStyle.Fill, AccessibleName = "Search windows" };
-			_refreshButton = new Button { Text = "Refresh", Dock = DockStyle.Right, Width = 86 };
-			_snapshotsButton = new Button { Text = "Snapshot", Dock = DockStyle.Right, Width = 88 };
+			_searchBox = new TextBox { Dock = DockStyle.Fill, AccessibleName = Localizer.L("Search windows") };
+			_refreshButton = new Button { Text = Localizer.L("Refresh"), Dock = DockStyle.Right, Width = 86 };
+			_snapshotsButton = new Button { Text = Localizer.L("Snapshot"), Dock = DockStyle.Right, Width = 88 };
 			_searchDebounceTimer = new System.Windows.Forms.Timer { Interval = 250 };
 			topPanel.Controls.Add(_searchBox);
 			topPanel.Controls.Add(_refreshButton);
@@ -62,8 +62,8 @@ namespace WindowsVirtualDesktopHelper {
 
 			var bottomPanel = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(10, 7, 10, 7) };
 			_statusLabel = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
-			_closeButton = new Button { Text = "Close Window", Dock = DockStyle.Right, Width = 104, Enabled = false };
-			_activateButton = new Button { Text = "Activate", Dock = DockStyle.Right, Width = 86, Enabled = false };
+			_closeButton = new Button { Text = Localizer.L("Close Window"), Dock = DockStyle.Right, Width = 104, Enabled = false };
+			_activateButton = new Button { Text = Localizer.L("Activate"), Dock = DockStyle.Right, Width = 86, Enabled = false };
 			bottomPanel.Controls.Add(_statusLabel);
 			bottomPanel.Controls.Add(_closeButton);
 			bottomPanel.Controls.Add(_activateButton);
@@ -93,6 +93,16 @@ namespace WindowsVirtualDesktopHelper {
 			Icon = Util.Icons.GenerateDesktopManagerIcon(theme, dpi);
 		}
 
+		public void ApplyLocalizedText() {
+			Text = Localizer.L(Text);
+			_searchBox.AccessibleName = Localizer.L(_searchBox.AccessibleName);
+			_refreshButton.Text = Localizer.L(_refreshButton.Text);
+			_snapshotsButton.Text = Localizer.L(_snapshotsButton.Text);
+			_closeButton.Text = Localizer.L(_closeButton.Text);
+			_activateButton.Text = Localizer.L(_activateButton.Text);
+			if(_hasSnapshot) PopulateGrid();
+		}
+
 		public void FocusSearchBox() {
 			if(IsDisposed || !IsHandleCreated) return;
 			try {
@@ -108,7 +118,7 @@ namespace WindowsVirtualDesktopHelper {
 			if(_isRefreshing) return;
 			_isRefreshing = true;
 			_refreshButton.Enabled = false;
-			_statusLabel.Text = "Reading open windows...";
+			_statusLabel.Text = Localizer.IsChinese ? "正在读取打开的窗口..." : "Reading open windows...";
 			if(!_hasSnapshot) {
 				_loadingOverlay.DesktopCount = _desktopCount;
 				_desktopGrid.Visible = false;
@@ -148,13 +158,13 @@ namespace WindowsVirtualDesktopHelper {
 					_loadingOverlay.Visible = false;
 					_desktopGrid.Visible = true;
 				}
-				_statusLabel.Text = "Could not read open windows: " + error.Message;
+				_statusLabel.Text = (Localizer.IsChinese ? "无法读取打开的窗口：" : "Could not read open windows: ") + error.Message;
 				return;
 			}
 			_items = items;
 			_desktopNames = desktopNames ?? new List<string>();
 			_desktopCount = Math.Max(1, desktopCount);
-			_statusLabel.Text = _items.Count + " window" + (_items.Count == 1 ? "" : "s") + " found";
+			_statusLabel.Text = Localizer.IsChinese ? "找到 " + _items.Count + " 个窗口" : _items.Count + " window" + (_items.Count == 1 ? "" : "s") + " found";
 			PopulateGrid();
 			_hasSnapshot = true;
 			_loadingOverlay.Visible = false;
@@ -185,7 +195,7 @@ namespace WindowsVirtualDesktopHelper {
 					AddDesktopCard(GetDesktopTitle(desktopIndex), matchingItems.Where(item => item.DesktopIndex == desktopIndex || item.IsShownOnAllDesktops), cardIndex++, desktopIndex);
 				}
 
-				if(unresolved.Count > 0) AddDesktopCard("Other windows", unresolved, cardIndex++, -1);
+				if(unresolved.Count > 0) AddDesktopCard(Localizer.L("Other windows"), unresolved, cardIndex++, -1);
 				while(cardIndex < rowCount * GridColumnCount) AddEmptyGridCell(cardIndex++);
 			} finally {
 				_desktopGrid.EndGridUpdate();
@@ -231,7 +241,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private string GetDesktopTitle(int desktopIndex) {
-			var defaultTitle = "Desktop " + (desktopIndex + 1);
+			var defaultTitle = Localizer.Desktop(desktopIndex + 1);
 			if(desktopIndex < 0 || desktopIndex >= _desktopNames.Count || string.IsNullOrEmpty(_desktopNames[desktopIndex]) || _desktopNames[desktopIndex] == defaultTitle) return defaultTitle;
 			return defaultTitle + " - " + _desktopNames[desktopIndex];
 		}
@@ -242,7 +252,7 @@ namespace WindowsVirtualDesktopHelper {
 			var heading = new Label { Text = title + " (" + cardItems.Count + ")", Dock = DockStyle.Top, Height = 30, Padding = new Padding(9, 7, 0, 0), Font = new Font(Font, FontStyle.Bold), BackColor = Color.FromArgb(240, 243, 247) };
 			var list = new ListView { Dock = DockStyle.Fill, View = View.Details, HeaderStyle = ColumnHeaderStyle.None, FullRowSelect = true, HideSelection = false, MultiSelect = false, BorderStyle = BorderStyle.None, SmallImageList = CreateImageList(cardItems) };
 			list.AllowDrop = true;
-			list.Columns.Add("Window", -2);
+			list.Columns.Add(Localizer.L("Window"), -2);
 			for(var i = 0; i < cardItems.Count; i++) list.Items.Add(new ListViewItem(cardItems[i].DisplayName) { Tag = cardItems[i], ImageIndex = i, ForeColor = cardItems[i].IsShownOnAllDesktops ? Color.DimGray : SystemColors.WindowText });
 			list.SelectedIndexChanged += (sender, e) => SelectListItem(list);
 			list.DoubleClick += (sender, e) => ActivateSelectedWindow(true);
@@ -279,10 +289,10 @@ namespace WindowsVirtualDesktopHelper {
 		private void DropWindow(DragEventArgs e, int targetDesktopIndex) {
 			var item = e.Data.GetData(typeof(WindowOverviewItem)) as WindowOverviewItem;
 			if(item == null || targetDesktopIndex < 0 || item.IsShownOnAllDesktops || item.DesktopIndex == targetDesktopIndex) return;
-			_statusLabel.Text = "Moving window...";
+			_statusLabel.Text = Localizer.IsChinese ? "正在移动窗口..." : "Moving window...";
 			var message = App.Instance.MoveOverviewWindow(item, targetDesktopIndex);
 			_statusLabel.Text = message;
-			if(message.StartsWith("Window moved", StringComparison.Ordinal)) RefreshSnapshot();
+			if(message.StartsWith(Localizer.L("Window moved to Desktop "), StringComparison.Ordinal)) RefreshSnapshot();
 		}
 
 		private void AddEmptyGridCell(int cardIndex) {
@@ -325,7 +335,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void CloseSelectedWindow() {
 			if(_selectedItem == null) return;
-			var result = MessageBox.Show(this, "Close \"" + _selectedItem.DisplayName + "\"?", "Close Window", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+			var result = MessageBox.Show(this, (Localizer.IsChinese ? "关闭 \"" : "Close \"") + _selectedItem.DisplayName + "\"?", Localizer.L("Close Window"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
 			if(result != DialogResult.Yes) return;
 			_statusLabel.Text = App.Instance.CloseOverviewWindow(_selectedItem);
 			RefreshSnapshot();

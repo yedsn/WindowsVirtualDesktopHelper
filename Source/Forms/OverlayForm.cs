@@ -20,6 +20,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public OverlayForm(int? screenNumber = null) {
 			InitializeComponent();
+			Text = Localizer.L(Text);
 
 			this.ScreenNumber = screenNumber;
 			this.FadeIn = Settings.GetBool("feature.showDesktopStatusOverlay.animate");

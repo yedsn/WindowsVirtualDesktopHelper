@@ -38,6 +38,7 @@ namespace WindowsVirtualDesktopHelper {
 
 			// General
 			RegisterDefault("general.startupWithWindows", false, "If true, the app will register itself with Windows to startup when Windows starts (via the registry).");
+			RegisterDefault("general.language", "en", "Application display language: en or zh-CN.");
 			RegisterDefault("general.theme", "auto", "Can be either auto, dark or light. If set to auto, the theme is derived from the current windows theme (dark or light).");
 
 			// Theme

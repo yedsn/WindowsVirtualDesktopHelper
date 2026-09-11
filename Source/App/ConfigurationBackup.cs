@@ -185,7 +185,7 @@ namespace WindowsVirtualDesktopHelper {
 
 	internal static class ConfigurationBackupWorkflow {
 		internal static string Export(App app, IWin32Window owner) {
-			using(var dialog = new SaveFileDialog { Title = "Export Configuration Backup", Filter = "Windows Virtual Desktop Helper Backup (*.wvdbak)|*.wvdbak|JSON Files (*.json)|*.json", DefaultExt = "wvdbak", AddExtension = true, FileName = "WindowsVirtualDesktopHelper-backup-" + DateTime.Now.ToString("yyyyMMdd-HHmm") + ".wvdbak" }) {
+			using(var dialog = new SaveFileDialog { Title = Localizer.L("Export Configuration Backup"), Filter = "Windows Virtual Desktop Helper Backup (*.wvdbak)|*.wvdbak|JSON Files (*.json)|*.json", DefaultExt = "wvdbak", AddExtension = true, FileName = "WindowsVirtualDesktopHelper-backup-" + DateTime.Now.ToString("yyyyMMdd-HHmm") + ".wvdbak" }) {
 				if(dialog.ShowDialog(owner) != DialogResult.OK) return null;
 				try {
 					app.ConfigurationBackups.Export(dialog.FileName);
@@ -198,7 +198,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		internal static string Import(App app, IWin32Window owner) {
-			using(var dialog = new OpenFileDialog { Title = "Import Configuration Backup", Filter = "Windows Virtual Desktop Helper Backup (*.wvdbak;*.json)|*.wvdbak;*.json|All Files (*.*)|*.*", CheckFileExists = true, Multiselect = false }) {
+			using(var dialog = new OpenFileDialog { Title = Localizer.L("Import Configuration Backup"), Filter = "Windows Virtual Desktop Helper Backup (*.wvdbak;*.json)|*.wvdbak;*.json|All Files (*.*)|*.*", CheckFileExists = true, Multiselect = false }) {
 				if(dialog.ShowDialog(owner) != DialogResult.OK) return null;
 				ConfigurationBackupSummary summary;
 				try { summary = app.ConfigurationBackups.ReadSummary(dialog.FileName); }

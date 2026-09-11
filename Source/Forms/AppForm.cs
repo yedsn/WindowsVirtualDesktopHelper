@@ -15,6 +15,15 @@ namespace WindowsVirtualDesktopHelper {
 		public AppForm() {
 			// Init UI
 			InitializeComponent();
+			ApplyLocalizedText();
+		}
+
+		internal void ApplyLocalizedText() {
+			Localizer.Apply(contextMenuStrip1);
+			notifyIconNumber.Text = Localizer.L("Desktop Number");
+			notifyIconPrev.Text = Localizer.L("Previous Desktop");
+			notifyIconNext.Text = Localizer.L("Next Desktop");
+			notifyIconName.Text = Localizer.L("Desktop Name");
 		}
 
 
@@ -148,7 +157,7 @@ namespace WindowsVirtualDesktopHelper {
 			if(insertIndex < 0) insertIndex = 0;
 
 			for(var i = 0; i < count; i++) {
-				var item = new ToolStripMenuItem("Desktop " + (i + 1)) { Tag = "desktop:" + i, Checked = i == current };
+				var item = new ToolStripMenuItem(Localizer.Desktop(i + 1)) { Tag = "desktop:" + i, Checked = i == current };
 				this.contextMenuStrip1.Items.Insert(insertIndex + i, item);
 			}
 		}
@@ -185,7 +194,7 @@ namespace WindowsVirtualDesktopHelper {
 					var desktopNumber = i;
 					var notifyIcon = new NotifyIcon(this.components) {
 						ContextMenuStrip = this.contextMenuStrip1,
-						Text = "Desktop " + (desktopNumber + 1),
+					Text = Localizer.Desktop(desktopNumber + 1),
 						Icon = Util.Icons.GenerateNotificationIcon((desktopNumber + 1).ToString(), theme, dpi, false, 1.0, desktopNumber != currentDesktopNumber, true),
 						Visible = true
 					};
@@ -200,7 +209,7 @@ namespace WindowsVirtualDesktopHelper {
 			for(var i = 0; i < _desktopNotifyIcons.Count; i++) {
 				var notifyIcon = _desktopNotifyIcons[i];
 				notifyIcon.Icon = Util.Icons.GenerateNotificationIcon((i + 1).ToString(), theme, dpi, false, 1.0, i != currentDesktopNumber, true);
-				notifyIcon.Text = "Desktop " + (i + 1);
+				notifyIcon.Text = Localizer.Desktop(i + 1);
 				notifyIcon.Visible = true;
 			}
 		}
@@ -209,7 +218,7 @@ namespace WindowsVirtualDesktopHelper {
 			if(_desktopManagerNotifyIcon == null) {
 				_desktopManagerNotifyIcon = new NotifyIcon(this.components) {
 					ContextMenuStrip = this.contextMenuStrip1,
-					Text = "Desktop Manager",
+					Text = Localizer.L("Desktop Manager"),
 					Visible = true
 				};
 				_desktopManagerNotifyIcon.MouseClick += (sender, e) => {

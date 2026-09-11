@@ -352,22 +352,22 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public string ActivateOverviewWindow(WindowOverviewItem item) {
-			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return Localizer.L("The selected window is no longer available.");
 			try {
 				if(item.DesktopIndex >= 0 && item.DesktopIndex != (int)CurrentVDDisplayNumber) {
 					SwitchToDesktop(item.DesktopIndex);
 					Thread.Sleep(150);
 				}
-				return Util.WindowEnumerator.TryActivate(item.Window.Handle) ? "Window activated." : "Windows did not allow that window to be activated.";
+				return Util.WindowEnumerator.TryActivate(item.Window.Handle) ? Localizer.L("Window activated.") : Localizer.L("Windows did not allow that window to be activated.");
 			} catch(Exception e) {
 				Util.Logging.WriteLine("App: ActivateOverviewWindow: " + e.Message);
-				return "Could not activate the selected window.";
+				return Localizer.L("Could not activate the selected window.");
 			}
 		}
 
 		public string CloseOverviewWindow(WindowOverviewItem item) {
-			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return "The selected window is no longer available.";
-			return Util.WindowEnumerator.TryClose(item.Window.Handle) ? "Close request sent." : "Could not send a close request to the selected window.";
+			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return Localizer.L("The selected window is no longer available.");
+			return Util.WindowEnumerator.TryClose(item.Window.Handle) ? Localizer.L("Close request sent.") : Localizer.L("Could not send a close request to the selected window.");
 		}
 
 		public string MoveOverviewWindow(WindowOverviewItem item, int targetDesktopIndex) {
@@ -379,13 +379,13 @@ namespace WindowsVirtualDesktopHelper {
 			try {
 				using(var desktopLookup = new WindowDesktopLookup()) {
 					string error;
-					if(desktopLookup.TryMoveWindowToDesktop(item.Window.Handle, desktopId, out error)) return "Window moved to Desktop " + (targetDesktopIndex + 1) + ".";
+					if(desktopLookup.TryMoveWindowToDesktop(item.Window.Handle, desktopId, out error)) return Localizer.L("Window moved to Desktop ") + (targetDesktopIndex + 1) + ".";
 					Util.Logging.WriteLine("App: MoveOverviewWindow: public move failed: " + error);
 				}
 				var privateMover = VDAPI as IWindowDesktopMover;
 				if(privateMover == null) return "Windows did not allow that window to be moved.";
 				privateMover.MoveWindowToDesktop(item.Window.Handle, targetDesktopIndex);
-				return "Window moved to Desktop " + (targetDesktopIndex + 1) + ".";
+				return Localizer.L("Window moved to Desktop ") + (targetDesktopIndex + 1) + ".";
 			} catch(Exception e) {
 				Util.Logging.WriteLine("App: MoveOverviewWindow: " + e.Message);
 				return "Could not move the selected window.";
@@ -432,6 +432,14 @@ namespace WindowsVirtualDesktopHelper {
 			} catch(Exception e) {
 				Util.Logging.WriteLine("App: ApplyImportedConfiguration: " + e.Message);
 			}
+		}
+
+		public void ApplyLanguage() {
+			AppForm.ApplyLocalizedText();
+			UIUpdateIcons();
+			SettingsForm.ReloadSettings();
+			if(WindowOverviewForm != null && !WindowOverviewForm.IsDisposed) WindowOverviewForm.ApplyLocalizedText();
+			if(DesktopLayoutSnapshotForm != null && !DesktopLayoutSnapshotForm.IsDisposed) DesktopLayoutSnapshotForm.ApplyLocalizedText();
 		}
 
 		public bool TryMoveWindowToDesktop(IntPtr windowHandle, int targetDesktopIndex, out string error) {

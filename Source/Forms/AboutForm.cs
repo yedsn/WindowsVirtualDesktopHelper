@@ -6,6 +6,7 @@ namespace WindowsVirtualDesktopHelper {
 	public partial class AboutForm : Form {
 		public AboutForm() {
 			InitializeComponent();
+			Localizer.Apply(this);
 		}
 
 		private void label3_Click(object sender, EventArgs e) {
@@ -21,7 +22,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private void AboutForm_Load(object sender, EventArgs e) {
-			labelVersion.Text = "version "
+			labelVersion.Text = Localizer.L("version ")
 				+ Assembly.GetExecutingAssembly().GetName().Version.Major
 				+ "."
 				+ Assembly.GetExecutingAssembly().GetName().Version.Minor;
@@ -33,14 +34,14 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void linkLabel4_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
 			var logForm = new Forms.LogForm();
-			logForm.Text = "Log";
+			logForm.Text = Localizer.L("Log");
 			logForm.SetLogText(string.Join("\n", Util.Logging.GetLogHistory()));
 			logForm.Show();
 		}
 
 		private void linkLabel5_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
 			var logForm = new Forms.LogForm();
-			logForm.Text = "Config";
+			logForm.Text = Localizer.L("Config");
 			var txt = "";
 			txt += "Using Config File(s): ";
 			txt += "\n\n" + string.Join("\n", Settings.GetUsedConfigFiles());
