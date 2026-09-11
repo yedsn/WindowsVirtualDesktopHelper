@@ -348,8 +348,7 @@ namespace WindowsVirtualDesktopHelper {
 
 		public bool ToggleOverviewWindowCleanupProtection(WindowOverviewItem item) {
 			if(item == null || !Util.WindowEnumerator.IsWindow(item.Window.Handle)) return false;
-			var currentWindow = Util.WindowEnumerator.GetApplicationWindows().FirstOrDefault(window => WindowCleanupLocks.Matches(item.Window, window));
-			return currentWindow != null && WindowCleanupLocks.Toggle(currentWindow);
+			return WindowCleanupLocks.Toggle(item.Window);
 		}
 
 		public WindowCleanupBatch PrepareOverviewLockAll() {
@@ -391,7 +390,7 @@ namespace WindowsVirtualDesktopHelper {
 			using(var desktopLookup = new WindowDesktopLookup()) foreach(var window in Util.WindowEnumerator.GetApplicationWindows()) {
 				Guid desktopId;
 				int desktopIndex;
-				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && desktopIndices.TryGetValue(desktopId, out desktopIndex)) windows.Add(window);
+				if(desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && (desktopIndices.TryGetValue(desktopId, out desktopIndex) || desktopId != Guid.Empty)) windows.Add(window);
 			}
 			return windows;
 		}
@@ -403,7 +402,7 @@ namespace WindowsVirtualDesktopHelper {
 			using(var desktopLookup = new WindowDesktopLookup()) {
 				Guid desktopId;
 				int windowDesktopIndex;
-				return desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && desktopIndices.TryGetValue(desktopId, out windowDesktopIndex);
+				return desktopLookup.TryGetWindowDesktopId(window.Handle, out desktopId) && (desktopIndices.TryGetValue(desktopId, out windowDesktopIndex) || desktopId != Guid.Empty);
 			}
 		}
 

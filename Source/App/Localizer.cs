@@ -17,7 +17,7 @@ namespace WindowsVirtualDesktopHelper {
 			{ "Window Manager", "窗口管理器" }, { "Built-in Manager", "内置管理器" }, { "System Manager", "系统管理器" },
 			{ "About", "关于" }, { "Donate", "捐赠" }, { "Exit", "退出" }, { "Previous Desktop", "上一个桌面" }, { "Next Desktop", "下一个桌面" },
 			{ "Desktop Name", "桌面名称" }, { "Desktop Number", "桌面编号" }, { "Desktop Manager", "桌面管理器" },
-			{ "All Windows", "所有窗口" }, { "Refresh", "刷新" }, { "Close Window", "关闭窗口" }, { "Activate", "激活" }, { "Search windows", "搜索窗口" }, { "Other windows", "其他窗口" },
+			{ "All Windows", "所有窗口" }, { "Refresh", "刷新" }, { "Close Window", "关闭窗口" }, { "Activate Window", "激活窗口" }, { "Search windows", "搜索窗口" }, { "Other windows", "其他窗口" },
 			{ "Lock All", "全部锁定" }, { "One-click Cleanup", "一键清理" }, { "One-click Cleanup ({0})", "一键清理（{0}）" }, { "Locked - protected from one-click cleanup", "已锁定 - 一键清理时保留" }, { "Unlocked - included in one-click cleanup", "未锁定 - 一键清理时会关闭" },
 			{ "Review {0} windows across all desktops before cleanup.", "清理前请确认所有桌面上的 {0} 个窗口。" }, { "Confirm Cleanup", "确认清理" },
 			{ "Window locked for cleanup.", "窗口已锁定，将在一键清理时保留。" }, { "Window unlocked for cleanup.", "窗口已解除锁定，将在一键清理时关闭。" },

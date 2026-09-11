@@ -51,7 +51,9 @@ namespace WindowsVirtualDesktopHelper {
 			Controls.Add(header);
 			_snapshots.SelectedIndexChanged += (sender, e) => UpdateActionState();
 			_snapshots.DoubleClick += (sender, e) => RestoreSelected();
+			_snapshots.Resize += (sender, e) => ResizeNameColumn();
 			FormClosing += (sender, e) => { if(e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; Hide(); } };
+			ResizeNameColumn();
 			UpdateActionState();
 		}
 
@@ -91,6 +93,10 @@ namespace WindowsVirtualDesktopHelper {
 			button.Click += click;
 			parent.Controls.Add(button);
 			return button;
+		}
+
+		private void ResizeNameColumn() {
+			_snapshots.Columns[0].Width = Math.Max(0, _snapshots.ClientSize.Width - _snapshots.Columns.Cast<ColumnHeader>().Skip(1).Sum(column => column.Width));
 		}
 
 		private DesktopLayoutSnapshot SelectedSnapshot { get { return _snapshots.SelectedItems.Count == 0 ? null : _snapshots.SelectedItems[0].Tag as DesktopLayoutSnapshot; } }
