@@ -126,14 +126,18 @@ namespace WindowsVirtualDesktopHelper {
 
 	public sealed class WindowCleanupLockService {
 		private readonly object _sync = new object();
-		private readonly WindowCleanupLockRepository _repository;
+		private readonly DesktopRuleStateService _state;
 		private List<WindowCleanupLockRule> _rules;
 
-		public WindowCleanupLockService() : this(new WindowCleanupLockRepository()) { }
+		public WindowCleanupLockService() : this(new DesktopRuleStateService()) { }
 
-		public WindowCleanupLockService(WindowCleanupLockRepository repository) {
-			_repository = repository ?? throw new ArgumentNullException("repository");
-			_rules = _repository.Load();
+		public WindowCleanupLockService(DesktopRuleStateService state) {
+			_state = state ?? throw new ArgumentNullException("state");
+			Reload();
+		}
+
+		public void Reload() {
+			lock(_sync) _rules = _state.ListCleanupRules();
 		}
 
 		public bool IsProtected(ApplicationWindow window) {
@@ -186,8 +190,8 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private void Save(List<WindowCleanupLockRule> rules) {
-			_repository.Save(rules);
-			_rules = rules;
+			_state.ReplaceCleanupRules(rules);
+			_rules = rules.Select(rule => rule.Copy()).ToList();
 		}
 	}
 }

@@ -15,6 +15,9 @@ namespace WindowsVirtualDesktopHelper {
 		private readonly SkeletonLoadingPanel _loadingOverlay;
 		private readonly Button _refreshButton;
 		private readonly Button _snapshotsButton;
+		private readonly Button _updateDesktopRulesButton;
+		private readonly Button _manageDesktopRulesButton;
+		private readonly Button _applyDesktopRulesButton;
 		private readonly Button _manageLockRulesButton;
 		private readonly Button _lockAllButton;
 		private readonly Button _cleanupButton;
@@ -41,7 +44,7 @@ namespace WindowsVirtualDesktopHelper {
 		public WindowOverviewForm() {
 			Text = Localizer.L("All Windows");
 			StartPosition = FormStartPosition.CenterScreen;
-			MinimumSize = new Size(860, 460);
+			MinimumSize = new Size(1100, 460);
 			Size = new Size(1280, 800);
 			ShowInTaskbar = true;
 			KeyPreview = true;
@@ -71,19 +74,29 @@ namespace WindowsVirtualDesktopHelper {
 			_activateButton = new Button { Text = Localizer.L("Activate Window"), Dock = DockStyle.Right, Width = 104, Enabled = false };
 			selectedWindowActions.Controls.Add(_activateButton);
 			selectedWindowActions.Controls.Add(_closeButton);
-			var actionGroupGap = new Panel { Dock = DockStyle.Right, Width = 10 };
-			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 384 };
+			var selectedWindowActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
+			var desktopRuleActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
+			var desktopRuleActions = new Panel { Dock = DockStyle.Right, Width = 384 };
+			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 350 };
 			_lockAllButton = new Button { Text = Localizer.L("Lock All"), Dock = DockStyle.Left, Width = 88 };
 			_manageLockRulesButton = new Button { Text = Localizer.L("Manage Lock Rules"), Dock = DockStyle.Left, Width = 136 };
+			_updateDesktopRulesButton = new Button { Text = Localizer.L("Update Desktop Rules"), Dock = DockStyle.Left, Width = 126 };
+			_manageDesktopRulesButton = new Button { Text = Localizer.L("Manage Desktop Rules"), Dock = DockStyle.Left, Width = 132 };
+			_applyDesktopRulesButton = new Button { Text = Localizer.L("Apply Desktop Rules"), Dock = DockStyle.Left, Width = 126 };
 			var cleanupPanel = new Panel { Dock = DockStyle.Fill };
 			_cleanupButton = new Button { Text = string.Format(Localizer.L("One-click Cleanup ({0})"), 0), Dock = DockStyle.Fill };
 			cleanupPanel.Controls.Add(_cleanupButton);
 			cleanupActions.Controls.Add(cleanupPanel);
 			cleanupActions.Controls.Add(_manageLockRulesButton);
 			cleanupActions.Controls.Add(_lockAllButton);
+			desktopRuleActions.Controls.Add(_applyDesktopRulesButton);
+			desktopRuleActions.Controls.Add(_manageDesktopRulesButton);
+			desktopRuleActions.Controls.Add(_updateDesktopRulesButton);
 			bottomPanel.Controls.Add(_statusLabel);
 			bottomPanel.Controls.Add(selectedWindowActions);
-			bottomPanel.Controls.Add(actionGroupGap);
+			bottomPanel.Controls.Add(selectedWindowActionsGap);
+			bottomPanel.Controls.Add(desktopRuleActions);
+			bottomPanel.Controls.Add(desktopRuleActionsGap);
 			bottomPanel.Controls.Add(cleanupActions);
 
 			Controls.Add(_gridHost);
@@ -101,6 +114,9 @@ namespace WindowsVirtualDesktopHelper {
 			};
 			_refreshButton.Click += (sender, e) => RefreshSnapshot();
 			_snapshotsButton.Click += (sender, e) => App.Instance.ShowDesktopLayoutSnapshots();
+			_updateDesktopRulesButton.Click += (sender, e) => UpdateDesktopRules();
+			_manageDesktopRulesButton.Click += (sender, e) => ManageDesktopRules();
+			_applyDesktopRulesButton.Click += (sender, e) => BeginApplyDesktopRules();
 			_manageLockRulesButton.Click += (sender, e) => ManageLockRules();
 			_lockAllButton.Click += (sender, e) => LockAllWindows();
 			_cleanupButton.Click += (sender, e) => BeginCleanupAllDesktops();
@@ -119,6 +135,9 @@ namespace WindowsVirtualDesktopHelper {
 			_searchBox.AccessibleName = Localizer.L(_searchBox.AccessibleName);
 			_refreshButton.Text = Localizer.L(_refreshButton.Text);
 			_snapshotsButton.Text = Localizer.L(_snapshotsButton.Text);
+			_updateDesktopRulesButton.Text = Localizer.L(_updateDesktopRulesButton.Text);
+			_manageDesktopRulesButton.Text = Localizer.L(_manageDesktopRulesButton.Text);
+			_applyDesktopRulesButton.Text = Localizer.L(_applyDesktopRulesButton.Text);
 			_manageLockRulesButton.Text = Localizer.L(_manageLockRulesButton.Text);
 			_lockAllButton.Text = Localizer.L(_lockAllButton.Text);
 			_closeButton.Text = Localizer.L(_closeButton.Text);
@@ -159,6 +178,32 @@ namespace WindowsVirtualDesktopHelper {
 			using(var dialog = new WindowCleanupLockRulesForm()) {
 				if(dialog.ShowDialog(this) == DialogResult.OK) RefreshSnapshot();
 			}
+		}
+
+		private void UpdateDesktopRules() {
+			RunBulkAction(() => App.Instance.DesktopRules.UpdateFromOpenWindows(), result => {
+				_statusLabel.Text = Localizer.IsChinese ? "桌面规则已更新：更新 " + result.UpdatedCount + " 条，新增 " + result.AddedCount + " 条。" : "Desktop rules updated: " + result.UpdatedCount + " updated, " + result.AddedCount + " added.";
+				if(result.Conflicts.Count > 0) _statusLabel.Text += Localizer.IsChinese ? " " + result.Conflicts.Count + " 项匹配存在歧义，请在管理桌面规则中处理。" : " " + result.Conflicts.Count + " ambiguous mapping(s) need review.";
+				RefreshSnapshot();
+			});
+		}
+
+		private void ManageDesktopRules() {
+			using(var dialog = new DesktopRulesForm()) {
+				if(dialog.ShowDialog(this) == DialogResult.OK) RefreshSnapshot();
+			}
+		}
+
+		private void BeginApplyDesktopRules() {
+			RunBulkAction(() => App.Instance.DesktopRules.Analyze(), preview => {
+				using(var dialog = new RuleApplyPreviewForm(preview)) {
+					if(dialog.ShowDialog(this) != DialogResult.OK) return;
+				}
+				RunBulkAction(() => App.Instance.DesktopRules.Apply(preview, null), items => {
+					_statusLabel.Text = Localizer.IsChinese ? "桌面规则应用完成：移动 " + items.Count(item => item.Status == RuleRestoreStatus.Moved) + " 个窗口。" : "Desktop rules applied: " + items.Count(item => item.Status == RuleRestoreStatus.Moved) + " window(s) moved.";
+					RefreshSnapshot();
+				});
+			});
 		}
 
 		private void ReadSnapshot(int refreshVersion) {
@@ -493,6 +538,9 @@ namespace WindowsVirtualDesktopHelper {
 			_isBulkActionRunning = true;
 			_lockAllButton.Enabled = false;
 			_cleanupButton.Enabled = false;
+			_updateDesktopRulesButton.Enabled = false;
+			_manageDesktopRulesButton.Enabled = false;
+			_applyDesktopRulesButton.Enabled = false;
 			var thread = new Thread(() => {
 				T result = default(T);
 				Exception error = null;
@@ -503,6 +551,9 @@ namespace WindowsVirtualDesktopHelper {
 						_isBulkActionRunning = false;
 						_lockAllButton.Enabled = true;
 						_cleanupButton.Enabled = true;
+						_updateDesktopRulesButton.Enabled = true;
+						_manageDesktopRulesButton.Enabled = true;
+						_applyDesktopRulesButton.Enabled = true;
 						if(error != null) {
 							_statusLabel.Text = (Localizer.IsChinese ? "操作失败：" : "Operation failed: ") + error.Message;
 							return;

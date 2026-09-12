@@ -1,113 +1,57 @@
-﻿# Windows Virtual Desktop Helper
+# Windows Virtual Desktop Helper 设置说明
 
-Back to [Home](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
+返回 [首页](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
 
-## Settings Documentation
+## 所有窗口概览
 
-(as of v2.0)
+通知区域图标的右键菜单包含 **所有窗口...** 和 **Windows 任务视图**。前者会打开全部虚拟桌面的可搜索窗口概览，即使桌面没有窗口也会显示独立的桌面卡片。每一行包含应用图标、清理锁定图标、进程标识和窗口标题。选择窗口可激活它，拖动到另一个桌面卡片可移动它，或使用 **关闭窗口** 在确认后发送正常关闭请求。无法识别所属桌面的窗口会放在 **其他窗口** 分组中。
 
-### Settings
+使用 **全部锁定** 可将所有虚拟桌面中的合格窗口标记为清理保护。点击一行的锁定图标，或选中窗口后按 `Ctrl+L`，可切换该窗口的保护状态。通过窗口管理器中的 **管理锁定规则** 可以新增、编辑或删除已保存的规则。规则按程序名和窗口标题进行不区分大小写的匹配；标题会变化时可启用正则表达式。锁定规则只影响 **一键清理**，不会阻止激活、移动或手动关闭窗口。
 
-### All Windows Overview
+使用 **一键清理** 可向全部虚拟桌面中符合条件且未锁定的窗口发送正常关闭请求。点击后会先显示完整的目标窗口列表；只有点击 **确认清理** 才会发送关闭请求。位于 **其他窗口** 分组、所属桌面未知的窗口永远不会成为清理目标。
 
-Every notification-area icon has both an **All Windows...** command and a **Windows Task View** command in its right-click menu. The first opens a searchable snapshot of application windows across every virtual desktop, shown as separate desktop cards even when a desktop has no windows. Each window row includes its application icon, a cleanup lock icon, process identity, and window title. Select a window to activate it, drag it to another desktop card to move it, or use **Close Window** to request a normal single-window close after confirmation. Windows whose desktop cannot be identified are kept in an **Other windows** group. Window moves use the system desktop API and a version-matched application-view fallback; protected or elevated windows may still be rejected by Windows.
+## 全局桌面规则与规则快照
 
-Use **Lock All** to mark every eligible window across all virtual desktops as protected from cleanup. Select a row's lock icon, or press `Ctrl+L` for the selected row, to change that individual window's cleanup protection. Use **Manage Lock Rules** in the window manager to add, edit, or remove saved rules. Each rule matches a process name and window title without case sensitivity; enable regular-expression matching for a title that changes. Saved rules remain protected after the helper restarts. These locks only affect **One-click Cleanup**; they do not prevent you from activating, moving, or manually closing a window.
+内置窗口管理器右下角的 **更新桌面规则**、**管理桌面规则** 和 **应用桌面规则** 都针对全部虚拟桌面，而非当前桌面。
 
-Use **One-click Cleanup** to request normal closes for eligible, unlocked windows across all virtual desktops, including a window shown on all desktops. Its label includes the current snapshot's cleanup target count and turns red when one or more windows can be cleaned. Clicking the command first shows the complete target window list, including application and window title; only **Confirm Cleanup** sends the close requests. Windows with unknown desktop ownership in the **Other windows** group are never targeted. It sends normal close requests rather than terminating processes, so each target application can display its normal save prompt or decline to close.
+- **更新桌面规则** 会读取所有已识别桌面上的打开窗口。已由唯一规则匹配的窗口只更新目标桌面，因此用户设置的正则表达式和其他匹配逻辑会保留；没有匹配规则的窗口会新增为精确规则；已关闭窗口的规则会保留。存在多个匹配关系时不会自动改动，需在管理界面中处理。
+- **管理桌面规则** 会列出完整的全局规则集合，可修改目标桌面、应用程序、窗口标题以及是否使用正则表达式。
+- **应用桌面规则** 会先显示预览。只有唯一且可靠匹配的已打开窗口会在确认后移动到目标桌面；不会启动、关闭或随意选择应用程序，也不会修改清理锁定规则。
 
-|Config|Default|Description|
+通过窗口管理器顶部的 **规则快照** 可以手动拍摄、查看、重命名、删除和恢复规则快照。每份新快照都保存当时完整的锁定规则和桌面规则；在快照详情中可查看其中每条锁定规则的应用程序、窗口标题和正则表达式设置。恢复快照只替换已保存的规则集合，**不会移动任何打开的窗口**；需要重新排列窗口时，请在恢复后明确点击 **应用桌面规则**。
+
+规则快照支持固定间隔自动拍摄，默认关闭。默认间隔为 30 分钟，默认最多保留 3 份自动快照。超过上限时仅移除最早的自动快照，手动快照不会因轮转而删除。程序启动或刚启用自动快照后会等待完整间隔，不会立即补拍。
+
+## 规则快照配置
+
+| 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
-| debug.singleInstance | ``true`` | If true, the app will prevent multiple instances of the app from starting.  Most users won't need to change this option. |
-| general.startupWithWindows | ``false`` | If true, the app will register itself with Windows to startup when Windows starts (via the registry). |
-| general.theme | ``"auto"`` | Can be either auto, dark or light. If set to auto, the theme is derived from the current windows theme (dark or light). |
-| theme.icons.disabledOpacity | ``"0.5"`` | Defines the opacity to use for icons which are disabled. |
-| theme.icons.font | ``"Segoe UI"`` | Defines the font name to use for the icons (for regular numbers, characters). If a specific style is to be used, then one can append 'Bold', 'Italic', 'Regular' after a comma and the font name - for example 'Arial, Bold'. |
-| theme.icons.emojiFont | ``"Segoe UI Symbol"`` | Defines the font name to use for emoji icons. |
-| theme.icons.symbolsFont | ``"Segoe UI Symbol"`` | Defines the font name to use for symbol icons. |
-| theme.icons.iconBG.dark | ``"#0078D4"`` |  |
-| theme.icons.iconFG.dark | ``"white"`` |  |
-| theme.icons.iconBG.light | ``"#0078D4"`` |  |
-| theme.icons.iconFG.light | ``"white"`` |  |
-| theme.icons.symbolFG.dark | ``"black"`` | Defines the color to use for the previous/next desktop tray icons. |
-| theme.icons.symbolFG.light | ``"black"`` | Defines the color to use for the previous/next desktop tray icons. |
-| theme.overlay.width | ``900`` | With width in pixels of the switch overlay. |
-| theme.overlay.height | ``430`` | With height in pixels of the switch overlay. |
-| theme.overlay.font | ``"Segoe UI Light"`` | Defines the font name to use for the switch overlay. |
-| theme.overlay.fontSize | ``30`` | Defines the font size to use for the switch overlay. |
-| theme.overlay.overlayBG.dark | ``"black"`` |  |
-| theme.overlay.overlayFG.dark | ``"white"`` |  |
-| theme.overlay.overlayBG.light | ``"black"`` |  |
-| theme.overlay.overlayFG.light | ``"white"`` |  |
-| theme.status.width | ``250`` | With width in pixels of the status overlay. |
-| theme.status.height | ``40`` | With height in pixels of the status overlay. |
-| theme.status.offset | ``0`` | With height in pixels of the status overlay. |
-| theme.status.font | ``"Segoe UI Light"`` | Defines the font name to use for the status overlay. |
-| theme.status.fontSize | ``12`` | Defines the font size to use for the status overlay. |
-| theme.status.overlayBG.dark | ``"black"`` |  |
-| theme.status.overlayFG.dark | ``"white"`` |  |
-| theme.status.overlayBG.light | ``"black"`` |  |
-| theme.status.overlayFG.light | ``"white"`` |  |
-| feature.showSplashScreen | ``true`` | If enabled, a splash screen is shown on startup of the app. Overlays must be enabled. |
-| feature.showSplashScreen.duration | ``2000`` | Splash duration in milliseconds. |
-| feature.showSplashScreen.text | ``"Virtual Desktop Helper"`` | The splash text to show. |
-| feature.iconTray.desktopDisplayMode | ``"navigation"`` | Controls the desktop tray layout. Use ``"navigation"`` for the previous, current, and next controls, or ``"all-desktops"`` to show one numbered icon per virtual desktop plus a Desktop Manager icon. In ``"all-desktops"`` mode, left-clicking a numbered icon switches directly to that desktop; Desktop Manager opens the configured window manager. |
-| feature.iconTray.windowManager | ``"system"`` | Controls the window manager opened by the tray manager icon: ``"system"`` opens Windows Task View; ``"built-in"`` opens the All Windows overview. |
-| feature.showPrevNextIcons | ``true`` | If enabled, a previous and next arrow will appear in the icons tray of Windows to allow easy switching between desktops. |
-| feature.showPrevNextIcons.automaticallyHidePrevNextOnBounds | ``false`` | If enabled, the prev/next icon will automatically hide if there is no prev/next desktop. |
-| feature.showPrevNextIcons.nextChar | ``"\u203A"`` | Defines the character to use for next desktop icon (typically a unicode character like the chevron, for example \xE101 = skip forward (player style),  = next (arrow style), \xe26b = next (chevron style), \u02C3 = next (chevron style), \u203A = next (chevron style)) |
-| feature.showPrevNextIcons.prevChar | ``"\u2039"`` | Defines the character to use for prev desktop icon (typically a unicode character like the chevron, for example \xE100 = skip back (player style), \xE112 = previous (arrow style), \xe26c = previous (chevron style), \u02C2 = previous (chevron style), \u2039 = previous (chevron style)) |
-| feature.showDesktopSwitchOverlay | ``true`` |  |
-| feature.showDesktopSwitchOverlay.duration | ``2000`` | Defines the duration in milliseconds for a switch overlay to show. If set to zero, then the overlay is shown indefinately. |
-| feature.showDesktopSwitchOverlay.animate | ``true`` |  |
-| feature.showDesktopSwitchOverlay.translucent | ``true`` |  |
-| feature.showDesktopSwitchOverlay.showOnAllMonitors | ``true`` |  |
-| feature.showDesktopSwitchOverlay.position | ``"middlecenter"`` |  |
-| feature.showDesktopStatusOverlay | ``false`` |  |
-| feature.showDesktopStatusOverlay.animate | ``true`` |  |
-| feature.showDesktopStatusOverlay.translucent | ``true`` |  |
-| feature.showDesktopStatusOverlay.showOnAllMonitors | ``true`` |  |
-| feature.showDesktopStatusOverlay.position | ``"topcenter"`` |  |
-| feature.useHotKeyToJumpToDesktopNumber | ``false`` |  |
-| feature.useHotKeyToJumpToDesktopNumber.hotkey | ``"Alt"`` |  |
-| feature.useHotKeyToJumpToPreviousDesktop | ``false`` |  |
-| feature.useHotKeyToJumpToPreviousDesktop.hotkey | ``"Alt + Tilde"`` |  |
-| feature.useHotKeyToSwitchDesktopForward | ``false`` |  |
-| feature.useHotKeyToSwitchDesktopForward.hotkey | ``"Alt + Right"`` |  |
-| feature.useHotKeyToSwitchDesktopBackward | ``false`` |  |
-| feature.useHotKeyToSwitchDesktopBackward.hotkey | ``"Alt + Left"`` |  |
-| feature.useHotKeyToOpenTaskView | ``false`` | Uses the configured window manager. |
-| feature.useHotKeyToOpenTaskView.hotkey | ``"Alt + D"`` | Hotkey for the configured window manager. |
-| feature.showDesktopNumberInIconTray | ``true`` |  |
-| feature.showDesktopNameInIconTray | ``false`` |  |
+| `desktopRules.autoSnapshot.enabled` | `false` | 是否启用固定间隔的自动规则快照。 |
+| `desktopRules.autoSnapshot.intervalMinutes` | `30` | 自动规则快照的间隔分钟数。 |
+| `desktopRules.autoSnapshot.maximumCount` | `3` | 最多保留的自动规则快照数量；手动快照不受此限制。 |
 
-### Config File
+## 常用配置
 
-This is located in ``%appdata%\WindowsVirtualDesktopHelper`` (for example ``C:\Users\<USER>\AppData\Roaming\WindowsVirtualDesktopHelper``)
-as a ``.config`` file, and can be edited with any text editor.
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `debug.singleInstance` | `true` | 是否防止应用重复启动。 |
+| `general.startupWithWindows` | `false` | 是否随 Windows 启动。 |
+| `general.theme` | `"auto"` | 可选 `auto`、`dark` 或 `light`。 |
+| `feature.iconTray.desktopDisplayMode` | `"navigation"` | 托盘布局：`navigation` 显示前后切换控件；`all-desktops` 为每个虚拟桌面显示编号图标和桌面管理器图标。 |
+| `feature.iconTray.windowManager` | `"system"` | 托盘桌面管理器打开的窗口管理器：`system` 为 Windows 任务视图，`built-in` 为应用内的所有窗口概览。 |
+| `feature.useHotKeyToOpenTaskView` | `false` | 是否启用打开窗口管理器的快捷键。 |
+| `feature.useHotKeyToOpenTaskView.hotkey` | `"Alt + D"` | 打开已配置窗口管理器的快捷键。 |
 
-Note: configuration lines that start with ``#`` are comments and ignored by the configuration system.
+完整设置在 `%appdata%\WindowsVirtualDesktopHelper` 目录下以 `.config` 文件保存，可使用文本编辑器修改。以 `#` 开头的配置行是注释，应用会忽略它们。命令行参数也可以指定任意配置项，且优先级高于配置文件。
 
-### Configuration Backup
+## 配置备份
 
-Open **Settings** and choose **Export Backup** to create one portable backup file. The backup includes saved application settings and custom hotkeys, the current virtual desktop names and order, and every saved desktop layout snapshot with its window matching rules.
+在 **设置** 中选择 **导出备份** 可创建一个便携配置备份。备份包含已保存的应用设置和自定义快捷键、当前虚拟桌面的名称及顺序、当前完整清理规则集合、当前完整桌面规则集合，以及所有手动、自动和旧版规则快照。
 
-Choose **Import Backup** from Settings, select a backup file, review its counts, and confirm the replacement. Import replaces the saved application settings and snapshot collection. It creates missing virtual desktops and restores names for the backed-up desktop positions. Extra local desktops are retained unchanged. Import does not start, close, move, or otherwise change open application windows; restore an imported snapshot separately when you want to restore its window layout.
+在 **设置** 中选择 **导入备份**，选择备份文件、查看摘要后确认替换。导入会替换已保存的应用设置和统一规则状态，并按备份的桌面位置创建缺失桌面及恢复名称。多出的本地桌面会保持不变。导入不会启动、关闭、移动或以其他方式改变已打开窗口；导入后需要重新排列窗口时，请明确使用 **应用桌面规则**。
 
-If the backup cannot be read or is from an unsupported format version, no local data changes. The startup-with-Windows registration is not changed during import; confirm that option in Settings or restart the application after import if it needs to be reconciled.
+无法读取或版本不受支持的备份不会更改本地数据。导入早期备份时，其中的布局快照会转换为旧版规则快照；由于早期备份没有清理规则历史，当前清理规则会被保留。导入不会立即变更随 Windows 启动的注册项；如需同步该设置，请在设置中确认或重启应用。
 
-### Command Line Arguments
+## 自定义快捷键
 
-The app can be run with command line arguments to specificy any configuration setting. For example, one could
-run the app with the following command line arguments:
-
-```
-WindowsVirtualDesktopHelper.exe --theme.overlay.overlayBG.dark "red" --feature.showPrevNextIcons.nextChar "]" --feature.showPrevNextIcons.prevChar "["
-```
-
-Command line arguments take precedence over the config file settings.
-
-### Custom Hotkey Settings
-
-See [Hotkeys Documentation](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md)
-for more information on how to define custom hotkeys.
+有关自定义快捷键的定义方式，请参阅 [快捷键文档](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md)。

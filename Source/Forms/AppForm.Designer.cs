@@ -28,11 +28,8 @@ namespace WindowsVirtualDesktopHelper {
             this.notifyIconNumber = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripSeparatorDesktops = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItemAllWindows = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemAllWindows = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemDesktopLayoutSnapshots = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItemNewSnapshot = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItemRestoreMostRecentSnapshot = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItemManageSnapshots = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemWindowManager = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemSystemTaskView = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,33 +77,8 @@ namespace WindowsVirtualDesktopHelper {
 			//
 			this.toolStripMenuItemDesktopLayoutSnapshots.Name = "toolStripMenuItemDesktopLayoutSnapshots";
 			this.toolStripMenuItemDesktopLayoutSnapshots.Size = new System.Drawing.Size(180, 36);
-			this.toolStripMenuItemDesktopLayoutSnapshots.Text = "Snapshot";
-			this.toolStripMenuItemDesktopLayoutSnapshots.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-				this.toolStripMenuItemNewSnapshot,
-				this.toolStripMenuItemRestoreMostRecentSnapshot,
-				this.toolStripMenuItemManageSnapshots
-			});
-			//
-			// toolStripMenuItemNewSnapshot
-			//
-			this.toolStripMenuItemNewSnapshot.Name = "toolStripMenuItemNewSnapshot";
-			this.toolStripMenuItemNewSnapshot.Size = new System.Drawing.Size(220, 36);
-			this.toolStripMenuItemNewSnapshot.Text = "New Snapshot";
-			this.toolStripMenuItemNewSnapshot.Click += new System.EventHandler(this.toolStripMenuItemNewSnapshot_Click);
-			//
-			// toolStripMenuItemRestoreMostRecentSnapshot
-			//
-			this.toolStripMenuItemRestoreMostRecentSnapshot.Name = "toolStripMenuItemRestoreMostRecentSnapshot";
-			this.toolStripMenuItemRestoreMostRecentSnapshot.Size = new System.Drawing.Size(220, 36);
-			this.toolStripMenuItemRestoreMostRecentSnapshot.Text = "Restore Most Recent";
-			this.toolStripMenuItemRestoreMostRecentSnapshot.Click += new System.EventHandler(this.toolStripMenuItemRestoreMostRecentSnapshot_Click);
-			//
-			// toolStripMenuItemManageSnapshots
-			//
-			this.toolStripMenuItemManageSnapshots.Name = "toolStripMenuItemManageSnapshots";
-			this.toolStripMenuItemManageSnapshots.Size = new System.Drawing.Size(220, 36);
-			this.toolStripMenuItemManageSnapshots.Text = "Manage Snapshots";
-			this.toolStripMenuItemManageSnapshots.Click += new System.EventHandler(this.toolStripMenuItemManageSnapshots_Click);
+			this.toolStripMenuItemDesktopLayoutSnapshots.Text = "Rule Snapshots";
+			this.toolStripMenuItemDesktopLayoutSnapshots.Click += new System.EventHandler(this.toolStripMenuItemRuleSnapshots_Click);
 			//
 			// toolStripMenuItemWindowManager
 			//
@@ -208,9 +180,6 @@ namespace WindowsVirtualDesktopHelper {
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDonate;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAllWindows;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDesktopLayoutSnapshots;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemNewSnapshot;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRestoreMostRecentSnapshot;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemManageSnapshots;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemWindowManager;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTaskView;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorDesktops;

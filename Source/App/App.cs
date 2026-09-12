@@ -29,7 +29,9 @@ namespace WindowsVirtualDesktopHelper {
 		public WindowOverviewForm WindowOverviewForm;
 		public DesktopLayoutSnapshotForm DesktopLayoutSnapshotForm;
 		public AppForm AppForm;
-		public DesktopLayoutSnapshotService DesktopLayoutSnapshots;
+		public DesktopRuleStateService DesktopRuleState;
+		public DesktopRuleService DesktopRules;
+		public DesktopRuleSnapshotScheduler DesktopRuleSnapshotScheduler;
 		public ConfigurationBackupService ConfigurationBackups;
 		public WindowCleanupLockService WindowCleanupLocks;
 		public string CurrentSystemThemeName = null;
@@ -92,9 +94,12 @@ namespace WindowsVirtualDesktopHelper {
 
 			// Create the app form, which acts as our ui main thread (we need such a main thread form for many of the win api calls)
 			this.AppForm = new AppForm();
-			this.DesktopLayoutSnapshots = new DesktopLayoutSnapshotService(this);
+			this.DesktopRuleState = new DesktopRuleStateService();
+			this.DesktopRules = new DesktopRuleService(this, DesktopRuleState);
+			this.WindowCleanupLocks = new WindowCleanupLockService(DesktopRuleState);
+			this.DesktopRuleSnapshotScheduler = new DesktopRuleSnapshotScheduler(DesktopRuleState);
+			this.DesktopRuleSnapshotScheduler.Reload();
 			this.ConfigurationBackups = new ConfigurationBackupService(this);
-			this.WindowCleanupLocks = new WindowCleanupLockService();
 
 			// Create settings form
 			this.SettingsForm = new SettingsForm();
@@ -493,10 +498,12 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void ApplyImportedConfiguration() {
 			try {
+				WindowCleanupLocks.Reload();
 				CurrentSystemThemeName = GetSystemThemeName();
 				SetupHotKeys();
 				UIUpdate();
 				SettingsForm?.ReloadSettings();
+				DesktopRuleSnapshotScheduler.Reload();
 			} catch(Exception e) {
 				Util.Logging.WriteLine("App: ApplyImportedConfiguration: " + e.Message);
 			}
@@ -1026,16 +1033,6 @@ namespace WindowsVirtualDesktopHelper {
 			DesktopLayoutSnapshotForm.BringToFront();
 			DesktopLayoutSnapshotForm.Activate();
 			DesktopLayoutSnapshotForm.RefreshSnapshots();
-		}
-
-		public void CreateDesktopLayoutSnapshot() {
-			ShowDesktopLayoutSnapshots();
-			DesktopLayoutSnapshotForm.CreateNewSnapshot();
-		}
-
-		public void RestoreMostRecentDesktopLayoutSnapshot() {
-			ShowDesktopLayoutSnapshots();
-			DesktopLayoutSnapshotForm.RestoreMostRecent();
 		}
 
 		public void ShowSplash() {

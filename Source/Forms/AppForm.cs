@@ -127,15 +127,7 @@ namespace WindowsVirtualDesktopHelper {
 			App.Instance.OpenTaskView();
 		}
 
-		private void toolStripMenuItemNewSnapshot_Click(object sender, EventArgs e) {
-			App.Instance.CreateDesktopLayoutSnapshot();
-		}
-
-		private void toolStripMenuItemRestoreMostRecentSnapshot_Click(object sender, EventArgs e) {
-			App.Instance.RestoreMostRecentDesktopLayoutSnapshot();
-		}
-
-		private void toolStripMenuItemManageSnapshots_Click(object sender, EventArgs e) {
+		private void toolStripMenuItemRuleSnapshots_Click(object sender, EventArgs e) {
 			App.Instance.ShowDesktopLayoutSnapshots();
 		}
 

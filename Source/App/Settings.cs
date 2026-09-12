@@ -129,6 +129,11 @@ namespace WindowsVirtualDesktopHelper {
 			// Feature: restorePreviousWindowFocus
 			RegisterDefault("feature.restorePreviousWindowFocus", false, "If enabled, when switching desktop the previously focused window on that desktop will be refocused", "v2.1");
 
+			// Desktop rules
+			RegisterDefault("desktopRules.autoSnapshot.enabled", false, "Enables fixed-interval automatic desktop rule snapshots.");
+			RegisterDefault("desktopRules.autoSnapshot.intervalMinutes", 30, "Minutes between automatic desktop rule snapshots.");
+			RegisterDefault("desktopRules.autoSnapshot.maximumCount", 3, "Maximum number of automatic desktop rule snapshots to retain.");
+
 		}
 
 		#endregion
