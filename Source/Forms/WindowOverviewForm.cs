@@ -35,6 +35,7 @@ namespace WindowsVirtualDesktopHelper {
 		private bool _hasSnapshot;
 		private bool _isClearingSearch;
 		private bool _isUpdatingSelection;
+		private bool _shouldFocusSearchBoxAfterRefresh;
 		private readonly List<Keys> _pendingNavigation = new List<Keys>();
 		private IntPtr _selectionHandle = IntPtr.Zero;
 		private int _selectionListIndex = -1;
@@ -148,11 +149,11 @@ namespace WindowsVirtualDesktopHelper {
 
 		public void FocusSearchBox() {
 			if(IsDisposed || !IsHandleCreated) return;
+			_shouldFocusSearchBoxAfterRefresh = true;
 			try {
 				BeginInvoke((Action)(() => {
 					if(IsDisposed || !Visible) return;
-					ActiveControl = _searchBox;
-					_searchBox.Focus();
+					FocusSearchBoxAtStart();
 				}));
 			} catch(InvalidOperationException) { }
 		}
@@ -258,6 +259,10 @@ namespace WindowsVirtualDesktopHelper {
 			_loadingOverlay.Visible = false;
 			_desktopGrid.Visible = true;
 			ApplyPendingNavigation();
+			if(_shouldFocusSearchBoxAfterRefresh) {
+				_shouldFocusSearchBoxAfterRefresh = false;
+				FocusSearchBoxAtStart();
+			}
 		}
 
 		private void PopulateGrid() {
@@ -721,12 +726,18 @@ namespace WindowsVirtualDesktopHelper {
 			if(_hasSnapshot) PopulateGrid();
 		}
 
+		private void FocusSearchBoxAtStart() {
+			ActiveControl = _searchBox;
+			_searchBox.Focus();
+			_searchBox.SelectionStart = 0;
+			_searchBox.SelectionLength = 0;
+		}
+
 		private void WindowOverviewForm_FormClosing(object sender, FormClosingEventArgs e) {
 			if(e.CloseReason == CloseReason.UserClosing) {
 				ClearSearch();
 				_pendingNavigation.Clear();
-				ActiveControl = _searchBox;
-				_searchBox.Focus();
+				FocusSearchBoxAtStart();
 				_refreshVersion++;
 				_isRefreshing = false;
 				_refreshButton.Enabled = true;
