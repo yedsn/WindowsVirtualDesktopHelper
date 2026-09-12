@@ -733,10 +733,25 @@ namespace WindowsVirtualDesktopHelper {
 			_searchBox.SelectionLength = 0;
 		}
 
+		private void ClearWindowSelection() {
+			_isUpdatingSelection = true;
+			try {
+				foreach(var list in _windowLists) foreach(ListViewItem item in list.SelectedItems) item.Selected = false;
+			} finally {
+				_isUpdatingSelection = false;
+			}
+			_selectionHandle = IntPtr.Zero;
+			_selectionListIndex = -1;
+			_selectionItemIndex = -1;
+			_selectedItem = null;
+			UpdateActionButtons();
+		}
+
 		private void WindowOverviewForm_FormClosing(object sender, FormClosingEventArgs e) {
 			if(e.CloseReason == CloseReason.UserClosing) {
 				ClearSearch();
 				_pendingNavigation.Clear();
+				ClearWindowSelection();
 				FocusSearchBoxAtStart();
 				_refreshVersion++;
 				_isRefreshing = false;
