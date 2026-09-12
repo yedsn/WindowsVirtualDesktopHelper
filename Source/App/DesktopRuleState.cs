@@ -172,7 +172,22 @@ namespace WindowsVirtualDesktopHelper {
 	public enum RuleRestoreStatus { CanRestore, AlreadyCorrect, NotFound, Ambiguous, Moved, Failed }
 	public sealed class RuleRestoreItem { public DesktopRule Rule; public ApplicationWindow CurrentWindow; public int TargetDesktopIndex; public int CurrentDesktopIndex; public RuleRestoreStatus Status; public string Reason; }
 	public sealed class RuleRestorePreview { public List<RuleRestoreItem> Items = new List<RuleRestoreItem>(); public int Count(RuleRestoreStatus status) { return Items.Count(item => item.Status == status); } }
-	public sealed class DesktopRuleUpdateResult { public int UpdatedCount; public int AddedCount; public List<string> Conflicts = new List<string>(); }
+	public sealed class DesktopRuleUpdateChange {
+		public DesktopRule Rule;
+		public int PreviousDesktopIndex;
+	}
+	public sealed class DesktopRuleUpdateResult {
+		public int UpdatedCount;
+		public int AddedCount;
+		public List<DesktopRuleUpdateChange> UpdatedRules = new List<DesktopRuleUpdateChange>();
+		public List<DesktopRule> AddedRules = new List<DesktopRule>();
+		public List<string> Conflicts = new List<string>();
+	}
+	public sealed class DesktopRuleUpdatePreview {
+		internal List<DesktopRule> Rules = new List<DesktopRule>();
+		internal bool HasStateChanges;
+		public DesktopRuleUpdateResult Result = new DesktopRuleUpdateResult();
+	}
 
 	public sealed class DesktopRuleService {
 		private sealed class Candidate { public ApplicationWindow Window; public int DesktopIndex; public int Score; }
@@ -181,8 +196,8 @@ namespace WindowsVirtualDesktopHelper {
 		internal DesktopRuleService(App app, DesktopRuleStateService state) { _app = app; _state = state; }
 		public List<DesktopRule> List() { return _state.ListDesktopRules(); }
 		public void ReplaceAll(IEnumerable<DesktopRule> rules) { _state.ReplaceDesktopRules(rules); }
-		public DesktopRuleUpdateResult UpdateFromOpenWindows() {
-			var rules = List(); var current = GetCurrentWindows(); var result = new DesktopRuleUpdateResult(); var additions = new List<DesktopRule>();
+		public DesktopRuleUpdatePreview PreviewUpdateFromOpenWindows() {
+			var rules = List(); var current = GetCurrentWindows(); var result = new DesktopRuleUpdateResult(); var additions = new List<DesktopRule>(); var hasStateChanges = false;
 			foreach(var window in current) {
 				var matches = rules.Where(existingRule => Matches(existingRule, window.Item1)).ToList();
 				if(matches.Count == 0) { additions.Add(FromWindow(window.Item1, window.Item2, window.Item3)); continue; }
@@ -190,9 +205,31 @@ namespace WindowsVirtualDesktopHelper {
 				var matchedRule = matches[0];
 				var windowsForRule = current.Where(candidate => Matches(matchedRule, candidate.Item1)).ToList();
 				if(windowsForRule.Count != 1) { result.Conflicts.Add(matchedRule.DisplayName + " matches multiple open windows."); continue; }
-				if(matchedRule.DesktopIndex != window.Item2 || !Same(matchedRule.DesktopId, window.Item3.ToString())) { matchedRule.DesktopIndex = window.Item2; matchedRule.DesktopId = window.Item3.ToString(); result.UpdatedCount++; }
+				if(matchedRule.DesktopIndex != window.Item2) {
+					var previousDesktopIndex = matchedRule.DesktopIndex;
+					matchedRule.DesktopIndex = window.Item2;
+					matchedRule.DesktopId = window.Item3.ToString();
+					hasStateChanges = true;
+					result.UpdatedCount++;
+					result.UpdatedRules.Add(new DesktopRuleUpdateChange { Rule = matchedRule.Copy(), PreviousDesktopIndex = previousDesktopIndex });
+				} else if(!Same(matchedRule.DesktopId, window.Item3.ToString())) {
+					matchedRule.DesktopId = window.Item3.ToString();
+					hasStateChanges = true;
+				}
 			}
-			rules.AddRange(additions); result.AddedCount = additions.Count; ReplaceAll(rules); return result;
+			rules.AddRange(additions);
+			result.AddedCount = additions.Count;
+			result.AddedRules = additions.Select(rule => rule.Copy()).ToList();
+			return new DesktopRuleUpdatePreview { Rules = rules.Select(rule => rule.Copy()).ToList(), HasStateChanges = hasStateChanges || additions.Count > 0, Result = result };
+		}
+		public void ApplyUpdatePreview(DesktopRuleUpdatePreview preview) {
+			if(preview == null) throw new ArgumentNullException("preview");
+			ReplaceAll(preview.Rules);
+		}
+		public DesktopRuleUpdateResult UpdateFromOpenWindows() {
+			var preview = PreviewUpdateFromOpenWindows();
+			ApplyUpdatePreview(preview);
+			return preview.Result;
 		}
 		public RuleRestorePreview Analyze() {
 			var preview = new RuleRestorePreview(); var desktopIndices = VirtualDesktopRegistry.GetDesktopIndices(); var current = GetCurrentWindows().Select(item => Tuple.Create(item.Item1, item.Item2)).ToList(); var reserved = new HashSet<IntPtr>();

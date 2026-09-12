@@ -357,9 +357,18 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public WindowCleanupBatch PrepareOverviewLockAll() {
-			var windows = GetEligibleOverviewWindowsOnAllDesktops();
-			WindowCleanupLocks.Protect(windows);
+			var windows = GetEligibleOverviewWindowsOnAllDesktops().Where(window => !WindowCleanupLocks.IsProtected(window)).ToList();
 			return new WindowCleanupBatch(-1, windows);
+		}
+
+		public int ExecuteOverviewLockAll(WindowCleanupBatch confirmedBatch) {
+			if(confirmedBatch == null) return 0;
+			var windows = new List<Util.ApplicationWindow>();
+			foreach(var expectedWindow in confirmedBatch.Windows) {
+				Util.ApplicationWindow window;
+				if(TryGetEligibleOverviewWindowOnAnyDesktop(expectedWindow, out window) && !WindowCleanupLocks.IsProtected(window)) windows.Add(window);
+			}
+			return WindowCleanupLocks.Protect(windows);
 		}
 
 		public WindowCleanupBatch PrepareOverviewCleanup() {

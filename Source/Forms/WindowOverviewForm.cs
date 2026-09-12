@@ -181,10 +181,23 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private void UpdateDesktopRules() {
-			RunBulkAction(() => App.Instance.DesktopRules.UpdateFromOpenWindows(), result => {
+			RunBulkAction(() => App.Instance.DesktopRules.PreviewUpdateFromOpenWindows(), preview => {
+				if(preview.Result.AddedCount == 0 && preview.Result.UpdatedCount == 0) {
+					if(!preview.HasStateChanges) {
+						_statusLabel.Text = Localizer.L("No desktop rule changes are needed.");
+						return;
+					}
+					RunBulkAction(() => { App.Instance.DesktopRules.ApplyUpdatePreview(preview); return preview.Result; }, result => {
+						_statusLabel.Text = Localizer.IsChinese ? "桌面规则已检查，无需修改规则。" : "Desktop rules checked; no rule changes are needed.";
+					});
+					return;
+				}
+				if(!ConfirmDesktopRuleUpdate(preview)) return;
+				RunBulkAction(() => { App.Instance.DesktopRules.ApplyUpdatePreview(preview); return preview.Result; }, result => {
 				_statusLabel.Text = Localizer.IsChinese ? "桌面规则已更新：更新 " + result.UpdatedCount + " 条，新增 " + result.AddedCount + " 条。" : "Desktop rules updated: " + result.UpdatedCount + " updated, " + result.AddedCount + " added.";
 				if(result.Conflicts.Count > 0) _statusLabel.Text += Localizer.IsChinese ? " " + result.Conflicts.Count + " 项匹配存在歧义，请在管理桌面规则中处理。" : " " + result.Conflicts.Count + " ambiguous mapping(s) need review.";
 				RefreshSnapshot();
+				});
 			});
 		}
 
@@ -487,9 +500,53 @@ namespace WindowsVirtualDesktopHelper {
 
 		private void LockAllWindows() {
 			RunBulkAction(() => App.Instance.PrepareOverviewLockAll(), batch => {
-				_statusLabel.Text = string.Format(Localizer.L("Locked {0} windows on all desktops."), batch.Windows.Count);
-				RefreshSnapshot();
+				if(batch.Windows.Count == 0) {
+					_statusLabel.Text = Localizer.L("All eligible windows are already locked.");
+					return;
+				}
+				if(!ConfirmLockAllTargets(batch)) return;
+				RunBulkAction(() => App.Instance.ExecuteOverviewLockAll(batch), added => {
+					_statusLabel.Text = string.Format(Localizer.L("Locked {0} windows on all desktops."), added);
+					RefreshSnapshot();
+				});
 			});
+		}
+
+		private bool ConfirmDesktopRuleUpdate(DesktopRuleUpdatePreview preview) {
+			using(var dialog = new Form { Text = Localizer.L("Review Desktop Rule Changes"), StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(850, 520), MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog, ShowInTaskbar = false }) {
+				var header = new Label { Dock = DockStyle.Top, Height = 58, Padding = new Padding(12, 12, 12, 4), Text = string.Format(Localizer.L("Review {0} new and {1} changed desktop rules before saving."), preview.Result.AddedCount, preview.Result.UpdatedCount) };
+				var changes = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				changes.Columns.Add(Localizer.L("Change"), 90);
+				changes.Columns.Add(Localizer.L("Application"), 180);
+				changes.Columns.Add(Localizer.L("Window"), 300);
+				changes.Columns.Add(Localizer.L("Desktop"), 220);
+				foreach(var change in preview.Result.UpdatedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Update"), change.Rule.ProcessName ?? "", change.Rule.WindowTitle ?? "", Localizer.Desktop(change.PreviousDesktopIndex + 1) + " -> " + Localizer.Desktop(change.Rule.DesktopIndex + 1) }));
+				foreach(var rule in preview.Result.AddedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Add"), rule.ProcessName ?? "", rule.WindowTitle ?? "", Localizer.Desktop(rule.DesktopIndex + 1) }));
+				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
+				var confirm = new Button { Text = Localizer.L("Save Desktop Rules"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
+				buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
+				dialog.Controls.Add(changes); dialog.Controls.Add(buttons); dialog.Controls.Add(header);
+				dialog.AcceptButton = confirm; dialog.CancelButton = cancel;
+				return dialog.ShowDialog(this) == DialogResult.OK;
+			}
+		}
+
+		private bool ConfirmLockAllTargets(WindowCleanupBatch batch) {
+			using(var dialog = new Form { Text = Localizer.L("Review Lock Rules"), StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(760, 500), MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog, ShowInTaskbar = false }) {
+				var header = new Label { Dock = DockStyle.Top, Height = 58, Padding = new Padding(12, 12, 12, 4), Text = string.Format(Localizer.L("Review {0} lock rules that will be added."), batch.Windows.Count) };
+				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				targets.Columns.Add(Localizer.L("Application"), 210);
+				targets.Columns.Add(Localizer.L("Window"), 490);
+				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }));
+				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
+				var confirm = new Button { Text = Localizer.L("Add Lock Rules"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
+				buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
+				dialog.Controls.Add(targets); dialog.Controls.Add(buttons); dialog.Controls.Add(header);
+				dialog.AcceptButton = confirm; dialog.CancelButton = cancel;
+				return dialog.ShowDialog(this) == DialogResult.OK;
+			}
 		}
 
 		private void BeginCleanupAllDesktops() {
