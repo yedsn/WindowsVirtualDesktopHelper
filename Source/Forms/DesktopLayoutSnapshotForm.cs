@@ -50,7 +50,7 @@ namespace WindowsVirtualDesktopHelper {
 			_snapshots.Columns.Add(Localizer.L("Captured"), 180);
 			_snapshots.Columns.Add(Localizer.L("Type"), 110);
 			_snapshots.Columns.Add(Localizer.L("Lock rules"), 120);
-			_snapshots.Columns.Add(Localizer.L("Desktop rules"), 120);
+			_snapshots.Columns.Add(Localizer.L("Desktop Rules"), 120);
 
 			var actions = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10, 8, 10, 8), FlowDirection = FlowDirection.LeftToRight };
 			_captureButton = AddButton(actions, Localizer.L("Capture Snapshot"), (sender, e) => CaptureSnapshot());
@@ -118,7 +118,7 @@ namespace WindowsVirtualDesktopHelper {
 				foreach(var rule in snapshot.CleanupRules.OrderBy(rule => rule.ProcessName).ThenBy(rule => rule.WindowTitle)) lines.Add("  " + (rule.ProcessName ?? "") + ": " + (rule.WindowTitle ?? "") + (rule.WindowTitleIsRegex ? Localizer.L(" [regular expression]") : ""));
 			}
 			lines.Add("");
-			lines.Add(Localizer.L("Desktop rules") + ": " + snapshot.DesktopRuleCount);
+			lines.Add(Localizer.L("Desktop Rules") + ": " + snapshot.DesktopRuleCount);
 			lines.AddRange(snapshot.DesktopRules.OrderBy(rule => rule.DesktopIndex).Select(rule => Localizer.L("Desktop ") + (rule.DesktopIndex + 1) + ": " + rule.DisplayName + (rule.WindowTitleIsRegex ? Localizer.L(" [regular expression]") : "")));
 			return string.Join(Environment.NewLine, lines);
 		}

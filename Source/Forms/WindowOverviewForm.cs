@@ -77,7 +77,7 @@ namespace WindowsVirtualDesktopHelper {
 			var selectedWindowActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
 			var desktopRuleActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
 			var desktopRuleActions = new Panel { Dock = DockStyle.Right, Width = 384 };
-			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 350 };
+			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 380 };
 			_lockAllButton = new Button { Text = Localizer.L("Lock All"), Dock = DockStyle.Left, Width = 88 };
 			_manageLockRulesButton = new Button { Text = Localizer.L("Manage Lock Rules"), Dock = DockStyle.Left, Width = 136 };
 			_updateDesktopRulesButton = new Button { Text = Localizer.L("Update Desktop Rules"), Dock = DockStyle.Left, Width = 126 };
