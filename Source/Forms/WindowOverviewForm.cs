@@ -78,8 +78,8 @@ namespace WindowsVirtualDesktopHelper {
 			var selectedWindowActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
 			var desktopRuleActionsGap = new Panel { Dock = DockStyle.Right, Width = 10 };
 			var desktopRuleActions = new Panel { Dock = DockStyle.Right, Width = 384 };
-			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 380 };
-			_lockAllButton = new Button { Text = Localizer.L("Lock All"), Dock = DockStyle.Left, Width = 88 };
+			var cleanupActions = new Panel { Dock = DockStyle.Right, Width = 420 };
+			_lockAllButton = new Button { Text = Localizer.L("Update Lock Rules"), Dock = DockStyle.Left, Width = 126 };
 			_manageLockRulesButton = new Button { Text = Localizer.L("Manage Lock Rules"), Dock = DockStyle.Left, Width = 136 };
 			_updateDesktopRulesButton = new Button { Text = Localizer.L("Update Desktop Rules"), Dock = DockStyle.Left, Width = 126 };
 			_manageDesktopRulesButton = new Button { Text = Localizer.L("Manage Desktop Rules"), Dock = DockStyle.Left, Width = 132 };
@@ -511,7 +511,7 @@ namespace WindowsVirtualDesktopHelper {
 				}
 				if(!ConfirmLockAllTargets(batch)) return;
 				RunBulkAction(() => App.Instance.ExecuteOverviewLockAll(batch), added => {
-					_statusLabel.Text = string.Format(Localizer.L("Locked {0} windows on all desktops."), added);
+					_statusLabel.Text = string.Format(Localizer.L("Updated {0} lock rules on all desktops."), added);
 					RefreshSnapshot();
 				});
 			});
@@ -520,37 +520,82 @@ namespace WindowsVirtualDesktopHelper {
 		private bool ConfirmDesktopRuleUpdate(DesktopRuleUpdatePreview preview) {
 			using(var dialog = new Form { Text = Localizer.L("Review Desktop Rule Changes"), StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(850, 520), MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog, ShowInTaskbar = false }) {
 				var header = new Label { Dock = DockStyle.Top, Height = 58, Padding = new Padding(12, 12, 12, 4), Text = string.Format(Localizer.L("Review {0} new and {1} changed desktop rules before saving."), preview.Result.AddedCount, preview.Result.UpdatedCount) };
-				var changes = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				var changes = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = true, HideSelection = false };
 				changes.Columns.Add(Localizer.L("Change"), 90);
 				changes.Columns.Add(Localizer.L("Application"), 180);
 				changes.Columns.Add(Localizer.L("Window"), 300);
 				changes.Columns.Add(Localizer.L("Desktop"), 220);
-				foreach(var change in preview.Result.UpdatedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Update"), change.Rule.ProcessName ?? "", change.Rule.WindowTitle ?? "", Localizer.Desktop(change.PreviousDesktopIndex + 1) + " -> " + Localizer.Desktop(change.Rule.DesktopIndex + 1) }));
-				foreach(var rule in preview.Result.AddedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Add"), rule.ProcessName ?? "", rule.WindowTitle ?? "", Localizer.Desktop(rule.DesktopIndex + 1) }));
+				foreach(var change in preview.Result.UpdatedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Update"), change.Rule.ProcessName ?? "", change.Rule.WindowTitle ?? "", Localizer.Desktop(change.PreviousDesktopIndex + 1) + " -> " + Localizer.Desktop(change.Rule.DesktopIndex + 1) }) { Tag = change });
+				foreach(var rule in preview.Result.AddedRules) changes.Items.Add(new ListViewItem(new[] { Localizer.L("Add"), rule.ProcessName ?? "", rule.WindowTitle ?? "", Localizer.Desktop(rule.DesktopIndex + 1) }) { Tag = rule });
 				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var remove = new Button { Text = Localizer.L("Remove from List"), Dock = DockStyle.Left, Width = 122, Enabled = false };
 				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
 				var confirm = new Button { Text = Localizer.L("Save Desktop Rules"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
-				buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
+				Action updateChanges = () => {
+					var addedCount = changes.Items.Cast<ListViewItem>().Count(item => item.Tag is DesktopRule);
+					var updatedCount = changes.Items.Cast<ListViewItem>().Count(item => item.Tag is DesktopRuleUpdateChange);
+					header.Text = string.Format(Localizer.L("Review {0} new and {1} changed desktop rules before saving."), addedCount, updatedCount);
+					remove.Enabled = changes.SelectedItems.Count > 0;
+					confirm.Enabled = changes.Items.Count > 0;
+				};
+				Action removeSelectedChanges = () => {
+					foreach(ListViewItem item in changes.SelectedItems.Cast<ListViewItem>().ToList()) changes.Items.Remove(item);
+					updateChanges();
+				};
+				changes.SelectedIndexChanged += (sender, e) => updateChanges();
+				changes.KeyDown += (sender, e) => {
+					if(e.KeyCode != Keys.Delete || changes.SelectedItems.Count == 0) return;
+					e.Handled = true;
+					e.SuppressKeyPress = true;
+					removeSelectedChanges();
+				};
+				remove.Click += (sender, e) => removeSelectedChanges();
+				buttons.Controls.Add(remove); buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
 				dialog.Controls.Add(changes); dialog.Controls.Add(buttons); dialog.Controls.Add(header);
 				dialog.AcceptButton = confirm; dialog.CancelButton = cancel;
-				return dialog.ShowDialog(this) == DialogResult.OK;
+				if(dialog.ShowDialog(this) != DialogResult.OK) return false;
+				var keptUpdatedRules = changes.Items.Cast<ListViewItem>().Select(item => item.Tag).OfType<DesktopRuleUpdateChange>().ToList();
+				var keptAddedRules = changes.Items.Cast<ListViewItem>().Select(item => item.Tag).OfType<DesktopRule>().ToList();
+				App.Instance.DesktopRules.KeepUpdatePreviewChanges(preview, keptUpdatedRules, keptAddedRules);
+				return preview.Result.UpdatedCount > 0 || preview.Result.AddedCount > 0;
 			}
 		}
 
 		private bool ConfirmLockAllTargets(WindowCleanupBatch batch) {
 			using(var dialog = new Form { Text = Localizer.L("Review Lock Rules"), StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(760, 500), MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog, ShowInTaskbar = false }) {
-				var header = new Label { Dock = DockStyle.Top, Height = 58, Padding = new Padding(12, 12, 12, 4), Text = string.Format(Localizer.L("Review {0} lock rules that will be added."), batch.Windows.Count) };
-				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				var header = new Label { Dock = DockStyle.Top, Height = 58, Padding = new Padding(12, 12, 12, 4), Text = string.Format(Localizer.L("Review {0} lock rules that will be updated."), batch.Windows.Count) };
+				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = true, HideSelection = false };
 				targets.Columns.Add(Localizer.L("Application"), 210);
 				targets.Columns.Add(Localizer.L("Window"), 490);
-				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }));
+				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }) { Tag = window });
 				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var remove = new Button { Text = Localizer.L("Remove from List"), Dock = DockStyle.Left, Width = 122, Enabled = false };
 				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
-				var confirm = new Button { Text = Localizer.L("Add Lock Rules"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
-				buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
+				var confirm = new Button { Text = Localizer.L("Update Lock Rules"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
+				Action updateTargets = () => {
+					header.Text = string.Format(Localizer.L("Review {0} lock rules that will be updated."), targets.Items.Count);
+					remove.Enabled = targets.SelectedItems.Count > 0;
+					confirm.Enabled = targets.Items.Count > 0;
+				};
+				Action removeSelectedTargets = () => {
+					foreach(ListViewItem item in targets.SelectedItems.Cast<ListViewItem>().ToList()) targets.Items.Remove(item);
+					updateTargets();
+				};
+				targets.SelectedIndexChanged += (sender, e) => updateTargets();
+				targets.KeyDown += (sender, e) => {
+					if(e.KeyCode != Keys.Delete || targets.SelectedItems.Count == 0) return;
+					e.Handled = true;
+					e.SuppressKeyPress = true;
+					removeSelectedTargets();
+				};
+				remove.Click += (sender, e) => removeSelectedTargets();
+				buttons.Controls.Add(remove); buttons.Controls.Add(cancel); buttons.Controls.Add(confirm);
 				dialog.Controls.Add(targets); dialog.Controls.Add(buttons); dialog.Controls.Add(header);
 				dialog.AcceptButton = confirm; dialog.CancelButton = cancel;
-				return dialog.ShowDialog(this) == DialogResult.OK;
+				if(dialog.ShowDialog(this) != DialogResult.OK) return false;
+				batch.Windows.Clear();
+				batch.Windows.AddRange(targets.Items.Cast<ListViewItem>().Select(item => item.Tag as Util.ApplicationWindow).Where(window => window != null));
+				return batch.Windows.Count > 0;
 			}
 		}
 
@@ -576,14 +621,33 @@ namespace WindowsVirtualDesktopHelper {
 					Padding = new Padding(12, 12, 12, 4),
 					Text = string.Format(Localizer.L("Review {0} windows across all desktops before cleanup."), batch.Windows.Count)
 				};
-				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = false, HideSelection = false };
+				var targets = new ListView { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, MultiSelect = true, HideSelection = false };
 				targets.Columns.Add(Localizer.L("Application"), 210);
 				targets.Columns.Add(Localizer.L("Window"), 490);
-				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }));
+				foreach(var window in batch.Windows) targets.Items.Add(new ListViewItem(new[] { window.ProcessName, window.Title }) { Tag = window });
 
 				var buttons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8) };
+				var remove = new Button { Text = Localizer.L("Remove from List"), Dock = DockStyle.Left, Width = 122, Enabled = false };
 				var cancel = new Button { Text = Localizer.L("Cancel"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 88 };
 				var confirm = new Button { Text = Localizer.L("Confirm Cleanup"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 132 };
+				Action updateTargets = () => {
+					header.Text = string.Format(Localizer.L("Review {0} windows across all desktops before cleanup."), targets.Items.Count);
+					remove.Enabled = targets.SelectedItems.Count > 0;
+					confirm.Enabled = targets.Items.Count > 0;
+				};
+				Action removeSelectedTargets = () => {
+					foreach(ListViewItem item in targets.SelectedItems.Cast<ListViewItem>().ToList()) targets.Items.Remove(item);
+					updateTargets();
+				};
+				targets.SelectedIndexChanged += (sender, e) => updateTargets();
+				targets.KeyDown += (sender, e) => {
+					if(e.KeyCode != Keys.Delete || targets.SelectedItems.Count == 0) return;
+					e.Handled = true;
+					e.SuppressKeyPress = true;
+					removeSelectedTargets();
+				};
+				remove.Click += (sender, e) => removeSelectedTargets();
+				buttons.Controls.Add(remove);
 				buttons.Controls.Add(cancel);
 				buttons.Controls.Add(confirm);
 				dialog.Controls.Add(targets);
@@ -591,7 +655,10 @@ namespace WindowsVirtualDesktopHelper {
 				dialog.Controls.Add(header);
 				dialog.AcceptButton = confirm;
 				dialog.CancelButton = cancel;
-				return dialog.ShowDialog(this) == DialogResult.OK;
+				if(dialog.ShowDialog(this) != DialogResult.OK) return false;
+				batch.Windows.Clear();
+				batch.Windows.AddRange(targets.Items.Cast<ListViewItem>().Select(item => item.Tag as Util.ApplicationWindow).Where(window => window != null));
+				return batch.Windows.Count > 0;
 			}
 		}
 

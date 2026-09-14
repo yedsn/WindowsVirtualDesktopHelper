@@ -174,7 +174,9 @@ namespace WindowsVirtualDesktopHelper {
 	public sealed class RuleRestorePreview { public List<RuleRestoreItem> Items = new List<RuleRestoreItem>(); public int Count(RuleRestoreStatus status) { return Items.Count(item => item.Status == status); } }
 	public sealed class DesktopRuleUpdateChange {
 		public DesktopRule Rule;
+		public DesktopRule PreviousRule;
 		public int PreviousDesktopIndex;
+		internal int RuleIndex = -1;
 	}
 	public sealed class DesktopRuleUpdateResult {
 		public int UpdatedCount;
@@ -184,6 +186,7 @@ namespace WindowsVirtualDesktopHelper {
 		public List<string> Conflicts = new List<string>();
 	}
 	public sealed class DesktopRuleUpdatePreview {
+		internal List<DesktopRule> OriginalRules = new List<DesktopRule>();
 		internal List<DesktopRule> Rules = new List<DesktopRule>();
 		internal bool HasStateChanges;
 		public DesktopRuleUpdateResult Result = new DesktopRuleUpdateResult();
@@ -198,20 +201,23 @@ namespace WindowsVirtualDesktopHelper {
 		public void ReplaceAll(IEnumerable<DesktopRule> rules) { _state.ReplaceDesktopRules(rules); }
 		public DesktopRuleUpdatePreview PreviewUpdateFromOpenWindows() {
 			var rules = List(); var current = GetCurrentWindows(); var result = new DesktopRuleUpdateResult(); var additions = new List<DesktopRule>(); var hasStateChanges = false;
+			var originalRules = rules.Select(rule => rule.Copy()).ToList();
 			foreach(var window in current) {
 				var matches = rules.Where(existingRule => Matches(existingRule, window.Item1)).ToList();
 				if(matches.Count == 0) { additions.Add(FromWindow(window.Item1, window.Item2, window.Item3)); continue; }
 				if(matches.Count != 1) { result.Conflicts.Add(window.Item1.Title + " matches multiple desktop rules."); continue; }
 				var matchedRule = matches[0];
+				var ruleIndex = rules.IndexOf(matchedRule);
 				var windowsForRule = current.Where(candidate => Matches(matchedRule, candidate.Item1)).ToList();
 				if(windowsForRule.Count != 1) { result.Conflicts.Add(matchedRule.DisplayName + " matches multiple open windows."); continue; }
 				if(matchedRule.DesktopIndex != window.Item2) {
+					var previousRule = matchedRule.Copy();
 					var previousDesktopIndex = matchedRule.DesktopIndex;
 					matchedRule.DesktopIndex = window.Item2;
 					matchedRule.DesktopId = window.Item3.ToString();
 					hasStateChanges = true;
 					result.UpdatedCount++;
-					result.UpdatedRules.Add(new DesktopRuleUpdateChange { Rule = matchedRule.Copy(), PreviousDesktopIndex = previousDesktopIndex });
+					result.UpdatedRules.Add(new DesktopRuleUpdateChange { Rule = matchedRule.Copy(), PreviousRule = previousRule, PreviousDesktopIndex = previousDesktopIndex, RuleIndex = ruleIndex });
 				} else if(!Same(matchedRule.DesktopId, window.Item3.ToString())) {
 					matchedRule.DesktopId = window.Item3.ToString();
 					hasStateChanges = true;
@@ -220,11 +226,27 @@ namespace WindowsVirtualDesktopHelper {
 			rules.AddRange(additions);
 			result.AddedCount = additions.Count;
 			result.AddedRules = additions.Select(rule => rule.Copy()).ToList();
-			return new DesktopRuleUpdatePreview { Rules = rules.Select(rule => rule.Copy()).ToList(), HasStateChanges = hasStateChanges || additions.Count > 0, Result = result };
+			return new DesktopRuleUpdatePreview { OriginalRules = originalRules, Rules = rules.Select(rule => rule.Copy()).ToList(), HasStateChanges = hasStateChanges || additions.Count > 0, Result = result };
 		}
 		public void ApplyUpdatePreview(DesktopRuleUpdatePreview preview) {
 			if(preview == null) throw new ArgumentNullException("preview");
 			ReplaceAll(preview.Rules);
+		}
+		public void KeepUpdatePreviewChanges(DesktopRuleUpdatePreview preview, IEnumerable<DesktopRuleUpdateChange> updatedRules, IEnumerable<DesktopRule> addedRules) {
+			if(preview == null) throw new ArgumentNullException("preview");
+			var keptUpdatedRules = (updatedRules ?? Enumerable.Empty<DesktopRuleUpdateChange>()).ToList();
+			var keptAddedRules = (addedRules ?? Enumerable.Empty<DesktopRule>()).ToList();
+			var rules = preview.OriginalRules.Select(rule => rule.Copy()).ToList();
+			foreach(var change in keptUpdatedRules) {
+				if(change.Rule == null || change.RuleIndex < 0 || change.RuleIndex >= rules.Count) continue;
+				rules[change.RuleIndex] = change.Rule.Copy();
+			}
+			rules.AddRange(keptAddedRules.Select(rule => rule.Copy()));
+			preview.Rules = rules;
+			preview.Result.UpdatedRules = keptUpdatedRules;
+			preview.Result.AddedRules = keptAddedRules.Select(rule => rule.Copy()).ToList();
+			preview.Result.UpdatedCount = preview.Result.UpdatedRules.Count;
+			preview.Result.AddedCount = preview.Result.AddedRules.Count;
 		}
 		public DesktopRuleUpdateResult UpdateFromOpenWindows() {
 			var preview = PreviewUpdateFromOpenWindows();
