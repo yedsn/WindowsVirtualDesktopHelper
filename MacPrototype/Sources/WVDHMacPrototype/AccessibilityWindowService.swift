@@ -50,6 +50,19 @@ final class AccessibilityWindowService {
 		return nil
 	}
 
+	func close(_ target: DesktopWindow) -> String? {
+		guard isTrusted else { return "需要先授予辅助功能权限。" }
+		guard let window = accessibilityWindow(windowID: target.id, pid: target.pid) else {
+			return "当前无法读取该窗口的辅助功能对象。"
+		}
+		var value: CFTypeRef?
+		guard AXUIElementCopyAttributeValue(window, kAXCloseButtonAttribute as CFString, &value) == .success,
+			let value, CFGetTypeID(value) == AXUIElementGetTypeID() else { return "该窗口未提供关闭按钮。" }
+		let button = unsafeBitCast(value, to: AXUIElement.self)
+		let result = AXUIElementPerformAction(button, kAXPressAction as CFString)
+		return result == .success ? nil : "关闭请求失败（AX 错误 \(result.rawValue)）。"
+	}
+
 	private func accessibilityWindow(windowID: CGWindowID, pid: pid_t) -> AXUIElement? {
 		guard let getWindow else { return nil }
 		let application = AXUIElementCreateApplication(pid)

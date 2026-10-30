@@ -22,6 +22,7 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 	private let statusLabel = NSTextField(labelWithString: "准备就绪")
 	private let targetPopup = NSPopUpButton(frame: .zero, pullsDown: false)
 	private let moveButton = NSButton(title: "移动窗口", target: nil, action: nil)
+	private let closeButton = NSButton(title: "关闭窗口", target: nil, action: nil)
 	private let focusButton = NSButton(title: "跳转并激活", target: nil, action: nil)
 	private let refreshButton = NSButton(title: "刷新", target: nil, action: nil)
 	private let permissionButton = NSButton(title: "授予辅助功能权限", target: nil, action: nil)
@@ -146,12 +147,16 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 		focusButton.target = self
 		focusButton.action = #selector(focusPressed)
 		focusButton.bezelStyle = .rounded
+		closeButton.target = self
+		closeButton.action = #selector(closePressed)
+		closeButton.bezelStyle = .rounded
+		closeButton.toolTip = "关闭所选窗口；未保存内容由目标应用提示保存"
 
 		statusLabel.textColor = .secondaryLabelColor
 		statusLabel.lineBreakMode = .byTruncatingTail
 		statusLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
-		let actionStack = NSStackView(views: [focusButton, targetLabel, targetPopup, moveButton, statusLabel])
+		let actionStack = NSStackView(views: [focusButton, targetLabel, targetPopup, moveButton, closeButton, statusLabel])
 		actionStack.orientation = .horizontal
 		actionStack.alignment = .centerY
 		actionStack.spacing = 10
@@ -226,6 +231,7 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 	private func updateActionButtons() {
 		let window = selectedWindow
 		focusButton.isEnabled = window != nil
+		closeButton.isEnabled = window != nil
 		moveButton.isEnabled = window != nil && window?.isSticky == false && (snapshot?.spaces.count ?? 0) > 1
 	}
 
@@ -281,6 +287,33 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 				self.setStatus("已将“\(window.ownerName)”移动到\(targetTitle)。")
 			} else {
 				self.setStatus("移动请求已发送，但没有确认到目标桌面。", isError: true)
+			}
+		}
+	}
+
+	@objc private func closePressed() {
+		guard let target = selectedWindow else { return }
+		guard accessibility.isTrusted else {
+			accessibility.requestAccess()
+			setStatus("请先授予辅助功能权限。", isError: true)
+			return
+		}
+		let needsSwitch = !target.isSticky && !skyLight.spaces().contains(where: { $0.id == target.spaceID && $0.isCurrent })
+		if needsSwitch {
+			skyLight.setCurrentSpace(displayUUID: target.displayUUID, spaceID: target.spaceID)
+		}
+		DispatchQueue.main.asyncAfter(deadline: .now() + (needsSwitch ? 0.65 : 0.05)) { [weak self] in
+			guard let self else { return }
+			if let error = self.accessibility.close(target) {
+				self.setStatus(error, isError: true)
+				return
+			}
+			DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+				guard let self else { return }
+				let info = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as? [[String: Any]] ?? []
+				let exists = info.contains { ($0[kCGWindowNumber as String] as? NSNumber)?.uint32Value == target.id }
+				self.refresh()
+				self.setStatus(exists ? "已请求关闭；窗口仍存在，请检查保存提示或应用响应。" : "已关闭“\(target.ownerName)”的所选窗口。")
 			}
 		}
 	}
