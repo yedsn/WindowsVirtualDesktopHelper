@@ -302,7 +302,7 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 		if needsSwitch {
 			skyLight.setCurrentSpace(displayUUID: target.displayUUID, spaceID: target.spaceID)
 		}
-		DispatchQueue.main.asyncAfter(deadline: .now() + (needsSwitch ? 0.65 : 0.05)) { [weak self] in
+		waitForDesktop(target.spaceID, required: needsSwitch) { [weak self] in
 			guard let self else { return }
 			if let error = self.accessibility.close(target) {
 				self.setStatus(error, isError: true)
@@ -310,8 +310,7 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 			}
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
 				guard let self else { return }
-				let info = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as? [[String: Any]] ?? []
-				let exists = info.contains { ($0[kCGWindowNumber as String] as? NSNumber)?.uint32Value == target.id }
+				let exists = self.accessibility.containsWindow(target)
 				self.refresh()
 				self.setStatus(exists ? "已请求关闭；窗口仍存在，请检查保存提示或应用响应。" : "已关闭“\(target.ownerName)”的所选窗口。")
 			}
@@ -332,7 +331,7 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 		if needsSwitch {
 			skyLight.setCurrentSpace(displayUUID: window.displayUUID, spaceID: window.spaceID)
 		}
-		DispatchQueue.main.asyncAfter(deadline: .now() + (needsSwitch ? 0.55 : 0.05)) { [weak self] in
+		waitForDesktop(window.spaceID, required: needsSwitch) { [weak self] in
 			guard let self else { return }
 			if let error = self.accessibility.focus(window) {
 				self.setStatus(error, isError: true)
@@ -340,6 +339,19 @@ final class OverviewWindowController: NSWindowController, NSOutlineViewDataSourc
 				self.setStatus("已激活“\(window.ownerName)”中的窗口。")
 			}
 			self.refresh()
+		}
+	}
+
+	private func waitForDesktop(_ id: UInt64, required: Bool, attempts: Int = 60, action: @escaping () -> Void) {
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+			guard let self else { return }
+			if !required || self.skyLight.spaces().contains(where: { $0.id == id && $0.isCurrent }) {
+				action()
+			} else if attempts > 0 {
+				self.waitForDesktop(id, required: true, attempts: attempts - 1, action: action)
+			} else {
+				self.setStatus("未能切换到目标桌面，请重试。", isError: true)
+			}
 		}
 	}
 

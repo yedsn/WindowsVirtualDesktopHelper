@@ -10,9 +10,9 @@ MACOS_DIR="$CONTENTS_DIR/MacOS"
 mkdir -p "$MACOS_DIR"
 cp "$SCRIPT_DIR/Resources/Info.plist" "$CONTENTS_DIR/Info.plist"
 
-xcrun clang -fobjc-arc -O2 -c "$SCRIPT_DIR/Native/SkyLightBridge.m" -o "$BUILD_DIR/SkyLightBridge.o"
+xcrun clang -target arm64-apple-macos13.0 -fobjc-arc -O2 -c "$SCRIPT_DIR/Native/SkyLightBridge.m" -o "$BUILD_DIR/SkyLightBridge.o"
 
-xcrun swiftc \
+xcrun swiftc -target arm64-apple-macos13.0 \
 	-swift-version 5 \
 	-O \
 	-framework AppKit \

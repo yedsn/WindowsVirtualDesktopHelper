@@ -48,12 +48,17 @@ final class StatusBarController: NSObject {
 
 	func refresh(forceRebuild: Bool = false) {
 		let spaces = skyLight.spaces()
+		guard !spaces.isEmpty else { return }
 		let signature = spaces.map { "\($0.displayUUID):\($0.uuid)" }.joined(separator: "|")
 		if forceRebuild || signature != lastSignature {
 			rebuildStatusItems(spaces: spaces)
 			lastSignature = signature
 		}
 		updateCurrentSpaceHighlight(spaces: spaces)
+		if ProcessInfo.processInfo.arguments.contains("--diagnostics") {
+			let lines = spaceItems.map { "id=\($0.space.id) visible=\($0.item.isVisible) frame=\(String(describing: $0.item.button?.window?.frame))" }
+			try? lines.joined(separator: " | ").write(toFile: "/tmp/wvdh-status-diagnostics.txt", atomically: true, encoding: .utf8)
+		}
 	}
 
 	private func rebuildStatusItems(spaces: [DesktopSpace]) {
@@ -70,7 +75,8 @@ final class StatusBarController: NSObject {
 		// desktop order followed by the overview control.
 		let overview = NSStatusBar.system.statusItem(withLength: 32)
 		overview.autosaveName = "wvdh.macprototype.overview"
-		overview.behavior = [.removalAllowed]
+		overview.behavior = []
+		overview.isVisible = true
 		if let image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "所有窗口") {
 			image.isTemplate = true
 			overview.button?.image = image
@@ -86,7 +92,8 @@ final class StatusBarController: NSObject {
 		for space in spaces.reversed() {
 			let item = NSStatusBar.system.statusItem(withLength: 32)
 			item.autosaveName = "wvdh.macprototype.\(space.displayUUID).\(space.uuid)"
-			item.behavior = [.removalAllowed]
+			item.behavior = []
+			item.isVisible = true
 			item.button?.target = self
 			item.button?.action = #selector(desktopClicked(_:))
 			item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])

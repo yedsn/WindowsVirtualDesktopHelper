@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Darwin
 import Foundation
@@ -22,7 +23,6 @@ final class SkyLightService {
 	private typealias MainConnectionFunction = @convention(c) () -> UInt32
 	private typealias CopyManagedDisplaySpacesFunction = @convention(c) (UInt32) -> CFArray?
 	private typealias SpaceGetTypeFunction = @convention(c) (UInt32, UInt64) -> Int32
-	private typealias SetCurrentSpaceFunction = @convention(c) (UInt32, CFString, UInt64) -> Void
 	private typealias CopyWindowsFunction = @convention(c) (
 		UInt32,
 		UInt32,
@@ -38,7 +38,6 @@ final class SkyLightService {
 	private let connection: UInt32
 	private let copyManagedDisplaySpaces: CopyManagedDisplaySpacesFunction
 	private let spaceGetType: SpaceGetTypeFunction
-	private let setCurrentSpaceFunction: SetCurrentSpaceFunction
 	private let copyWindows: CopyWindowsFunction
 	private let copySpacesForWindows: CopySpacesForWindowsFunction
 	private let moveWindows: MoveWindowsFunction
@@ -59,7 +58,6 @@ final class SkyLightService {
 		let mainConnection = try symbol("CGSMainConnectionID", as: MainConnectionFunction.self)
 		copyManagedDisplaySpaces = try symbol("CGSCopyManagedDisplaySpaces", as: CopyManagedDisplaySpacesFunction.self)
 		spaceGetType = try symbol("SLSSpaceGetType", as: SpaceGetTypeFunction.self)
-		setCurrentSpaceFunction = try symbol("SLSManagedDisplaySetCurrentSpace", as: SetCurrentSpaceFunction.self)
 		copyWindows = try symbol("SLSCopyWindowsWithOptionsAndTags", as: CopyWindowsFunction.self)
 		copySpacesForWindows = try symbol("SLSCopySpacesForWindows", as: CopySpacesForWindowsFunction.self)
 		moveWindows = try symbol("SLSMoveWindowsToManagedSpace", as: MoveWindowsFunction.self)
@@ -101,8 +99,85 @@ final class SkyLightService {
 		return result
 	}
 
+	private var pendingSwitch: (display: String, id: UInt64)?
+	private var switching = false
+
 	func setCurrentSpace(displayUUID: String, spaceID: UInt64) {
-		setCurrentSpaceFunction(connection, displayUUID as CFString, spaceID)
+		pendingSwitch = (displayUUID, spaceID)
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+			self?.continueSwitch()
+		}
+	}
+
+	private func continueSwitch() {
+		guard !switching, let target = pendingSwitch else { return }
+		pendingSwitch = nil
+		let desktops = spaces().filter { $0.displayUUID == target.display }
+		guard let current = desktops.firstIndex(where: { $0.isCurrent }),
+			let destination = desktops.firstIndex(where: { $0.id == target.id }), current != destination else { return }
+		guard AXIsProcessTrusted() else { return }
+		let direction = destination > current ? 1.0 : -1.0
+
+		// On macOS 27 the private Dock gesture is ignored. Use the system
+		// desktop shortcut directly, without preceding it with a gesture.
+		guard CGPreflightPostEventAccess() else {
+			CGRequestPostEventAccess()
+			return
+		}
+		switching = true
+		let shortcuts = UserDefaults(suiteName: "com.apple.symbolichotkeys")?.dictionary(forKey: "AppleSymbolicHotKeys")
+		let shortcut = shortcuts?[String(118 + destination)] as? [String: Any]
+		let value = shortcut?["value"] as? [String: Any]
+		let parameters = value?["parameters"] as? [NSNumber]
+		let direct = desktops.first?.displayCount == 1 && destination < 9 &&
+			(shortcut?["enabled"] as? NSNumber)?.boolValue == true && parameters?.count == 3
+		if direct, let parameters {
+			let flags = CGEventFlags(rawValue: parameters[2].uint64Value)
+			let modifiers: [(CGEventFlags, CGKeyCode)] = [(.maskControl, 59), (.maskShift, 56), (.maskAlternate, 58), (.maskCommand, 55)]
+			let pressed = modifiers.filter { flags.contains($0.0) }
+			for (_, key) in pressed {
+				let event = CGEvent(keyboardEventSource: nil, virtualKey: key, keyDown: true)
+				event?.flags = flags
+				event?.post(tap: .cghidEventTap)
+			}
+			for down in [true, false] {
+				let event = CGEvent(keyboardEventSource: CGEventSource(stateID: .hidSystemState),
+					virtualKey: CGKeyCode(parameters[1].uint16Value), keyDown: down)
+				event?.flags = flags
+				event?.post(tap: .cghidEventTap)
+			}
+			var remaining = flags
+			for (flag, key) in pressed.reversed() {
+				remaining.remove(flag)
+				let event = CGEvent(keyboardEventSource: nil, virtualKey: key, keyDown: false)
+				event?.flags = remaining
+				event?.post(tap: .cghidEventTap)
+			}
+		} else {
+			let key: CGKeyCode = direction > 0 ? 124 : 123
+			let control = CGEvent(keyboardEventSource: nil, virtualKey: 59, keyDown: true)
+			control?.flags = .maskControl
+			control?.post(tap: .cghidEventTap)
+			usleep(50_000)
+			for down in [true, false] {
+				let keyEvent = CGEvent(keyboardEventSource: CGEventSource(stateID: .hidSystemState), virtualKey: key, keyDown: down)
+				keyEvent?.flags = [.maskControl, .maskSecondaryFn, .maskNumericPad]
+				keyEvent?.post(tap: .cghidEventTap)
+				usleep(50_000)
+			}
+			let release = CGEvent(keyboardEventSource: nil, virtualKey: 59, keyDown: false)
+			release?.flags = []
+			release?.post(tap: .cghidEventTap)
+		}
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { [weak self] in
+			guard let self else { return }
+			self.switching = false
+			let actual = self.spaces().first { $0.displayUUID == target.display && $0.isCurrent }?.id
+			if self.pendingSwitch == nil && actual != target.id && actual != desktops[current].id {
+				self.pendingSwitch = target
+			}
+			self.continueSwitch()
+		}
 	}
 
 	func windowIDs(on spaceID: UInt64) -> [CGWindowID] {

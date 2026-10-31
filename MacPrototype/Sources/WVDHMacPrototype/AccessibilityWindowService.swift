@@ -50,6 +50,10 @@ final class AccessibilityWindowService {
 		return nil
 	}
 
+	func containsWindow(_ target: DesktopWindow) -> Bool {
+		return accessibilityWindow(windowID: target.id, pid: target.pid) != nil
+	}
+
 	func close(_ target: DesktopWindow) -> String? {
 		guard isTrusted else { return "需要先授予辅助功能权限。" }
 		guard let window = accessibilityWindow(windowID: target.id, pid: target.pid) else {
