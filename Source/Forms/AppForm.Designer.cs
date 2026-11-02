@@ -115,6 +115,7 @@ namespace WindowsVirtualDesktopHelper {
             this.toolStripMenuItemDonate.Size = new System.Drawing.Size(180, 36);
             this.toolStripMenuItemDonate.Tag = "donate";
             this.toolStripMenuItemDonate.Text = "Donate";
+            this.toolStripMenuItemDonate.Visible = false;
             // 
             // toolStripMenuItemSettings
             // 

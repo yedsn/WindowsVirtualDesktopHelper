@@ -1,6 +1,6 @@
 # Windows Virtual Desktop Helper 设置说明
 
-返回 [首页](https://github.com/dankrusi/WindowsVirtualDesktopHelper)
+返回 [首页](https://github.com/yedsn/WindowsVirtualDesktopHelper)
 
 ## 所有窗口概览
 
@@ -54,4 +54,4 @@
 
 ## 自定义快捷键
 
-有关自定义快捷键的定义方式，请参阅 [快捷键文档](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md)。
+有关自定义快捷键的定义方式，请参阅 [快捷键文档](https://github.com/yedsn/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md)。

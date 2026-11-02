@@ -82,7 +82,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public void OpenIssueOnGithub() {
-			var url = "https://github.com/dankrusi/WindowsVirtualDesktopHelper/issues/new";
+			var url = "https://github.com/yedsn/WindowsVirtualDesktopHelper/issues/new";
 			url += $"?title={Uri.EscapeDataString($"WVDH v{GetAppBuildVersion()} / {GetWindowsProductName()} {GetWindowsDisplayVersion()} {GetWindowsBuildVersion()} / Error: {this.labelError.Text}")}";
 			url += $"&body={Uri.EscapeDataString("\n\n" + this.textBoxDetails.Text)}";
 			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
@@ -109,7 +109,7 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		private void button1_Click(object sender, EventArgs e) {
-			Process.Start(new ProcessStartInfo("https://github.com/dankrusi/WindowsVirtualDesktopHelper/issues") { UseShellExecute = true });
+			Process.Start(new ProcessStartInfo("https://github.com/yedsn/WindowsVirtualDesktopHelper/issues") { UseShellExecute = true });
 		}
 	}
 }

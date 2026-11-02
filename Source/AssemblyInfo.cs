@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Windows Virtual Desktop Helper")]
 [assembly: AssemblyDescription("Simple and lightweight app to help with Virtual Desktops for Windows 10 and Windows 11")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Open Source Developer, Daniel Kr閻』i")]
+[assembly: AssemblyCompany("yedsn")]
 [assembly: AssemblyProduct("Windows Virtual Desktop Helper")]
-[assembly: AssemblyCopyright("Copyright 濠?Dan Krusi 2022-2024")]
+[assembly: AssemblyCopyright("Copyright © 2026 yedsn; original work © 2022-2025 Dan Krusi")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

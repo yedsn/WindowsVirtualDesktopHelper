@@ -61,7 +61,7 @@ $EXE_DEST_PATH = $RELEASE_FOLDER + "\WindowsVirtualDesktopHelper Executable v"+$
 Compress-Archive -Force -Path $EXE_PATH, $CONFIG_PATH, $LICENSE_PATH, $README_PATH, $CHANGELOG_PATH -DestinationPath $EXE_DEST_PATH
 $EXE_DEST_PATH_HASH = (Get-FileHash -Algorithm SHA256 -Path $EXE_DEST_PATH).Hash
 $EXE_DEST_PATH_HASH | Set-Content -NoNewline -Force -Path ($EXE_DEST_PATH + ".sha256")
-$EXE_DEST_URL = "https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v"+$VERSION+"/WindowsVirtualDesktopHelper.Executable.v"+$VERSION+".zip"
+$EXE_DEST_URL = "https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v"+$VERSION+"/WindowsVirtualDesktopHelper.Executable.v"+$VERSION+".zip"
 
 
 # Copy Setup
@@ -93,4 +93,4 @@ echo "================================================================"
 
 $null = Read-Host "Press enter to open release folder and create a release at GitHub..."
 Start-Process $RELEASE_FOLDER
-Start-Process "https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/new"
+Start-Process "https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/new"

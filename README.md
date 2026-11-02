@@ -4,8 +4,8 @@ Simple and lightweight app to help with Virtual Desktops for Windows 10 and Wind
 
 ![Screenshot](Images/WindowsVirtualDeskopHelper%20Screenshot.png)
 
-[Download v2.0 Setup (.msi)](https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Setup.v2.0.msi) | 
-[Download v2.0 Executable (.zip)](https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Executable.v2.0.zip)
+[Download v2.0 Setup (.msi)](https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Setup.v2.0.msi) |
+[Download v2.0 Executable (.zip)](https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Executable.v2.0.zip)
 
 Windows comes builtin with virtual desktops, however some important features are missing, such
 as displaying which desktop you are on when switching. Windows Virtual Desktop Helper helps
@@ -48,7 +48,7 @@ Windows Virtual Desktop Helper needs the Microsoft .NET Framework 4.7 or higher 
 
 You can install Windows Virtual Desktop Helper to your system using the setup program.
 
-[Download WindowsVirtualDesktopHelper Setup v2.0.msi](https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Setup.v2.0.msi)
+[Download WindowsVirtualDesktopHelper Setup v2.0.msi](https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Setup.v2.0.msi)
 
 Note: Currently Windows Virtual Desktop Helper is not code-signed, and may be reported as malware by Windows
 Defender or other anti-virus applications. Typically, after enough users download, install, and report
@@ -58,7 +58,7 @@ the software as okay/safe, this malware warning will go away. If you prefer to a
 
 You can just run the executable file WindowsVirtualDesktopHelper.exe to use Windows Virtual Desktop Helper.
 
-[Download WindowsVirtualDesktopHelper Executable v2.0.zip](https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Executable.v2.0.zip)
+[Download WindowsVirtualDesktopHelper Executable v2.0.zip](https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v2.0/WindowsVirtualDesktopHelper.Executable.v2.0.zip)
 
 ### Scoop
 
@@ -76,7 +76,7 @@ A command-line installer for Windows
 
 Do you like Windows Virtual Desktop Helper? 
 
-[Donate via PayPal](https://www.paypal.com/donate/?hosted_button_id=BG5FYMAHFG9V6)
+捐赠地址暂未配置。
 
 
 
@@ -115,7 +115,7 @@ Technical Roadmap:
 
 ## 📜 Changelog
 
-See [CHANGELOG.md](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/CHANGELOG.md)
+See [CHANGELOG.md](https://github.com/yedsn/WindowsVirtualDesktopHelper/blob/main/CHANGELOG.md)
 
 
 
@@ -168,11 +168,11 @@ hotkeys.myCustomKey1: "Alt + W = DesktopForward"
 hotkeys.myCustomKey2: "Alt + Q = DesktopBackward"
 ```
 
-See [Hotkeys Documentation](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md) for more info.
+See [Hotkeys Documentation](https://github.com/yedsn/WindowsVirtualDesktopHelper/blob/main/Documentation/Hotkeys.md) for more info.
 
 ### Settings
 
-See [Settings Documentation](https://github.com/dankrusi/WindowsVirtualDesktopHelper/blob/main/Documentation/Settings.md)
+See [Settings Documentation](https://github.com/yedsn/WindowsVirtualDesktopHelper/blob/main/Documentation/Settings.md)
 for a full list of all settings.
 
 ### Config File
@@ -274,7 +274,7 @@ Thanks to the following contributors:
  - [SleepyBag](https://github.com/SleepyBag)
  - [yossdev](https://github.com/yossdev)
  - [MadoScientist97](https://github.com/MadoScientist97)
- - [...and more](https://github.com/dankrusi/WindowsVirtualDesktopHelper/pulls?q=is%3Apr+is%3Aclosed)
+ - [...and more](https://github.com/yedsn/WindowsVirtualDesktopHelper/pulls?q=is%3Apr+is%3Aclosed)
 
 
 	 

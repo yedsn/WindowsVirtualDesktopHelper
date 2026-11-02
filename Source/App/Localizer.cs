@@ -38,7 +38,7 @@ namespace WindowsVirtualDesktopHelper {
 			{ "Save", "保存" }, { "Cancel", "取消" }, { "Apply", "应用" }, { "Target desktop", "目标桌面" }, { "Window", "窗口" }, { "Application", "应用程序" }, { "Match type", "匹配方式" }, { "Exact", "精确匹配" }, { "Regular expression", "正则表达式" }, { "Use regular expression", "使用正则表达式" },
 			{ "Status", "状态" }, { "Reason", "原因" }, { "Done", "完成" }, { "Preparing restore...", "正在准备恢复..." }, { "Restore Details", "恢复详情" },
 			{ "Error Details", "错误详情" }, { "Open Issue on GitHub", "在 GitHub 提交问题" }, { "View Issues on GitHub", "查看 GitHub 问题" }, { "Issue Checklist", "问题检查清单" },
-			{ "Show Log", "查看日志" }, { "Show Config", "查看配置" }, { "version ", "版本 " }, { "Donate via PayPal", "通过 PayPal 捐赠" }, { "by Dan Krusi", "作者：Dan Krusi" },
+			{ "Show Log", "查看日志" }, { "Show Config", "查看配置" }, { "version ", "版本 " }, { "Donation link is not configured yet.", "暂未配置捐赠地址。" }, { "by yedsn", "作者：yedsn" },
 			{ "Log", "日志" }, { "Config", "配置" }, { "Configuration Backup", "配置备份" }, { "Import Configuration Backup", "导入配置备份" }, { "Export Configuration Backup", "导出配置备份" },
 			{ "Unknown", "未知" }, { "Continue?", "是否继续？" }, { "English", "English" }, { "Simplified Chinese", "简体中文" }
 			, { "No desktop layout snapshots saved.", "尚未保存桌面布局快照。" }, { "No desktop layout snapshots are available to restore.", "没有可恢复的桌面布局快照。" }

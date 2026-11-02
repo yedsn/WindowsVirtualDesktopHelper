@@ -55,7 +55,7 @@ namespace WindowsVirtualDesktopHelper {
             this.linkLabel1.Size = new System.Drawing.Size(536, 28);
             this.linkLabel1.TabIndex = 1;
             this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "https://github.com/dankrusi/WindowsVirtualDesktopHelper";
+            this.linkLabel1.Text = "https://github.com/yedsn/WindowsVirtualDesktopHelper";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
             // labelVersion
@@ -79,7 +79,8 @@ namespace WindowsVirtualDesktopHelper {
             this.linkLabel2.Size = new System.Drawing.Size(166, 28);
             this.linkLabel2.TabIndex = 3;
             this.linkLabel2.TabStop = true;
-            this.linkLabel2.Text = "Donate via PayPal";
+            this.linkLabel2.Text = "Donate";
+            this.linkLabel2.Visible = false;
             this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
             // 
             // label3
@@ -91,7 +92,7 @@ namespace WindowsVirtualDesktopHelper {
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(122, 28);
             this.label3.TabIndex = 4;
-            this.label3.Text = "by Dan Krusi";
+            this.label3.Text = "by yedsn";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // linkLabel3
@@ -104,7 +105,7 @@ namespace WindowsVirtualDesktopHelper {
             this.linkLabel3.Size = new System.Drawing.Size(180, 28);
             this.linkLabel3.TabIndex = 6;
             this.linkLabel3.TabStop = true;
-            this.linkLabel3.Text = "dan@dankrusi.com";
+            this.linkLabel3.Text = "https://github.com/yedsn";
             this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel3_LinkClicked);
             // 
             // linkLabel4

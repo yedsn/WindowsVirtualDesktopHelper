@@ -1075,15 +1075,15 @@ namespace WindowsVirtualDesktopHelper {
 		}
 
 		public void OpenEmailContact() {
-			App.Instance.OpenURL("mailto:dan@dankrusi.com");
+			App.Instance.OpenURL("https://github.com/yedsn");
 		}
 
 		public void OpenAboutPage() {
-			App.Instance.OpenURL("https://github.com/dankrusi/WindowsVirtualDesktopHelper");
+			App.Instance.OpenURL("https://github.com/yedsn/WindowsVirtualDesktopHelper");
 		}
 
 		public void OpenDonatePage() {
-			App.Instance.OpenURL("https://www.paypal.com/donate/?hosted_button_id=BG5FYMAHFG9V6");
+			MessageBox.Show(Localizer.L("Donation link is not configured yet."), Localizer.L("Donate"), MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
 		#endregion

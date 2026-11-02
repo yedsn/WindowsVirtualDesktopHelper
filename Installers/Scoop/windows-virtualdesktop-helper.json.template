@@ -1,7 +1,7 @@
 {
     "version": "{version}",
     "description": "Simple and lightweight app to help with Virtual Desktops for Windows 10 and Windows 11.",
-    "homepage": "https://github.com/dankrusi/WindowsVirtualDesktopHelper",
+    "homepage": "https://github.com/yedsn/WindowsVirtualDesktopHelper",
     "license": "AGPL-3.0-only",
     "architecture": {
         "64bit": {
@@ -17,9 +17,9 @@
     ],
     "checkver": "github",
     "autoupdate": {
-        "url": "https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v$version/WindowsVirtualDesktopHelper.Executable.v$version.zip",
+        "url": "https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v$version/WindowsVirtualDesktopHelper.Executable.v$version.zip",
         "hash": {
-            "url": "https://github.com/dankrusi/WindowsVirtualDesktopHelper/releases/download/v$version/WindowsVirtualDesktopHelper.Executable.v$version.zip.sha256"
+            "url": "https://github.com/yedsn/WindowsVirtualDesktopHelper/releases/download/v$version/WindowsVirtualDesktopHelper.Executable.v$version.zip.sha256"
         }
     },
     "## Internal Comment 1": "https://github.com/ScoopInstaller/Scoop/wiki/App-Manifests",

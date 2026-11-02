@@ -1,5 +1,6 @@
 Windows Virtual Desktop Helper
 Copyright (c) 2022-2025 Dan Krusi
+Copyright (c) 2026 yedsn (modifications)
 
 
 

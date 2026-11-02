@@ -45,6 +45,7 @@ namespace WindowsVirtualDesktopHelper {
 			_applicationName = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
 			_windowTitle = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
 			_windowTitleIsRegex = new CheckBox { AutoSize = true, Anchor = AnchorStyles.Left, Text = Localizer.L("Use regular expression") };
+			Util.WindowTitlePattern.Bind(_windowTitleIsRegex, _windowTitle);
 			_applyButton = new Button { Anchor = AnchorStyles.Right, Width = 72, Text = Localizer.L("Apply") };
 			_deleteButton = new Button { Anchor = AnchorStyles.Right, Width = 72, Text = Localizer.L("Delete") };
 			var editorActions = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
